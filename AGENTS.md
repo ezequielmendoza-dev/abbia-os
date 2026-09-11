@@ -144,9 +144,9 @@ Los scripts se encuentran en `scripts/` y automatizan tareas repetitivas de setu
 
 | Script | Propósito | Uso |
 | :--- | :--- | :--- |
-| [`setup-ide.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/setup-ide.sh) | Inicializa la estructura `.ai/` y genera reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
+| [`setup-ide.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/setup-ide.sh) | Inicializa `.ai/`, seeds de memoria/métricas/KG, genera reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
 | [`new-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/new-initiative.sh) | Bootstrap automático de una feature o bug | `bash .ai/agents/scripts/new-initiative.sh <FEAT\|BUG> <ID> <slug>` |
-| [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida el cumplimiento de la estructura y reglas en `.ai/` | `bash .ai/agents/scripts/validate-project.sh` |
+| [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
 | [`common.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/common.sh) | Librería compartida de soporte (interno, DRY) | *(Interno)* |
 
 ---

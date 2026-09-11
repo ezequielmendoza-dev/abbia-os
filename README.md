@@ -239,9 +239,9 @@ cp .ai/agents/templates/github-action-ci.yml .github/workflows/ai-agents-validat
 
 | Script | Qué hace | Uso |
 |--------|----------|-----|
-| [`setup-ide.sh`](scripts/setup-ide.sh) | Inicializa `.ai/`, configura IDE, genera contexto | `bash .ai/agents/scripts/setup-ide.sh` |
+| [`setup-ide.sh`](scripts/setup-ide.sh) | Inicializa `.ai/`, genera seeds de memoria/métricas/KG, configura IDEs | `bash .ai/agents/scripts/setup-ide.sh` |
 | [`new-initiative.sh`](scripts/new-initiative.sh) | Crea estructura de feature/bug automáticamente | `bash .ai/agents/scripts/new-initiative.sh FEAT 003 login-seguro` |
-| [`validate-project.sh`](scripts/validate-project.sh) | Valida cumplimiento de estructura documental | `bash .ai/agents/scripts/validate-project.sh` |
+| [`validate-project.sh`](scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
 
 ---
 
