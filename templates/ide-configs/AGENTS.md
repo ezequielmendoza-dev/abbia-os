@@ -103,11 +103,13 @@ Los templates se encuentran en `.ai/agents/templates/` y deben usarse como base 
 | `feature-spec.md` | Especificación funcional de una feature |
 | `ui-design-spec.md` | Plantilla para el diseño visual de interfaz de una feature |
 | `architecture-spec.md` | Diseño técnico de una feature |
-| `technical-task.md` | Tarea técnica para el Developer |
-| `qa-report.md` | Reporte de validación de QA |
+| `technical-task.md` | Tarea técnica con paso de localización y living checklist |
+| `qa-report.md` | Reporte de validación de QA y diagnóstico self-healing |
 | `bug-report.md` | Reporte estructurado de bugs |
 | `project-context.md` | Plantilla base para `.ai/context.md` |
 | `feature-folder-template.md` | Estructura estándar de carpeta por feature |
+| `ide-configs/cursor-rules/` | Reglas modulares de Cursor (`.cursor/rules/*.mdc`) |
+| `ide-configs/roomodes` | Custom modes preconfigurados para Roo-Code / Cline |
 
 ---
 

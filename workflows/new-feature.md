@@ -277,6 +277,12 @@ Si es **APROBADO** → continuar al Paso 6.
 **Agente:** Senior Developer  
 **Template de referencia:** [`templates/technical-task.md`](../templates/technical-task.md)
 
+#### 🎯 Sub-paso 6.1: Localización Previa (Token Optimization)
+Antes de escribir código o editar archivos, el Developer debe:
+1. **Localizar:** Listar explícitamente qué archivos, funciones o clases existentes serán modificadas y cuáles se crearán.
+2. **Delimitar:** Confirmar que no se tocarán componentes fuera del alcance del `spec.md` y `architecture.md`.
+3. **Living Task List:** Iniciar una lista de tareas vivas con checkboxes `- [ ]` en `technical-task.md` para rastrear el avance incremental.
+
 **Activación:**
 
 ```
@@ -297,11 +303,11 @@ Diseño técnico de referencia:
 [contenido de .ai/features/FEAT-NNN-slug/architecture.md]
 ```
 
-**Criterio de salida:** Implementación completa, funcional y fiel a la UI y la arquitectura, lista para QA.
+**Criterio de salida:** Implementación completa, funcional, con tests unitarios pasando y fiel a la UI y la arquitectura, lista para QA.
 
 ---
 
-### Paso 7 — Validación de Calidad (QA)
+### Paso 7 — Validación de Calidad (QA) y Self-Healing Loop
 
 **Agente:** QA Engineer  
 **Output:** `.ai/features/FEAT-NNN-slug/qa.md`  
@@ -327,8 +333,15 @@ Implementación a revisar:
 [descripción de los cambios implementados]
 ```
 
-Si el resultado es **FAIL** → volver al Paso 6 con los bugs reportados.  
-Si el resultado es **PASS** o **PASS WITH OBSERVATIONS** → continuar al Paso 8.
+#### 🔄 Protocolo de Autocorrección (Self-Healing Loop)
+Si el resultado es **RECHAZADO / FAIL**:
+1. El QA genera en `qa.md` un diagnóstico estructurado con:
+   - Archivo y línea causante del fallo.
+   - Trace o log de error exacto.
+   - Criterio de aceptación o test roto.
+2. **Developer Parchea:** El Developer consume `qa.md`, aplica el parche correctivo y re-ejecuta la suite de pruebas.
+3. **Re-evaluación:** Se repite el paso de QA (máximo 3 iteraciones). Si tras 3 intentos no pasa, se escala al Tech Lead para intervención arquitectónica.
+4. Si el resultado es **APROBADO / PASS** → continuar al Paso 8.
 
 ---
 

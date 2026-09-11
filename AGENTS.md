@@ -162,6 +162,8 @@ Las plantillas de configuración para IDEs están en `templates/ide-configs/`:
 | `AGENTS.md` | Todos | Fuente de verdad compartida: roles, workflows, reglas |
 | `CLAUDE.md` | Claude Code CLI | Comandos, reglas de terminal, memoria |
 | `cursorrules` | Cursor IDE | Reglas para Composer, Chat, edición inline |
+| `cursor-rules/` | Cursor IDE | Reglas modulares por contexto (`.cursor/rules/*.mdc`) |
+| `roomodes` | Roo-Code / Cline | Definición de Custom Modes por rol con tool permissions |
 | `windsurfrules` | Windsurf (Cascade) | Reglas para flujos de Cascade |
 | `clinerules` | Cline / Roo-Code | Control de costos, aprobación de acciones |
 | `copilot-instructions.md` | GitHub Copilot | Autocompletado, PR review, workspace agent |

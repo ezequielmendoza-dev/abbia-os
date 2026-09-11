@@ -28,6 +28,23 @@ Estos agentes se activan bajo demanda, no siguen el pipeline estándar.
 
 ---
 
+## 🧠 Asignación de Modelos de IA Recomendados (Tiered Models)
+
+Para maximizar la calidad de los artefactos y optimizar el consumo de tokens/costos, se recomienda asignar los tiers de modelos de IA según la complejidad cognitiva del rol:
+
+| Rol | Tier Recomendado | Modelos de Ejemplo | Justificación |
+| :--- | :--- | :--- | :--- |
+| **Product Analyst** | **Reasoning / Pro** | Claude 3.7 Sonnet (Thinking), GPT-4o / o3, Gemini 2.5 Pro | Descubrimiento de casos borde y ambigüedades funcionales. |
+| **UI Designer** | **Visual / Multimodal** | Claude 3.7 Sonnet, GPT-4o | Comprensión espacial, sistemas de diseño y análisis de capturas. |
+| **Software Architect** | **High Reasoning / Pro** | o3, Claude 3.7 Sonnet (Extended Thinking), Gemini Pro | Modelado de ADRs, consistencia de datos y análisis de impacto en KG. |
+| **Tech Lead** | **Reasoning / Pro** | o3, Claude 3.7 Sonnet, Gemini Pro | Gatekeeper crítico, auditoría cruzada y detección de riesgos. |
+| **Senior Developer** | **Balanced / Code** | Claude 3.7 Sonnet / Sonnet 3.5, GPT-4o, Gemini 2.5 Flash | Generación de código preciso, tipado estricto y pruebas unitarias. |
+| **QA Engineer** | **Balanced / Code** | Claude Sonnet, GPT-4o, Gemini Flash | Ejecución y análisis adversarial de pruebas y suites de test. |
+| **DevOps Engineer** | **Fast / Standard** | Claude Sonnet / Haiku, GPT-4o mini, Gemini Flash | Scripts de despliegue, YAMLs y CI/CD pipelines. |
+| **Skill Manager** | **Fast / Lite** | Gemini Flash, Claude Haiku, GPT-4o mini | Compactación de memoria, snapshots (<50 líneas) y descubrimiento. |
+
+---
+
 ## Recursos
 
 - **Framework Skills:** [`../skills/`](../skills/) — Skills metodológicas invocadas según la tarea (UX, testing, seguridad…)
@@ -44,4 +61,4 @@ Ver [`../CHANGELOG.md`](../CHANGELOG.md) para el historial de cambios.
 
 ---
 
-*ai-agents library v3.2.0 | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*ai-agents library v3.3.0 | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*

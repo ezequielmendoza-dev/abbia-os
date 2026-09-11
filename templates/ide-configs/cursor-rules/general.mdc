@@ -1,0 +1,27 @@
+---
+description: Reglas generales de arquitectura y desarrollo con ai-agents OS (Specification-Driven Development)
+globs: *
+alwaysApply: true
+---
+
+# Reglas Generales de ai-agents OS
+
+Este proyecto sigue la metodología **Specification-Driven Development (SDD)** gobernada por el framework `ai-agents`.
+
+## 📜 Principios Clave
+1. **Documentos como fuente de verdad:** Todo cambio comienza con una especificación (`spec.md` o `bug-report.md`) y un diseño arquitectónico aprobado (`architecture.md`).
+2. **Reglas Documentales R1–R5:**
+   - **R1:** Antes de crear un documento, verificar si existe uno equivalente para actualizar.
+   - **R2:** Priorizar la actualización sobre la creación.
+   - **R3:** No crear versiones del tipo `archivo-v2.md`. Modificar el existente.
+   - **R4:** Los cambios en roles/workflows deben reflejarse en el changelog correspondiente.
+   - **R5:** Los documentos representan el **estado actual**, no el histórico.
+3. **Memoria y Métricas:**
+   - Al finalizar cualquier fase de trabajo, registrar el cierre utilizando el script `.ai/agents/scripts/finish-phase.sh` para actualizar `workflow-log.md`, `executions.yaml` y regenerar `context-snapshot.md`.
+
+## 🧭 Estructura de Consulta Obligatoria
+Antes de proponer o implementar código, consulta:
+- `.ai/context.md` (visión global, stack y registro de iniciativas)
+- `.ai/business-rules.md` (reglas de negocio vigentes)
+- `.ai/architecture.md` (decisiones y arquitectura técnica global)
+- `.ai/memory/context-snapshot.md` (estado reciente y lecciones aprendidas)

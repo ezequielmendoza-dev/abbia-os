@@ -32,7 +32,7 @@ fi
 
 echo -e "${BLUE}====================================================${NC}"
 echo -e "${BLUE}   🤖 Instalador de Configuración de IDEs de IA      ${NC}"
-echo -e "${BLUE}            ai-agents OS v1.8.0                     ${NC}"
+echo -e "${BLUE}            ai-agents OS v3.3.0                     ${NC}"
 echo -e "${BLUE}====================================================${NC}"
 
 # 1. Determinar rutas y directorios
@@ -61,27 +61,51 @@ if [ ! -d "$IDE_TEMPLATES_DIR" ]; then
     exit 1
 fi
 
-echo -e "\n${BLUE}--- Paso 1: Inicialización de Estructura Documental .ai/ ---${NC}"
-
-# Preguntar si desea inicializar la estructura .ai/
+echo -e "\n${BLUE}--- Paso 1: Verificación e Inicialización Documental ---${NC}"
 if [ "$AUTO_MODE" = true ]; then
     init_ai="s"
-    echo -e "${YELLOW}! Modo automático: inicializando estructura .ai/ (sistemas v3.x).${NC}"
+    echo -e "${YELLOW}! Modo automático: inicializando estructura .ai/ si no existe.${NC}"
 else
-    read -p "¿Deseas inicializar la estructura de carpetas .ai/? (s/n): " init_ai
+    read -p "¿Deseas inicializar la estructura documental (.ai/) con los archivos base si no existen? (s/n): " init_ai
 fi
+
 if [[ "$init_ai" =~ ^[sS]$ ]]; then
-    # Crear carpetas
+    echo -e "Creando estructura base en $PROJECT_ROOT/.ai/..."
+    mkdir -p "$PROJECT_ROOT/.ai"
     mkdir -p "$PROJECT_ROOT/.ai/features"
     mkdir -p "$PROJECT_ROOT/.ai/archive"
     mkdir -p "$PROJECT_ROOT/.ai/sessions"
-    echo -e "${GREEN}✓ Estructura de carpetas .ai/ creada (.ai/features, .ai/archive, .ai/sessions).${NC}"
 
-    # Copiar context.md si no existe
+    # Crear context.md si no existe
     if [ ! -f "$PROJECT_ROOT/.ai/context.md" ]; then
         if [ -f "$TEMPLATES_DIR/project-context.md" ]; then
             cp "$TEMPLATES_DIR/project-context.md" "$PROJECT_ROOT/.ai/context.md"
-            echo -e "${GREEN}✓ Creado .ai/context.md (basado en plantilla). ¡Recuerda editarlo con los datos del proyecto!${NC}"
+            echo -e "${GREEN}✓ Creado .ai/context.md desde plantilla.${NC}"
+        else
+            cat << 'EOF' > "$PROJECT_ROOT/.ai/context.md"
+# Contexto General del Proyecto
+
+## 1. Visión General
+[Descripción del producto y sus objetivos de negocio]
+
+## 2. Stack Tecnológico
+- **Frontend:** [ej. Next.js, React, TailwindCSS]
+- **Backend:** [ej. Node.js, Express, Go]
+- **Base de Datos:** [ej. PostgreSQL, Supabase]
+
+## 3. Estado de Adopción
+- Estado: EN_DESARROLLO
+
+## 4. Registro de IDs
+- **Última Feature:** FEAT-000
+- **Último Bug:** BUG-000
+- **Última Auditoría:** AUDIT-000
+- **Último Refactor:** REF-000
+- **Última Decisión Técnica:** DEC-000
+- **Última Decisión de Arquitectura:** ARCH-000
+- **Última Regla de Negocio:** RN-000
+EOF
+            echo -e "${GREEN}✓ Creado .ai/context.md inicial.${NC}"
         fi
     else
         echo -e "  - .ai/context.md ya existe. Omitido."
@@ -90,15 +114,13 @@ if [[ "$init_ai" =~ ^[sS]$ ]]; then
     # Crear business-rules.md si no existe
     if [ ! -f "$PROJECT_ROOT/.ai/business-rules.md" ]; then
         cat << 'EOF' > "$PROJECT_ROOT/.ai/business-rules.md"
-# Reglas de Negocio Permanentes
+# Reglas de Negocio del Sistema
 
-Este documento centraliza las reglas de negocio globales del dominio que no cambian con cada feature.
+Reglas inmutables y de dominio que todo agente y desarrollador debe respetar.
 
-## Módulo: General
-
-| ID | Regla | Fuente | Vigente desde |
-|----|-------|--------|---------------|
-| RN-001 | [Regla general de ejemplo] | [Owner/Doc] | YYYY-MM-DD |
+| ID | Regla | Descripción | Entidad Afectada | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| RN-001 | Regla de Ejemplo | Descripción detallada del comportamiento requerido | Dominio | ACTIVA |
 EOF
         echo -e "${GREEN}✓ Creado .ai/business-rules.md inicial.${NC}"
     else
@@ -110,16 +132,15 @@ EOF
         cat << 'EOF' > "$PROJECT_ROOT/.ai/architecture.md"
 # Arquitectura del Sistema
 
-## Última actualización: YYYY-MM-DD
+## 1. Diagrama de Alto Nivel
+[Descripción o diagrama conceptual de componentes]
 
-## Visión General
-[Diagrama general de arquitectura]
+## 2. Patrones Arquitectónicos
+- Patrón Principal: [ej. Clean Architecture, Modular Monolith]
 
-## Tecnologías Principales
-* Ver `.ai/context.md` para el stack detallado.
-
-## Decisiones de Arquitectura Vigentes (ADRs)
-Ver `.ai/decisions.md` para el log completo de decisiones.
+## 3. Convenciones de Código
+- Estilo: Standard
+- Linting: Prettier / ESLint
 EOF
         echo -e "${GREEN}✓ Creado .ai/architecture.md inicial.${NC}"
     else
@@ -129,14 +150,11 @@ EOF
     # Crear decisions.md si no existe
     if [ ! -f "$PROJECT_ROOT/.ai/decisions.md" ]; then
         cat << 'EOF' > "$PROJECT_ROOT/.ai/decisions.md"
-# Log de Decisiones de Arquitectura (ADR)
+# Registro de Decisiones de Arquitectura y Técnicas (ADR / DEC)
 
-Este archivo registra las decisiones arquitectónicas importantes tomadas en el proyecto.
-
-## ARCH-001: [Título de la Decisión]
-
-*   **Estado:** Propuesto / Aprobado / Reemplazado por ARCH-XXX
+## [ARCH-001] Decisión de Arquitectura Inicial
 *   **Fecha:** YYYY-MM-DD
+*   **Estado:** APROBADO
 *   **Contexto:** [Descripción del problema y por qué requiere una decisión técnica]
 *   **Decisión:** [Detalle de la decisión adoptada]
 *   **Consecuencias:** [Lo que ganamos y lo que perdemos con esta decisión]
@@ -163,7 +181,7 @@ EOF
     fi
 
     # Crear los sistemas de v3.2.0: memoria persistente, métricas y knowledge graph
-    echo -e "\n${BLUE}  → Sistemas v3.2.0: memoria persistente, métricas y knowledge graph${NC}"
+    echo -e "\n${BLUE}  → Sistemas v3.2.0+: memoria persistente, métricas y knowledge graph${NC}"
 
     # Sistema de Memoria Persistente (.ai/memory/)
     mkdir -p "$PROJECT_ROOT/.ai/memory"
@@ -208,7 +226,7 @@ EOF
 
 Índice de decisiones **vigentes** con referencia al detalle en `decisions.md`
 (que sigue siendo la fuente de verdad). El Architect mantiene este índice; el
-Tech Lead lo consulta antes de cada gate.
+Tech Lead o el Developer lo consultan antes de cada gate.
 
 | ID | Decisión | Estado | Referencia | Última revisión |
 |:---|:---|:---|:---|:---|
@@ -307,20 +325,22 @@ fi
 
 echo -e "\n${BLUE}--- Paso 2: Generación de Archivos de Reglas para IDEs ---${NC}"
 
-ide_choice=8
+ide_choice=10
 if [ "$AUTO_MODE" = true ]; then
     echo -e "${YELLOW}! Modo automático: omitiendo generación de reglas de IDEs (ejecuta setup-ide.sh interactivo si lo necesitas).${NC}"
 else
     echo "Selecciona qué archivos de reglas deseas generar en la raíz de tu proyecto:"
-    echo "1) Cursor IDE (.cursorrules)"
-    echo "2) Claude Code (CLAUDE.md)"
-    echo "3) Windsurf IDE (.windsurfrules)"
-    echo "4) Cline / Roo-Code (.clinerules)"
-    echo "5) GitHub Copilot (.github/copilot-instructions.md)"
-    echo "6) Guía General de Agentes (AGENTS.md)"
-    echo "7) Instalar TODOS los anteriores"
-    echo "8) Ninguno"
-    read -p "Ingresa tu opción (1-8): " ide_choice
+    echo "1) Cursor IDE (.cursorrules clásico)"
+    echo "2) Cursor Modular Rules (.cursor/rules/*.mdc)"
+    echo "3) Claude Code (CLAUDE.md)"
+    echo "4) Windsurf IDE (.windsurfrules)"
+    echo "5) Cline / Roo-Code (.clinerules)"
+    echo "6) Roo-Code Custom Modes (.roomodes)"
+    echo "7) GitHub Copilot (.github/copilot-instructions.md)"
+    echo "8) Guía General de Agentes (AGENTS.md)"
+    echo "9) Instalar TODOS los anteriores"
+    echo "10) Ninguno"
+    read -p "Ingresa tu opción (1-10): " ide_choice
 fi
 
 copy_rule_file() {
@@ -338,31 +358,50 @@ copy_rule_file() {
     fi
 }
 
+copy_cursor_mdc_rules() {
+    local src_dir="$IDE_TEMPLATES_DIR/cursor-rules"
+    local dest_dir="$PROJECT_ROOT/.cursor/rules"
+    if [ -d "$src_dir" ]; then
+        mkdir -p "$dest_dir"
+        cp -r "$src_dir/"* "$dest_dir/"
+        echo -e "${GREEN}✓ Creadas reglas modulares de Cursor en $dest_dir (.mdc)${NC}"
+    else
+        echo -e "${RED}Error: No se encontró el directorio de reglas modulares en $src_dir${NC}"
+    fi
+}
+
 case $ide_choice in
     1)
         copy_rule_file "$IDE_TEMPLATES_DIR/cursorrules" "$PROJECT_ROOT/.cursorrules" "Cursor (.cursorrules)"
         ;;
     2)
-        copy_rule_file "$IDE_TEMPLATES_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md" "Claude Code (CLAUDE.md)"
+        copy_cursor_mdc_rules
         ;;
     3)
-        copy_rule_file "$IDE_TEMPLATES_DIR/windsurfrules" "$PROJECT_ROOT/.windsurfrules" "Windsurf (.windsurfrules)"
+        copy_rule_file "$IDE_TEMPLATES_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md" "Claude Code (CLAUDE.md)"
         ;;
     4)
-        copy_rule_file "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" "Cline (.clinerules)"
+        copy_rule_file "$IDE_TEMPLATES_DIR/windsurfrules" "$PROJECT_ROOT/.windsurfrules" "Windsurf (.windsurfrules)"
         ;;
     5)
-        copy_rule_file "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md" "Copilot (.github/copilot-instructions.md)"
+        copy_rule_file "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" "Cline (.clinerules)"
         ;;
     6)
-        copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General (AGENTS.md)"
+        copy_rule_file "$IDE_TEMPLATES_DIR/roomodes" "$PROJECT_ROOT/.roomodes" "Roo-Code (.roomodes)"
         ;;
     7)
+        copy_rule_file "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md" "Copilot (.github/copilot-instructions.md)"
+        ;;
+    8)
+        copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General (AGENTS.md)"
+        ;;
+    9)
         copy_rule_file "$IDE_TEMPLATES_DIR/cursorrules" "$PROJECT_ROOT/.cursorrules" "Cursor (.cursorrules)"
-        # Modificar ligeramente CLAUDE.md para proyectos con submódulo
+        copy_cursor_mdc_rules
         copy_rule_file "$IDE_TEMPLATES_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md" "Claude Code (CLAUDE.md)"
         copy_rule_file "$IDE_TEMPLATES_DIR/windsurfrules" "$PROJECT_ROOT/.windsurfrules" "Windsurf (.windsurfrules)"
         copy_rule_file "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" "Cline (.clinerules)"
+        copy_rule_file "$IDE_TEMPLATES_DIR/roomodes" "$PROJECT_ROOT/.roomodes" "Roo-Code (.roomodes)"
         copy_rule_file "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md" "Copilot (.github/copilot-instructions.md)"
         copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General (AGENTS.md)"
         ;;

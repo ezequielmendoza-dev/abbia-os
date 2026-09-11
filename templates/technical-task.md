@@ -110,19 +110,42 @@ interface BookingResponse {
 
 ---
 
-## 6. Archivos a Modificar / Crear
+## 6. Archivos a Modificar / Crear (Localización)
 
-| Acción | Archivo | Descripción |
-|--------|---------|-------------|
-| Crear | `src/modules/bookings/booking.entity.ts` | Entidad Booking |
-| Crear | `src/modules/bookings/bookings.service.ts` | Lógica de negocio |
-| Crear | `src/modules/bookings/bookings.controller.ts` | Controlador REST |
-| Modificar | `src/modules/trips/trips.service.ts` | Agregar método para decrementar asientos |
-| Crear | `migrations/YYYYMMDD_create_bookings.sql` | Migración de base de datos |
+> **Localización Previa:** El Developer debe confirmar los archivos y módulos exactos antes de editar código para acotar el consumo de tokens y evitar efectos colaterales.
+
+| Acción | Archivo / Símbolo | Descripción | Estado |
+|--------|-------------------|-------------|--------|
+| Crear | `src/modules/bookings/booking.entity.ts` | Entidad Booking | - [ ] |
+| Crear | `src/modules/bookings/bookings.service.ts` | Lógica de negocio | - [ ] |
+| Crear | `src/modules/bookings/bookings.controller.ts` | Controlador REST | - [ ] |
+| Modificar | `src/modules/trips/trips.service.ts` | Agregar método para decrementar asientos | - [ ] |
+| Crear | `migrations/YYYYMMDD_create_bookings.sql` | Migración de base de datos | - [ ] |
 
 ---
 
-## 7. Dependencias
+## 7. Living Implementation Tasks (Checklist de Progreso)
+
+> El agente debe actualizar los checkboxes `- [ ]` a medida que avanza en la implementación.
+
+- [ ] **Fase 1: Preparación de Datos y Migraciones**
+  - [ ] Crear migración SQL de la tabla `bookings`
+  - [ ] Ejecutar migración y verificar esquema
+- [ ] **Fase 2: Capa de Dominio y Lógica de Negocio**
+  - [ ] Implementar entidad `Booking`
+  - [ ] Implementar `BookingsService` con transacción atómica
+  - [ ] Actualizar `TripsService` para decremento de asientos
+- [ ] **Fase 3: Capa de Presentación / API**
+  - [ ] Implementar `BookingsController`
+  - [ ] Validar DTOs de entrada y serialización de salida
+- [ ] **Fase 4: Testing y Auto-Verificación**
+  - [ ] Escribir y ejecutar tests unitarios de servicio
+  - [ ] Validar tests de integración contra base de datos local
+  - [ ] Registrar decisiones técnicas en `decision.md`
+
+---
+
+## 8. Dependencias
 
 > ¿Esta tarea depende de otras? ¿Otras tareas dependen de esta?
 

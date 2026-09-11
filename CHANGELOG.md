@@ -4,6 +4,23 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.3.0] — 2026-09-11
+
+### Agregado
+- **Reglas Modulares de Cursor (`.cursor/rules/*.mdc`)** — Nuevo directorio de plantillas `templates/ide-configs/cursor-rules/` con archivos `.mdc` (`general.mdc`, `architect.mdc`, `developer.mdc`, `qa.mdc`) que aprovechan el sistema de activación contextual (`globs`, `alwaysApply`, `description`) de Cursor IDE.
+- **Custom Modes para Roo-Code / Cline (`.roomodes`)** — Plantilla `templates/ide-configs/roomodes` con la definición JSON de los 8 roles del framework y sus restricciones de herramientas (`read`, `edit`, `command`, `browser`, `mcp`) para ejecución controlada.
+- **Localization Step en Workflows (`new-feature.md`, `bug-fix.md`)** — Sub-paso formal previo a la implementación donde el Developer identifica explícitamente los archivos, módulos y símbolos a modificar/crear antes de escribir código, reduciendo el consumo de tokens y evitando modificaciones colaterales.
+- **Self-Healing QA Loop (`new-feature.md`, `bug-fix.md`)** — Protocolo estructurado de autoreparación cuando QA emite veredicto `RECHAZADO`: generación de diagnóstico estructurado en `qa.md`, aplicación de parche inmediato por el Developer y re-evaluación en bucle acotado (máximo 3 iteraciones).
+- **Living Implementation Tasks (`technical-task.md`)** — Lista de tareas viva e interactiva con checkboxes Markdown (`- [ ]`) por fases para rastreo incremental de avance.
+- **Matriz de Asignación de Modelos por Rol (Tiered Models)** — Documentada en `roles/README.md` la estrategia recomendada de modelos según la carga cognitiva del rol (Reasoning/Pro para Analyst/Architect/Tech Lead; Balanced/Code para Developer/QA; Fast/Lite para Skill Manager/DevOps).
+
+### Modificado
+- **`scripts/setup-ide.sh`** — Actualizado a v3.3.0 con nuevas opciones de menú interactivo para instalar las reglas modulares de Cursor (`.cursor/rules/*.mdc`) y los modos personalizados de Roo-Code (`.roomodes`).
+- **`scripts/validate-project.sh`** — Añadida validación semántica de dependencias en `knowledge-graph.yaml` (verificación de formato `[ARCH-NNN]`) y validación de sintaxis de veredicto obligatorio (`APROBADO` / `RECHAZADO`) en los reportes `qa.md` de iniciativas activas.
+- **`README.md`, `AGENTS.md`, `templates/ide-configs/AGENTS.md`** — Actualizados con las nuevas capacidades y plantillas de la versión 3.3.0.
+
+---
+
 ## [3.2.5] — 2026-09-11
 
 ### Agregado

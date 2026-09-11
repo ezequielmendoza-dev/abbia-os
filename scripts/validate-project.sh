@@ -81,6 +81,11 @@ if [ -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
     KG_TEMPLATE=$(grep -cE '^updated: YYYY-MM-DD|^[[:space:]]*title: "Nombre corto de la decisión"' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
     if [ "$KG_NODES" -gt 0 ] && [ "$KG_TEMPLATE" -eq 0 ]; then
         echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado ($KG_NODES nodo(s))."
+        # Validación semántica: verificar que dependencias sigan el formato ARCH-NNN
+        INVALID_REFS=$(grep -E '^[[:space:]]*(depends_on|supersedes|conflicts_with):' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" | grep -v '\[\]' | grep -E '\[.*\]' | grep -vE '\[(ARCH-[0-9]{3}(, *ARCH-[0-9]{3})*)\]' || true)
+        if [ -n "$INVALID_REFS" ]; then
+            warning_found "El grafo de decisiones contiene dependencias con formato no estándar: $INVALID_REFS (debe ser [ARCH-NNN])."
+        fi
     else
         warning_found ".ai/knowledge-graph.yaml existe pero sin nodos reales (solo el template). Registrar los ARCH-NNN (o usar finish-phase.sh)."
     fi
@@ -171,12 +176,22 @@ if [ -d "$FEATURES_DIR" ]; then
             fi
         fi
         
-        # WARN de placeholders solo aplica a features (spec.md con FEAT-XXX / [nombre])
+        # Validaciones Semánticas por Archivo
         if [ "$TYPE" = "FEAT" ]; then
             SPEC_FILE="$dir/spec.md"
             if [ -f "$SPEC_FILE" ]; then
                 if grep -q "FEAT-XXX" "$SPEC_FILE" || grep -q "\[nombre\]" "$SPEC_FILE"; then
                     warning_found "Feature '$folder_name' contiene placeholders de plantilla (FEAT-XXX / [nombre]) en spec.md."
+                fi
+            fi
+        fi
+
+        # Validación semántica de qa.md (FEAT y BUG)
+        if [ "$TYPE" = "FEAT" ] || [ "$TYPE" = "BUG" ]; then
+            QA_FILE="$dir/qa.md"
+            if [ -f "$QA_FILE" ]; then
+                if ! grep -qiE "(Veredicto.*(APROBADO|RECHAZADO|PASS|FAIL)|Verdict.*(APPROVED|REJECTED|PASS|FAIL))" "$QA_FILE"; then
+                    warning_found "Iniciativa '$folder_name' tiene qa.md pero no declara un veredicto explícito (APROBADO/RECHAZADO)."
                 fi
             fi
         fi

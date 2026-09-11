@@ -206,6 +206,11 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 **Agente:** Senior Developer  
 **Entradas:** Reporte del bug + especificaciones modificadas (funcional, visual o técnica, según aplique).
 
+#### 🎯 Sub-paso 2.1: Localización del Defecto (Pinpoint Bug Scope)
+Antes de modificar archivos:
+1. **Localizar la causa raíz:** Identificar con precisión el archivo, la función y las líneas causantes del bug.
+2. **Delimitar el cambio:** Restringir el alcance exclusivamente al fix para evitar introducir regresiones.
+
 **Activación:**
 ```
 Actúa como el agente Senior Developer definido en roles/developer.md.
@@ -218,12 +223,13 @@ Especificación de corrección de referencia:
 
 **Reglas de Corrección:**
 - La intervención de código debe ser **mínima y enfocada** estrictamente a resolver el bug.
+- Escribir o actualizar una prueba automatizada (unit/integration) que reproduzca el bug y valide que no vuelva a ocurrir (Regression Test).
 - Queda estrictamente prohibido realizar refactorizaciones o agregar features no relacionadas (scope creep) dentro del fix.
 - Si el fix requiere modificar APIs o esquemas de BD no contemplados en el Paso 1.C, detener la implementación y notificar al Architect.
 
 ---
 
-### Paso 3 — Validación (QA)
+### Paso 3 — Validación y Self-Healing Loop (QA)
 
 **Agente:** QA Engineer  
 **Entradas:** Cambios implementados + Reporte del Bug + Checklist de verificación.
@@ -237,10 +243,13 @@ Reporte del bug original: [Detalles]
 Cambios realizados: [Lista de commits o descripción de modificaciones de código]
 ```
 
-**Flujo de Verificación:**
+**Flujo de Verificación y Autocorrección:**
 - Si el bug era **Visual/UI-UX**, el QA Engineer (o el UI Designer) debe auditar los cambios contra el checklist [`checklists/ui-review.md`](../checklists/ui-review.md).
 - Si el bug era **Técnico**, validar que no haya regresiones en endpoints o integraciones mediante [`checklists/frontend-review.md`](../checklists/frontend-review.md) o [`checklists/backend-review.md`](../checklists/backend-review.md).
-- Si la prueba falla, el bug vuelve al **Paso 2** (Developer) con los logs y pasos de fallo documentados.
+- **Self-Healing Loop:** Si la prueba falla (`FAIL` / `RECHAZADO`):
+  1. El QA genera en `qa.md` el diagnóstico estructurado con logs de error y pasos de reproducción.
+  2. El Developer ajusta el parche de forma inmediata y re-ejecuta los tests.
+  3. Se repite el ciclo hasta que el veredicto sea `APROBADO` (máximo 3 intentos antes de escalar al Tech Lead).
 
 ---
 
