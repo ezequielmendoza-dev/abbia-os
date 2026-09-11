@@ -1,8 +1,8 @@
 # Estructura .ai/ — Guía de Integración para Proyectos
 
-> **Versión:** 2.0  
+> **Versión:** 3.0  
 > **Estado:** Vigente  
-> **Última actualización:** Julio 2026
+> **Última actualización:** Septiembre 2026
 
 ---
 
@@ -25,6 +25,16 @@ proyecto/
     ├── architecture.md         # Arquitectura actual del sistema
     ├── decisions.md            # Log de decisiones arquitectónicas
     ├── glossary.md             # Glosario del dominio
+    ├── knowledge-graph.yaml    # Grafo de relaciones entre decisiones (NUEVO)
+    │
+    ├── memory/                 # Memoria persistente del pipeline (NUEVO)
+    │   ├── workflow-log.md     # Memoria episódica (append-only)
+    │   ├── decisions-catalog.md# Memoria semántica (decisiones indexadas)
+    │   ├── patterns-learned.md # Memoria procedimental (lecciones)
+    │   └── context-snapshot.md # Memoria compactada (resumen para sesión)
+    │
+    ├── metrics/                # Métricas del pipeline (NUEVO)
+    │   └── executions.yaml     # Registro por ejecución de agente
     │
     ├── features/               # Trabajo activo por feature
     │   ├── FEAT-001-nombre/
@@ -172,6 +182,70 @@ proyecto/
 **Cuándo agregar una entrada:** Cuando el Tech Lead o el Architect toman una decisión técnica no obvia que debería quedar registrada para que futuros desarrolladores entiendan por qué el sistema es como es.
 
 **Regla importante:** Este es el único documento donde se permite el crecimiento por adición. Cada nueva decisión se agrega al final — nunca se elimina ni reemplaza una entrada anterior. Si una decisión cambia, se agrega una nueva entrada con el estado "Supersede a ARCH-XXX".
+
+---
+
+### `knowledge-graph.yaml`
+
+**Propósito:** Grafo ligero de relaciones entre decisiones arquitectónicas. Permite calcular transitivamente qué decisiones dependen, superseden o están en conflicto con una decisión dada — sin recorrer `decisions.md` completo.
+
+**Formato:** YAML con nodos (ADRs) y aristas tipadas (`depends_on`, `supersedes`, `related`, `conflicts_with`). Cada nodo referencia su entrada en `decisions.md` mediante el campo `ref`.
+
+**Quién lo mantiene:** El Software Architect lo actualiza cuando crea o modifica un `ARCH-NNN` en `decisions.md`. El Tech Lead lo consulta antes de cada gate para evaluar impacto.
+
+**Regla:** El grafo es un **índice de relaciones**, no una segunda fuente de verdad. Si hay divergencia, manda `decisions.md`.
+
+**Documentación completa:** [`docs/knowledge-graph.md`](knowledge-graph.md)  
+**Template:** [`templates/knowledge-graph.yaml`](../templates/knowledge-graph.yaml)
+
+---
+
+### `memory/` — Memoria Persistente del Pipeline
+
+**Propósito:** Evitar que el contexto se pierda entre sesiones. Cada ejecución del pipeline deja una huella que los agentes futuros consumen automáticamente.
+
+**Archivos:**
+
+| Archivo | Tipo | Qué contiene |
+|:---|:---|:---|
+| `workflow-log.md` | Episódico | Log append-only de cada ejecución de agente |
+| `decisions-catalog.md` | Semántico | Índice de decisiones vigentes con estado |
+| `patterns-learned.md` | Procedimental | Patrones y lecciones reutilizables |
+| `context-snapshot.md` | Compactado | Resumen ejecutivo para arrancar una sesión (~30 líneas) |
+
+**Ciclo de vida:** `Capture → Compact → Recall`:
+1. **Capture:** Cada agente, al terminar, escribe una entrada en `workflow-log.md`.
+2. **Compact:** El Skill Manager regenera `context-snapshot.md` al iniciar cada sesión.
+3. **Recall:** Los agentes leen el snapshot como parte de su contexto de activación.
+
+**Regla de inferiencia:** La memoria es **contexto, no autoridad**. Los artefactos aprobados (`spec.md`, `architecture.md`) siguen siendo la fuente de verdad. La memoria ayuda a arrancar y a evitar repeticiones.
+
+**Documentación completa:** [`docs/workflow-memory.md`](workflow-memory.md)
+
+---
+
+### `metrics/` — Métricas del Pipeline
+
+**Propósito:** Rastrear tokens consumidos por rol, tiempo por fase y tasa de retry en cada ejecución, para detectar fases costosas y mejorar el sistema de agentes.
+
+**Archivos:**
+
+| Archivo | Propósito |
+|:---|:---|
+| `executions.yaml` | Registro append-only por ejecución (tokens, duración, fase, veredicto) |
+| `agregados.yaml` | Agregados por fase/rol (regenerado por Skill Manager) |
+
+**Métricas que se miden:** `tokens_in`, `tokens_out`, `duration_s`, `phase`, `attempts`, `veredicto`.
+
+**Ciclo de vida:** `Capturar → Agregar → Decidir`:
+1. **Capturar:** Cada agente registra su ejecución en `executions.yaml`.
+2. **Agregar:** El Skill Manager regenera `agregados.yaml` al final de sesión.
+3. **Decidir:** El Tech Lead revisa las métricas y ajusta el sistema (modos de ejecución, gates).
+
+**Regla de inferiencia:** Las métricas **nunca** modifican artefactos ni versiones de agentes — son insumo para el Tech Lead, no autoridad.
+
+**Documentación completa:** [`docs/agent-metrics.md`](agent-metrics.md)  
+**Template:** [`templates/metrics-executions.yaml`](../templates/metrics-executions.yaml)
 
 ---
 

@@ -4,6 +4,8 @@
 > Debe ser leído por cualquier asistente de IA (Cursor, Claude Code, Windsurf, Cline, Copilot) antes de realizar cualquier tarea.
 > **Importante:** Para comprender el contexto de negocio, stack técnico y especificaciones particulares de este proyecto, la IA debe leer primero [.ai/context.md](file:///.ai/context.md).
 
+> **ℹ️ Relación con `AGENTS.md` (raíz):** Este archivo es la plantilla instalada en los proyectos que **consumen** `ai-agents`. El `AGENTS.md` que vive en la raíz del *repo* `ai-agents` es un documento **distinto**: describe cómo portar cambios al framework (reglas documentales R1–R5, estructura interna del repo). No confundir ambos roles — si estás contribuyendo al repo, usa el de la raíz; si estás trabajando en un proyecto integrado, usa este.
+
 ---
 
 ## 📂 Arquitectura Documental y Memoria (.ai/)
@@ -21,6 +23,9 @@ Estos archivos representan el **estado actual** del proyecto y deben consultarse
 | `.ai/architecture.md` | Arquitectura actual del sistema en producción |
 | `.ai/decisions.md` | Log histórico de decisiones técnicas (ADRs: `ARCH-NNN`) |
 | `.ai/glossary.md` | Términos de negocio acordados con definiciones |
+| `.ai/knowledge-graph.yaml` | Grafo de relaciones entre decisiones (depends_on, supersedes, conflicts_with) |
+| `.ai/memory/*` | Memoria persistente del pipeline (workflow-log, decisions-catalog, patterns-learned, context-snapshot) |
+| `.ai/metrics/*` | Métricas por ejecución de agente (tokens, duración, fase, veredicto) |
 
 ### 2. Trabajo Activo (`.ai/features/`)
 

@@ -2,6 +2,8 @@
 
 > Este `AGENTS.md` es específico para el desarrollo del **propio repositorio `ai-agents`**.
 > No confundir con el template `templates/ide-configs/AGENTS.md`, que es la versión que se instala en los proyectos que consumen esta biblioteca.
+>
+> **ℹ️ Relación entre ambos:** Este archivo (raíz) gobierna el desarrollo **del framework** — reglas documentales R1–R5, estructura interna, convenciones de contribución. El template `templates/ide-configs/AGENTS.md` gobierna los **proyectos que consumen** el framework — cómo trabajan los agentes en un proyecto integrado. Cada vez que se modifique un rol, workflow, checklist o script, debe reflejarse **en ambos** (R4) manteniendo el propósito distinto de cada documento.
 
 ---
 
@@ -13,7 +15,7 @@
 
 ```
 ai-agents/
-├── roles/                    # Definiciones de agentes (v2.0)
+├── roles/                    # Definiciones de agentes (v3.0)
 │   ├── analyst.md
 │   ├── ui-designer.md
 │   ├── architect.md
@@ -24,14 +26,31 @@ ai-agents/
 │   ├── skill-manager.md
 │   └── prompt-guide.md
 ├── skills/                   # Skills metodológicas (Framework Skills)
+│   ├── README.md             # Catálogo de las 15 skills
+│   ├── registry.md           # Reglas de orquestación
+│   ├── analysis/             # requirements-discovery, ux-heuristics
+│   ├── architecture/         # api-design, backend-architecture, database-design, performance-tuning, ai-integration
+│   ├── development/          # code-review, frontend-patterns, mobile-development
+│   ├── qa/                   # test-strategy, testing-automation, security-audit
+│   └── workflow/             # release-readiness, devops-pipeline
 ├── templates/                # Plantillas reutilizables
 │   ├── ide-configs/          # Configuraciones para IDEs de IA
+│   ├── knowledge-graph.yaml  # Template del grafo de decisiones
+│   ├── metrics-executions.yaml  # Template de métricas por ejecución
+│   ├── dag-manifest.yaml     # Template de DAG para workflows
 │   └── *.md                  # Templates de documentos de proyecto
 ├── checklists/               # Checklists por área técnica
-├── workflows/                # Flujos de trabajo
+├── workflows/                # Flujos de trabajo (con DAG declarado)
 ├── scripts/                  # Scripts de automatización
 ├── docs/                     # Documentación del repositorio
-├── AGENTS.md                 # ← Este archivo
+│   ├── workflow-memory.md    # Sistema de memoria persistente
+│   ├── workflow-dag.md       # Sistema de DAG de workflows
+│   ├── knowledge-graph.md    # Grafo ligero de decisiones
+│   ├── agent-metrics.md      # Métricas por rol y fase
+│   ├── skill-discovery.md    # Descubrimiento de skills
+│   ├── skill-resolution.md   # Resolución de conflictos
+│   └── ...
+├── AGENTS.md                 # ← Este archivo (contribución al repo)
 ├── README.md
 └── CHANGELOG.md
 ```
