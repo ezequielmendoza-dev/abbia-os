@@ -287,7 +287,7 @@ Si eliges la forma interactiva del Paso 2 (Opción 7 "Instalar TODOS"), los arch
 | Aspecto | v1.x | v3.x | ¿Qué cambia? |
 |:---|:---|:---|:---|
 | Archivos requeridos por feature | `spec.md`, `architecture.md`, `qa.md`, `decision.md` | + `ui-design.md` | Las features de v1 **fallan** la validación hasta tener `ui-design.md` |
-| Nomenclatura | `FEAT-NNN-slug` | `FEAT-NNN-slug` | Sin cambios |
+| Nomenclatura | `FEAT-NNN-slug` | `FEAT-NNN-slug`, `BUG-NNN-slug`, `AUDIT-NNN-slug`, `REF-NNN-slug` | Sin cambios para FEAT/BUG; se agregan AUDIT y REF (estructura libre) |
 
 ```bash
 # Para cada feature existente (si no lo tiene ya):

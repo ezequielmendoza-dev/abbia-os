@@ -90,6 +90,31 @@ BUG-023-seat-count-mismatch
 
 ---
 
+## Identificadores de Iniciativas Especiales (AUDIT y REF)
+
+Además de `FEAT` y `BUG`, el sistema soporta dos tipos de iniciativa con **estructura libre** (sin documentos obligatorios por convención; cada una define los suyos):
+
+| Prefijo | Tipo | Ejemplo | Uso típico |
+|-----------|-----|---------|------------|
+| `AUDIT` | Auditoría / Seguridad | `AUDIT-001-ecosystem-audit` | Auditorías de seguridad, revisión de arquitectura, compliance |
+| `REF` | Refactor | `REF-001-migrate-payments-service` | Refactors técnicos, migraciones, deuda técnica |
+
+### Formato
+
+```
+AUDIT-NNN-slug-descriptivo
+REF-NNN-slug-descriptivo
+```
+
+### Reglas
+
+- Mismo `NNN` (3 dígitos con padding) y slug kebab-case que FEAT/BUG
+- **Estructura libre:** el validador no exige archivos concretos; solo verifica que la carpeta no esté vacía
+- Se registran en `.ai/context.md` (`Último AUDIT asignado`, `Último REF asignado`)
+- En commits: `audit(AUDIT-001): ...` / `refactor(REF-001): ...`
+
+---
+
 ## Identificadores de Decisión de Arquitectura
 
 ### Formato
