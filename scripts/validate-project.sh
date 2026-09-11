@@ -124,41 +124,42 @@ if [ -d "$FEATURES_DIR" ]; then
         # Obtener el nombre de la carpeta (sin barra final)
         folder_name=$(basename "$dir")
         
-        # Validar nomenclatura (FEAT-NNN-slug o BUG-NNN-slug)
-        if [[ ! "$folder_name" =~ ^(FEAT|BUG)-[0-9]{3}-[a-z0-9-]+$ ]]; then
-            error_found "El nombre de la carpeta '$folder_name' no sigue el patrón '<FEAT|BUG>-<ID>-<slug>' (ej: FEAT-001-seat-layout)."
+        # Validar nomenclatura central (<FEAT|BUG|AUDIT|REF>-<ID>-<slug>)
+        INITIATIVE_PATTERN="$(initiative_name_pattern)"
+        READABLE_TYPES="$(initiative_types_readable)"
+        if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
+            error_found "El nombre de la carpeta '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>' (ej: FEAT-001-seat-layout)."
             continue
         fi
         
         # Determinar tipo
         TYPE=$(echo "$folder_name" | cut -d'-' -f1)
         
-        # Validar archivos internos obligatorios por tipo
-        if [ "$TYPE" = "FEAT" ]; then
-            # Archivos obligatorios para Feature
-            REQ_FILES=("spec.md" "ui-design.md" "architecture.md" "qa.md" "decision.md")
-            for req in "${REQ_FILES[@]}"; do
+        # Validar archivos internos obligatorios por tipo (en minúsculas)
+        REQ_FILES="$(required_files_for "$TYPE")"
+        if [ -n "$REQ_FILES" ]; then
+            for req in $REQ_FILES; do
                 if [ ! -f "$dir/$req" ]; then
-                    error_found "Feature '$folder_name' no contiene el archivo obligatorio '$req'."
+                    error_found "Iniciativa '$TYPE' '$folder_name' no contiene el archivo obligatorio '$req'."
                 fi
             done
-            
-            # Advertir si spec.md aún tiene placeholders de templates sin cambiar
+        else
+            # Tipos de estructura libre (AUDIT, REF): solo verificar que no esté vacía
+            if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+                error_found "Iniciativa '$folder_name' está vacía. Debe contener al menos un documento."
+            else
+                echo -e "  [${GREEN}OK${NC}]    '$folder_name' (estructura libre) verificada."
+            fi
+        fi
+        
+        # WARN de placeholders solo aplica a features (spec.md con FEAT-XXX / [nombre])
+        if [ "$TYPE" = "FEAT" ]; then
             SPEC_FILE="$dir/spec.md"
             if [ -f "$SPEC_FILE" ]; then
                 if grep -q "FEAT-XXX" "$SPEC_FILE" || grep -q "\[nombre\]" "$SPEC_FILE"; then
                     warning_found "Feature '$folder_name' contiene placeholders de plantilla (FEAT-XXX / [nombre]) en spec.md."
                 fi
             fi
-            
-        elif [ "$TYPE" = "BUG" ]; then
-            # Archivos obligatorios para Bug
-            REQ_FILES=("bug-report.md" "qa.md")
-            for req in "${REQ_FILES[@]}"; do
-                if [ ! -f "$dir/$req" ]; then
-                    error_found "Bug '$folder_name' no contiene el archivo obligatorio '$req'."
-                fi
-            done
         fi
     done
     fi
@@ -183,9 +184,11 @@ if [ -d "$ARCHIVE_DIR" ]; then
     for dir in "${archived_dirs[@]}"; do
         folder_name=$(basename "$dir")
         
-        # Validar nomenclatura
-        if [[ ! "$folder_name" =~ ^(FEAT|BUG)-[0-9]{3}-[a-z0-9-]+$ ]]; then
-            error_found "Archivo: El nombre de la carpeta archivada '$folder_name' no sigue el patrón '<FEAT|BUG>-<ID>-<slug>'."
+        # Validar nomenclatura central
+        INITIATIVE_PATTERN="$(initiative_name_pattern)"
+        READABLE_TYPES="$(initiative_types_readable)"
+        if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
+            error_found "Archivo: El nombre de la carpeta archivada '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>'."
         fi
     done
     fi

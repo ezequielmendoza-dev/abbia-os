@@ -28,6 +28,32 @@ fi
 AI_AGENTS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CWD="$(pwd)"
 
+# ---------- Iniciativas: tipos y patrón de nomenclatura ----------
+# Tipos de iniciativa soportados en .ai/features/ y .ai/archive/.
+# - FEAT: feature | BUG: corrección | AUDIT: auditoría/seguridad | REF: refactor
+INITIATIVE_TYPES="FEAT BUG AUDIT REF"
+
+# Patrón central de nomenclatura: <TIPO>-<ID 3 dígitos>-<slug>
+# Se construye dinámicamente desde INITIATIVE_TYPES.
+initiative_name_pattern() {
+    printf '^(%s)-[0-9]{3}-[a-z0-9-]+$' "$(echo "$INITIATIVE_TYPES" | tr ' ' '|')"
+}
+
+# Devuelve los archivos obligatorios para un tipo (vacío = estructura libre).
+# Uso: required_files_for <FEAT|BUG|AUDIT|REF>
+required_files_for() {
+    case "$1" in
+        FEAT) echo "spec.md ui-design.md architecture.md qa.md decision.md" ;;
+        BUG)  echo "bug-report.md qa.md" ;;
+        *)    echo "" ;;   # AUDIT y REF: estructura libre
+    esac
+}
+
+# Versión legible del patrón de tipos para mensajes: FEAT|BUG|AUDIT|REF
+initiative_types_readable() {
+    echo "$INITIATIVE_TYPES" | tr ' ' '|'
+}
+
 # Función para detectar la raíz del proyecto
 detect_project_root() {
     if [ -d "$CWD/.ai" ]; then

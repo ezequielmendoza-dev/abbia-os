@@ -3,8 +3,12 @@
 # ==============================================================================
 # new-initiative.sh — ai-agents Initiative Bootstrapper
 # ==============================================================================
-# Automatiza el bootstrap de una nueva feature (FEAT) o bug (BUG) en la carpeta
-# .ai/features/ y actualiza el registro de IDs en .ai/context.md.
+# Automatiza el bootstrap de una nueva iniciativa (feature, bug, auditoría o
+# refactor) en la carpeta .ai/features/ y actualiza el registro de IDs en
+# .ai/context.md.
+# Tipos soportados: FEAT (feature), BUG (bug), AUDIT (auditoría/seguridad),
+# REF (refactor). FEAT y BUG generan templates completos; AUDIT y REF crean
+# una carpeta con estructura libre.
 # ==============================================================================
 
 set -euo pipefail
@@ -48,16 +52,20 @@ else
     echo "Selecciona el tipo de iniciativa:"
     echo "1) Nueva Feature (FEAT)"
     echo "2) Corrección de Bug (BUG)"
-    read -p "Ingresa tu opción (1-2): " type_choice
+    echo "3) Auditoría / Seguridad (AUDIT)"
+    echo "4) Refactor (REF)"
+    read -p "Ingresa tu opción (1-4): " type_choice
     
-    if [ "$type_choice" = "1" ]; then
-        TYPE="FEAT"
-    elif [ "$type_choice" = "2" ]; then
-        TYPE="BUG"
-    else
-        echo -e "${RED}Opción inválida. Cancelando.${NC}"
-        exit 1
-    fi
+    case "$type_choice" in
+        "1") TYPE="FEAT" ;;
+        "2") TYPE="BUG" ;;
+        "3") TYPE="AUDIT" ;;
+        "4") TYPE="REF" ;;
+        *)
+            echo -e "${RED}Opción inválida. Cancelando.${NC}"
+            exit 1
+            ;;
+    esac
     
     # Intentar sugerir el siguiente ID analizando context.md
     SUGGESTED_ID=""
@@ -86,8 +94,8 @@ else
 fi
 
 # 2. Validar formatos
-if [[ ! "$TYPE" =~ ^(FEAT|BUG)$ ]]; then
-    echo -e "${RED}Error: El tipo debe ser FEAT o BUG.${NC}"
+if [[ ! " $INITIATIVE_TYPES " =~ " $TYPE " ]]; then
+    echo -e "${RED}Error: El tipo debe ser uno de: $INITIATIVE_TYPES${NC}"
     exit 1
 fi
 
@@ -174,6 +182,24 @@ elif [ "$TYPE" = "BUG" ]; then
         fi
     done
     echo -e "${GREEN}✓ Creados archivos de bug: bug-report.md, qa.md${NC}"
+
+else
+    # AUDIT y REF: estructura libre (README de inicio, sin template fijo)
+    cat << EOF > "$TARGET_DIR/README.md"
+# $INITIATIVE_NAME
+
+> Iniciativa de tipo $TYPE con estructura libre (sin documentos obligatorios).
+> Completa esta carpeta con los documentos que apliquen según el flujo
+> (ej: auditoría, hallazgos, plan de remediación, decisiones, etc.) y
+> registra los avances en .ai/memory/workflow-log.md.
+
+## Alcance
+- Pendiente de definir.
+
+## Documentos internos
+- README.md
+EOF
+    echo -e "${GREEN}✓ Creada estructura libre: README.md (tipo $TYPE).${NC}"
 fi
 
 # 5. Actualizar .ai/context.md
@@ -186,8 +212,10 @@ if [ -f "$CONTEXT_FILE" ]; then
         cat << 'EOF' >> "$CONTEXT_FILE"
 
 ## Registro de IDs
-- Último FEAT asignado: FEAT-000
+- Último AUDIT asignado: AUDIT-000
 - Último BUG asignado: BUG-000
+- Último FEAT asignado: FEAT-000
+- Último REF asignado: REF-000
 - Último ARCH asignado: ARCH-000
 EOF
         echo -e "${YELLOW}! Sección '## Registro de IDs' agregada al final de context.md${NC}"
