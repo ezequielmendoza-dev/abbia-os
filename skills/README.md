@@ -30,39 +30,33 @@ skills/
 ├── README.md           ← Este archivo
 ├── registry.md         ← Registro centralizado (fuente de verdad)
 │
-├── frontend/           # Skills de frontend
-│   ├── react.md
-│   ├── nextjs.md
-│   ├── mui.md
-│   └── shadcn.md
+├── analysis/           # Skills de análisis y producto (type: method)
+│   ├── requirements-discovery.md
+│   └── ux-heuristics.md
 │
-├── backend/            # Skills de backend
-│   ├── nodejs.md
-│   ├── express.md
-│   └── nestjs.md
+├── architecture/       # Skills de arquitectura (type: method)
+│   ├── api-design.md
+│   ├── backend-architecture.md
+│   ├── database-design.md
+│   ├── performance-tuning.md
+│   └── ai-integration.md
 │
-├── database/           # Skills de bases de datos y BaaS
-│   ├── postgresql.md
-│   ├── supabase.md
-│   └── firebase.md
+├── development/        # Skills de desarrollo (type: method)
+│   ├── code-review.md
+│   ├── frontend-patterns.md
+│   └── mobile-development.md
 │
-├── testing/            # Skills de testing
-│   ├── vitest.md
-│   └── playwright.md
+├── qa/                 # Skills de QA y calidad (type: method)
+│   ├── test-strategy.md
+│   ├── testing-automation.md
+│   └── security-audit.md
 │
-├── ux/                 # Skills de UX y accesibilidad
-│   ├── accessibility.md
-│   └── design-system.md
-│
-├── devops/             # Skills de DevOps e infraestructura
-│   ├── docker.md
-│   └── github-actions.md
-│
-└── ai/                 # Skills de IA y ML
-    ├── openai.md
-    ├── gemini.md
-    └── rag.md
+└── workflow/           # Skills de proceso y continuidad (type: method)
+    ├── release-readiness.md
+    └── devops-pipeline.md
 ```
+
+> **Skills tecnológicas (type: tech):** Las categorías por tecnología (`frontend/`, `backend/`, `database/`, `testing/`, `ux/`, `devops/`, `ai/`) no se almacenan en el framework — se descubren dinámicamente desde `Project` (L1) o `UserExternal` (L2) por el **Skill Manager** (ver `docs/skill-discovery.md` y `registry.md`). Los directorios anteriores son la semilla metodológica del framework.
 
 ---
 
@@ -73,8 +67,9 @@ Cada skill es un archivo Markdown con **frontmatter YAML** para metadatos y **cu
 ```markdown
 ---
 id: nombre-del-skill
-category: frontend | backend | database | testing | ux | devops | ai
+category: analysis | architecture | development | qa | workflow
 aliases: [alias1, alias2]
+type: method                 # method | tech | business
 tags: [tag1, tag2]
 dependencies: [skill-id-1, skill-id-2]
 version: 1.0
@@ -87,11 +82,11 @@ version: 1.0
 ## Cuándo Usar Este Skill
 [Criterios de activación]
 
-## Convenciones
-[Reglas y convenciones de la tecnología]
+## Principios Fundamentales
+[Principios rectores]
 
-## Patrones Recomendados
-[Patrones de diseño y arquitectura]
+## [Secciones específicas del dominio]
+[Reglas, patrones, checklists]
 
 ## Anti-Patrones
 [Errores comunes a evitar]
@@ -107,7 +102,8 @@ version: 1.0
 ### Nomenclatura
 - **IDs de skills:** `kebab-case` (ej: `github-actions`, `design-system`)
 - **Archivos:** `kebab-case.md` dentro de la categoría correspondiente
-- **Categorías:** Nombres en plural, minúsculas
+- **Categorías:** Nombres en plural, minúsculas (`analysis`, `architecture`, `development`, `qa`, `workflow`)
+- **Tipos:** `method` (proceso de ingeniería), `tech` (herramienta específica), `business` (reglas de negocio del proyecto)
 
 ### Reglas
 - Un skill = un archivo = una tecnología/herramienta/disciplina
@@ -135,6 +131,28 @@ version: 1.0
 3. El archivo `.ai/skills.md` del proyecto lista los skills instalados
 
 Ver [`docs/skill-system.md`](../docs/skill-system.md) para la guía completa del ciclo de vida.
+
+---
+
+## Catálogo de Skills Framework (v1.1)
+
+| Skill | Categoría | Tipo | Uso Principal |
+|:---|:---|:---|:---|
+| `requirements-discovery` | analysis | method | Descubrimiento de requerimientos antes del diseño |
+| `ux-heuristics` | analysis | method | Evaluación y diseño de UX con heurísticas |
+| `api-design` | architecture | method | Diseño de APIs RESTful |
+| `backend-architecture` | architecture | method | Capas y arquitectura de servicios backend |
+| `database-design` | architecture | method | Modelado de datos, índices y migraciones |
+| `performance-tuning` | architecture | method | Optimización de rendimiento |
+| `ai-integration` | architecture | method | Integración de IA/LLMs como componente |
+| `code-review` | development | method | Revisión de código y PRs |
+| `frontend-patterns` | development | method | Componentes y arquitectura frontend |
+| `mobile-development` | development | method | Apps móviles y offline-first |
+| `test-strategy` | qa | method | Pirámide de pruebas y estrategia |
+| `testing-automation` | qa | method | Automatización de tests y CI |
+| `security-audit` | qa | method | Auditoría de seguridad |
+| `release-readiness` | workflow | method | Checklist pre-lanzamiento |
+| `devops-pipeline` | workflow | method | Diseño de CI/CD y entornos |
 
 ---
 

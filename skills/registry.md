@@ -46,6 +46,20 @@ Los conflictos ocurren cuando se detectan skills con **IDs diferentes** pero que
 1. **Revisión de Contexto Duro:** El Skill Manager debe examinar los manifiestos del proyecto (`package.json`, `Cargo.toml`, etc.) o el `.ai/context.md`. La skill que esté respaldada por el manifiesto se mantiene; las demás se descartan.
 2. **Intervención Humana Exigida:** Si los manifiestos no resuelven la ambigüedad, el Skill Manager **debe detener la ejecución** (usando herramientas como `ask_question`) para que el desarrollador humano decida. Nunca debe avanzar con un contexto tecnológico esquizofrénico o mezclado.
 
+## 2.1 Categorías Framework (skills `type: method`)
+
+El framework agrupa sus skills metodológicas en 5 categorías de dominio. Cada categoría alimenta a un grupo de roles:
+
+| Categoría | Rol(es) que consume(n) | Skills framework |
+|:---|:---|:---|
+| `analysis` | Product Analyst, UI Designer | `requirements-discovery`, `ux-heuristics` |
+| `architecture` | Software Architect, Developer, Tech Lead | `api-design`, `backend-architecture`, `database-design`, `performance-tuning`, `ai-integration` |
+| `development` | Senior Developer, QA | `code-review`, `frontend-patterns`, `mobile-development` |
+| `qa` | QA Engineer, Tech Lead | `test-strategy`, `testing-automation`, `security-audit` |
+| `workflow` | DevOps Engineer, Tech Lead | `release-readiness`, `devops-pipeline` |
+
+> Las categorías por tecnología del README histórico (`frontend/`, `backend/`, etc.) corresponden a skills `type: tech` que **no se shippean en el framework**; se descubren dinámicamente desde `Project` (L1) o `UserExternal` (L2).
+
 ## 5. El Catálogo Dinámico
 
 El Skill Manager no mantiene un JSON o tabla estática. Al iniciar una sesión de trabajo:
