@@ -63,9 +63,10 @@ ai-agents/
 │   └── architecture-change.md     # Cambios de arquitectura
 │
 ├── scripts/                       # Scripts de automatización
-│   ├── setup-ide.sh               # Inicializa .ai/ y genera reglas de IDE
+│   ├── setup-ide.sh               # Inicializa .ai/ + seeds v3.2.0 y genera reglas de IDE
+│   ├── update-ai-agents.sh        # Actualiza el framework (submodule + setup en un comando)
 │   ├── new-initiative.sh          # Bootstrap de feature/bug
-│   ├── validate-project.sh        # Valida estructura documental
+│   ├── validate-project.sh        # Valida estructura documental + sistemas v3.2.0
 │   └── common.sh                  # Librería compartida (interno)
 │
 ├── docs/                          # Documentación del repositorio
@@ -165,7 +166,7 @@ Los workflows documentan el flujo completo de trabajo para escenarios comunes. I
 
 ### `scripts/` — Automatización
 
-Scripts de setup y validación que los proyectos consumen desde `.ai/agents/scripts/`: `setup-ide.sh` (inicializa `.ai/` y reglas de IDE), `new-initiative.sh` (bootstrap de feature/bug), `validate-project.sh` (cumplimiento de reglas documentales) y `common.sh` (librería compartida).
+Scripts de setup y validación que los proyectos consumen desde `.ai/agents/scripts/`: `setup-ide.sh` (inicializa `.ai/` y reglas de IDE, con modo `--auto` para no-interactivo), `update-ai-agents.sh` (actualiza el framework en un comando: submodule + setup), `new-initiative.sh` (bootstrap de feature/bug), `validate-project.sh` (cumplimiento de reglas documentales) y `common.sh` (librería compartida).
 
 **Regla:** Los scripts deben ser idempotentes y no destructivos: pueden ejecutarse varias veces sin romper el estado del proyecto.
 

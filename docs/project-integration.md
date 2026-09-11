@@ -126,26 +126,24 @@ git submodule status
 ### 4.1 Actualizar al último commit de ai-agents
 
 ```bash
-# Desde la raíz del proyecto
-git submodule update --remote .ai/agents
-
-# Verificar qué cambió
-cd .ai/agents && git log --oneline -5
-
-# Commitear la actualización en el proyecto
-cd ../..
-git add .ai/agents
-git commit -m "chore: update ai-agents submodule to latest"
+# Desde la raíz del proyecto — en un solo comando:
+# actualiza el submodule, commitea el puntero y ejecuta setup-ide.sh --auto
+bash .ai/agents/scripts/update-ai-agents.sh
 ```
+
+Equivale a hacer manualmente `git submodule update --remote .ai/agents`, revisar el log (`cd .ai/agents && git log --oneline -5`) y commitear el puntero.
 
 ### 4.2 Actualizar a una versión específica (tag)
 
 ```bash
+# Pin a un tag concreto (submodule + setup en un comando)
+bash .ai/agents/scripts/update-ai-agents.sh v3.2.2
+# Si prefieres control total de los pasos, puedes hacerlo manualmente:
 cd .ai/agents
-git checkout v3.2.1       # apuntar a un tag específico
+git checkout v3.2.2       # apuntar a un tag específico
 cd ../..
 git add .ai/agents
-git commit -m "chore: pin ai-agents to v3.2.1"
+git commit -m "chore: pin ai-agents to v3.2.2"
 ```
 
 ### 4.3 Estrategia recomendada por tipo de proyecto
@@ -158,7 +156,7 @@ git commit -m "chore: pin ai-agents to v3.2.1"
 
 ### 4.4 Actualizar desde v3.0 a v3.2.x — Qué cambia y qué hacer
 
-Este apartado aplica a proyectos que ya usaban `ai-agents` v3.0.x y quieren aprovechar los sistemas nuevos (v3.1.0 → v3.2.1).
+Este apartado aplica a proyectos que ya usaban `ai-agents` v3.0.x y quieren aprovechar los sistemas nuevos (v3.1.0 → v3.2.x).
 
 #### Qué se actualiza automáticamente (vía submodule)
 
@@ -170,23 +168,30 @@ Al actualizar el submodule, todo esto se aplica **sin intervención manual**:
 | 15 framework skills (skills/) | 5 existentes + 10 nuevas metodológicas |
 | 5 workflows (workflows/*.md) | Contienen DAG embebido (bloque `<!-- dag:start -->`/`<!-- dag:end -->`) |
 | Skill Manager | Nuevo rol orquestador de memoria, DAG y skills |
-| scripts/ | `setup-ide.sh` v1.7.0 y `validate-project.sh` actualizados |
+| scripts/ | `setup-ide.sh` v1.8.0, `update-ai-agents.sh` y `validate-project.sh` actualizados |
 
 #### Qué requiere activación manual
 
-Los sistemas nuevos de v3.2.0 **no se crean solos** al actualizar el submodule. Hay dos opciones:
+Los sistemas nuevos de v3.2.0 **no se crean solos** al actualizar el submodule. La forma más simple es usar el actualizador de un solo comando:
 
-**Opción A — Rerun del setup (recomendado):**
+**Opción A — Actualizador de un comando (recomendado):**
 ```bash
-bash .ai/agents/scripts/setup-ide.sh
+bash .ai/agents/scripts/update-ai-agents.sh        # último commit
+bash .ai/agents/scripts/update-ai-agents.sh v3.2.2 # pin a un tag
 ```
-Este comando es idempotente: solo crea archivos que no existen. Al ejecutarlo:
+Este comando actualiza el submodule, commitea el puntero y ejecuta `setup-ide.sh --auto`. Los sistemas nuevos se activan sin preguntas (idempotente):
 - Se crea `.ai/memory/` con sus 4 archivos seed
 - Se crea `.ai/metrics/executions.yaml` (seed de métricas)
 - Se crea `.ai/knowledge-graph.yaml` (grafo vacío para indexar decisiones)
-- Se regeneran los archivos de reglas IDE (`.cursorrules`, `CLAUDE.md`, etc.) con las nuevas referencias
+- No se regeneran las reglas IDE (evita sobrescribir copias del proyecto)
 
-**Opción B — Creación manual:**
+**Opción B — Rerun del setup manual (para regenerar reglas IDE):**
+```bash
+bash .ai/agents/scripts/setup-ide.sh
+```
+Este comando es idempotente: solo crea archivos que no existen, y además regenera los archivos de reglas IDE (`.cursorrules`, `CLAUDE.md`, etc.) con las nuevas referencias.
+
+**Opción C — Creación manual:**
 ```bash
 mkdir -p .ai/memory .ai/metrics
 # Copiar seeds desde los templates del submodule
