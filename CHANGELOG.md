@@ -4,6 +4,59 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.2.0] — 2026-09-11
+
+### Agregado
+- **Knowledge Graph ligero** (`docs/knowledge-graph.md` + `templates/knowledge-graph.yaml`) — Grafo de relaciones entre decisiones arquitectónicas (ADRs) modelado como nodos/aristas tipadas (`depends_on`, `supersedes`, `related`, `conflicts_with`), inspirado en Ogcode. Permite calcular el impacto de cambios por transitividad sin embeddings. El grafo es un índice de relaciones; `decisions.md` sigue siendo la fuente de verdad.
+- **Métricas de agentes** (`docs/agent-metrics.md` + `templates/metrics-executions.yaml`) — Observabilidad del pipeline inspirada en AgEnFK: registro append-only por ejecución (tokens in/out, duración, fase, attempts, veredicto) en `.ai/metrics/executions.yaml` + agregados regenerados por el Skill Manager (`aggregates.yaml`). Habilitan decisiones sobre el sistema de agentes (fases costosas, retry rate, eficiencia de tokens) sin modificar el proceso documental.
+
+### Corregido
+- **Versiones de roles inconsistentes** — `roles/devops.md` y `roles/ui-designer.md` quedaron en v1.0 mientras el pipeline pasó a v3.0. Alineados todos los roles a **v3.0** (incluido `roles/skill-manager.md`, cuyo frontmatter pasó de `1.2` → `3.0`). Actualizada la tabla de versiones en `docs/versioning-strategy.md` (que seguía declarando v2.0) y el comentario de estructura en `README.md` y `AGENTS.md`. El campo `Versión: \`1.0\`` dentro de los output formats (ej. `ui-design.md`, `architecture.md`) se documenta explícitamente como versión del **documento de salida**, no del agente.
+- **CHANGELOG con secciones duplicadas** — Existían dos bloques `## [2.0.0]` (2026-06-25 y 2026-06-22) y dos `## [2.0.1]` (2026-06-27 y 2026-06-22) fuera de orden. Fusionado el contenido histórico de las versiones de 2026-06-22 dentro de las entradas canónicas y eliminadas las secciones duplicadas. El CHANGELOG ahora tiene una única sección por versión en orden descendente.
+
+### Modificado
+- `templates/github-action-ci.yml` — El template de CI pasa de validar solo la estructura documental a ser **multi-lenguaje**: conserva el job `validate-ai-structure` (con verificación de balance de bloques DAG) y agrega un job `language-checks` con matriz Node/Python/Go que detecta el manifest presente (`package.json`, `pyproject.toml`/`requirements.txt`, `go.mod`), instala dependencias y corre los tests.
+- `docs/versioning-strategy.md` — Añadida la sección **Versionado de Skills** (MAJOR.MINOR en frontmatter, mismas reglas semánticas que los agentes, sin obligación de alinearse a la MAJOR del framework). Los skills ya declaraban `version: 1.0` en su frontmatter; faltaba la política documentada.
+- `skills/README.md` — Verificado: la estructura solo lista directorios y skills reales; las categorías tecnológicas (`frontend/`, `backend/`, …) están documentadas como fuentes de skills `type: tech` externas (no como carpetas del repo).
+- `AGENTS.md` (raíz) y `templates/ide-configs/AGENTS.md` — Aclarada la relación entre ambos (raíz = contribuir al framework; template = consumirlo en un proyecto) con referencias cruzadas explícitas para evitar la percepción de duplicidad.
+- `README.md` — **Reescritura completa** del archivo principal: reestructurado como experiencia de usuario (Qué es → Quick Start → Qué tiene → Flujo de trabajo → Ejemplos → Guía de integración → Documentación completa). Incluye las 15 skills, los 5 workflows, los 4 sistemas nuevos (Memory, DAG, Knowledge Graph, Metrics) y la tabla completa de documentación. Se eliminaron las secciones redundantes y se reorganizó para que el usuario nuevo pueda empezar en 3 pasos.
+- `AGENTS.md` (raíz) — Árbol de estructura actualizado para incluir `knowledge-graph.md`, `agent-metrics.md`, `workflow-memory.md`, `workflow-dag.md` y las 15 skills organizadas por categoría.
+- `templates/ide-configs/AGENTS.md` — Añadidas las referencias a `knowledge-graph.yaml`, `.ai/memory/*` y `.ai/metrics/*` en la tabla de documentos permanentes.
+- `docs/project-ai-structure.md` — Actualizado árbol `.ai/` y añadidas secciones de `knowledge-graph.yaml`, `memory/` y `metrics/` con su ciclo de vida.
+- `docs/repository-structure.md` — Árbol del repo reconstruido (roles v3.0, skills/, scripts/, sistemas, mermaid actualizado, convenciones v3.2.0).
+- `roles/README.md` — Versión 2.0→3.0, añadido skill-manager, sección "Agentes de Soporte", referencia a `skills/`.
+
+---
+
+## [3.1.0] — 2026-09-11
+
+### Agregado
+- **10 nuevas Framework Skills metodológicas** (`type: method`) — El catálogo de skills del framework pasa de 5 a 15:
+  - `skills/analysis/ux-heuristics.md` — Evaluación y diseño de UX con heurísticas (Nielsen, a11y WCAG 2.1 AA).
+  - `skills/architecture/backend-architecture.md` — Capas, manejo de errores y contratos de servicios backend.
+  - `skills/architecture/database-design.md` — Modelado de entidades, índices, migraciones y SQL vs NoSQL.
+  - `skills/architecture/performance-tuning.md` — Optimización medida (métricas, cache, scaling).
+  - `skills/architecture/ai-integration.md` — Integración de IA/LLMs como componente con contrato.
+  - `skills/development/frontend-patterns.md` — Componentes, estado y rendimiento frontend.
+  - `skills/development/mobile-development.md` — Apps móviles, offline-first y decisiones de plataforma.
+  - `skills/qa/testing-automation.md` — Automatización sostenible de tests y anti-flakiness.
+  - `skills/qa/security-audit.md` — Auditoría de seguridad: authN/Z, secretos, dependencias y threat modeling.
+  - `skills/workflow/devops-pipeline.md` — Diseño de CI/CD, entornos y observabilidad.
+- **Sistema de Workflow Memory** (`docs/workflow-memory.md`) — Memoria persistente del pipeline (`Capture → Compact → Recall`) para que el contexto sobreviva entre sesiones. Define `.ai/memory/` (`workflow-log.md`, `decisions-catalog.md`, `patterns-learned.md`, `context-snapshot.md`), tipos de memoria y el contrato de escritura de cada rol.
+- **Sistema de Workflow DAG** (`docs/workflow-dag.md`) — Grafo de dependencias explícitas (nodos, aristas, gates, fan-out/fan-in, back-edges) para cada workflow, con **3 modos de ejecución**: `rápido`, `estándar` y `profundo` (con revisión adversarial).
+- **Manifest DAG en los 5 workflows** — `new-feature.md`, `bug-fix.md` (sub-DAGs por categoría de bug), `refactor.md`, `release.md`, `architecture-change.md` declaran ahora su DAG en bloques `<!-- dag:start -->`/`<!-- dag:end -->`.
+- **Template `templates/dag-manifest.yaml`** — Plantilla reutilizable para declarar DAGs custom.
+
+### Modificado
+- `skills/README.md` — Estructura actualizada a las 5 categorías metodológicas reales del framework (analysis, architecture, development, qa, workflow) + catálogo de las 15 skills. Las categorías por tecnología (frontend/backend/database/…) se documentan como fuentes de skills `type: tech` externas.
+- `skills/registry.md` — Añadida sección §2.1 "Categorías Framework" mapeando categorías → roles → skills.
+- `roles/skill-manager.md` — v1.1 → v1.2. Añadido el **Contrato de Workflow Memory** (orquesta `Capture → Compact → Recall`) y la **Ejecución por DAG** (extracción, validación, selección de modo y secuenciación de nodos).
+
+### Nota
+- El sistema DAG es **descriptivo** v1.0: los manifiests documentan la estructura de dependencias para orquestadores (Skill Manager, scripts, herramientas externas) y humanos. La ejecución determinista por maquinaria se puede implementar sobre estos manifiests.
+
+---
+
 ## [3.0.0] — 2026-07-18
 
 ### Agregado
@@ -33,6 +86,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - `skills/registry.md` — Incorporado [skills.sh](https://www.skills.sh/) como catálogo externo de referencia de donde provienen las skills `L1` y `L2`.
 - `README.md`, `AGENTS.md` y `templates/ide-configs/AGENTS.md` — Actualizada la responsabilidad del `Skill Manager` para incluir el diagnóstico tecnológico y recomendación de skills.
 
+### Eliminado
+- `analyst.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/analyst.md` v2.0
+- `architect.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/architect.md` v2.0
+- `developer.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/developer.md` v2.0
+- `qa.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/qa.md` v2.0
+- `tech-lead.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/tech-lead.md` v2.0
+- `agent-definitions.md` (raíz) — reemplazado por `docs/agent-definitions.md` con contenido real
+
+### Razón
+Los archivos de la raíz eran versiones v1.0 sin headers markdown, sin Chain of Thought, sin output format estructurado y sin guías de activación. Mantenerlos junto a las versiones v2.0 en `roles/` generaba confusión sobre cuál era la fuente canónica. La raíz queda limpia — los agentes viven en `roles/`.
+
 ---
 
 ## [2.0.0] — 2026-06-25
@@ -42,16 +106,33 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - Nuevo rol: `Skill Manager` (`roles/skill-manager.md`), encargado de descubrir, priorizar y resolver conflictos de skills como paso previo a la ejecución.
 - Documentación del motor de orquestación en `docs/`: `skill-discovery.md`, `skill-resolution.md`, `external-skill-providers.md`, y `skill-context.md`.
 - Scaffolding de **Framework Skills** (Skills metodológicas): `analysis/requirements-discovery.md`, `architecture/api-design.md`, `development/code-review.md`, `qa/test-strategy.md`, `workflow/release-readiness.md`.
+- `roles/analyst.md` v2.0 — Chain of Thought, Output Format estructurado, guía de activación
+- `roles/architect.md` v2.0 — Chain of Thought, Output Format estructurado, guía de activación
+- `roles/tech-lead.md` v2.0 — Decision Framework, Chain of Thought, Output Format estructurado
+- `roles/developer.md` v2.0 — Chain of Thought, Output Format estructurado, guía de activación
+- `roles/qa.md` v2.0 — Clasificación de bugs, Chain of Thought, Output Format estructurado
+- `roles/devops.md` v1.0 — Nuevo agente especializado para infraestructura y deployments
+- `roles/prompt-guide.md` v1.0 — Guía completa de prompts por agente con ejemplos reales
+- `docs/agent-definitions.md` — Meta-documento con estándar de diseño de agentes
+- `templates/feature-spec.md` — Template completo para especificaciones funcionales
+- `templates/architecture-spec.md` — Template completo para diseños técnicos
+- `templates/technical-task.md` — Template para tareas técnicas de desarrollo
+- `templates/qa-report.md` — Template para reportes de QA
+- `templates/bug-report.md` — Template para reporte de bugs
+- `templates/project-context.md` — Template para el contexto del proyecto (`.ai/context.md`)
+- `checklists/frontend-review.md` — Checklist de revisión frontend
+- `checklists/backend-review.md` — Checklist de revisión backend
+- `checklists/database-review.md` — Checklist de revisión de base de datos
 
 ### Modificado
 - `skills/registry.md` — Transformado de un índice estático de tecnologías a un catálogo dinámico de reglas de orquestación, priorización (Shadowing) y resolución de conflictos.
 - Todos los roles (`analyst.md`, `architect.md`, `ui-designer.md`, `tech-lead.md`, `developer.md`, `qa.md`, `devops.md`) actualizados para incluir la sección **Skill Awareness**, obligándolos a subordinar su conocimiento a las skills activas detectadas.
 - `README.md` y `AGENTS.md` actualizados para reflejar el nuevo paradigma de orquestación agnóstica.
+- Repositorio inicializado como Git repo con remote `https://github.com/ezequielmendoza-dev/ai-agents.git`
+- Rama principal renombrada de `master` a `main`
 
 ### Eliminado
 - Todas las skills tecnológicas hardcodeadas (`frontend/`, `backend/`, `database/`, etc.). El conocimiento tecnológico ahora debe vivir en el proyecto (`.skills/`) o en el entorno del usuario (ej. Gemini CLI, Claude Code).
-
----
 
 ## [1.6.6] — 2026-06-24
 
@@ -206,57 +287,6 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - Flujo de trabajo con paso de archivado de features
 - Buenas prácticas actualizadas con reglas de actualización documental
 - Versión bumped a `v1.1.0`
-
----
-
-## [2.0.1] — 2026-06-22
-
-### Eliminado
-- `analyst.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/analyst.md` v2.0
-- `architect.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/architect.md` v2.0
-- `developer.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/developer.md` v2.0
-- `qa.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/qa.md` v2.0
-- `tech-lead.md` (raíz) — v1.0 obsoleta, reemplazada por `roles/tech-lead.md` v2.0
-- `agent-definitions.md` (raíz) — reemplazado por `docs/agent-definitions.md` con contenido real
-
-### Razón
-Los archivos de la raíz eran versiones v1.0 sin headers markdown, sin Chain of Thought, sin output format estructurado y sin guías de activación. Mantenerlos junto a las versiones v2.0 en `roles/` generaba confusión sobre cuál era la fuente canónica. La raíz queda limpia — los agentes viven en `roles/`.
-
----
-
-## [2.0.0] — 2026-06-22
-
-
-### Agregado
-- `roles/analyst.md` v2.0 — Chain of Thought, Output Format estructurado, guía de activación
-- `roles/architect.md` v2.0 — Chain of Thought, Output Format estructurado, guía de activación
-- `roles/tech-lead.md` v2.0 — Decision Framework, Chain of Thought, Output Format estructurado
-- `roles/developer.md` v2.0 — Chain of Thought, Output Format estructurado, guía de activación
-- `roles/qa.md` v2.0 — Clasificación de bugs, Chain of Thought, Output Format estructurado
-- `roles/devops.md` v1.0 — Nuevo agente especializado para infraestructura y deployments
-- `roles/prompt-guide.md` v1.0 — Guía completa de prompts por agente con ejemplos reales
-- `docs/agent-definitions.md` — Meta-documento con estándar de diseño de agentes
-- `templates/feature-spec.md` — Template completo para especificaciones funcionales
-- `templates/architecture-spec.md` — Template completo para diseños técnicos
-- `templates/technical-task.md` — Template para tareas técnicas de desarrollo
-- `templates/qa-report.md` — Template para reportes de QA
-- `templates/bug-report.md` — Template para reporte de bugs
-- `templates/project-context.md` — Template para el contexto del proyecto (`.ai/context.md`)
-- `checklists/frontend-review.md` — Checklist de revisión frontend
-- `checklists/backend-review.md` — Checklist de revisión backend
-- `checklists/database-review.md` — Checklist de revisión de base de datos
-- `README.md` — README principal del repositorio
-- `.gitignore` — Archivos a ignorar por Git
-- `CHANGELOG.md` — Este archivo
-
-### Modificado
-- Repositorio inicializado como Git repo con remote `https://github.com/ezequielmendoza-dev/ai-agents.git`
-- Rama principal renombrada de `master` a `main`
-
-### Estructura de carpetas establecida
-```
-agents/       checklists/       docs/       examples/       templates/       workflows/
-```
 
 ---
 
