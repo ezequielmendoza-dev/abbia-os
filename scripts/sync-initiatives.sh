@@ -167,7 +167,8 @@ EOF
             fi
 
             if ! grep -q "$ARCH_ID" "$CATALOG_FILE" 2>/dev/null; then
-                echo "| $ARCH_ID | $TITLE | ⚖️ Vigente | [decisions.md](../../decisions.md#${ARCH_ID,,}) | $CURRENT_DATE |" >> "$CATALOG_FILE"
+                ARCH_LOWER=$(echo "$ARCH_ID" | tr '[:upper:]' '[:lower:]')
+                echo "| $ARCH_ID | $TITLE | ⚖️ Vigente | [decisions.md](../../decisions.md#$ARCH_LOWER) | $CURRENT_DATE |" >> "$CATALOG_FILE"
             fi
         fi
 
