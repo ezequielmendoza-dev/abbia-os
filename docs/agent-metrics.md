@@ -124,6 +124,8 @@ per_feature:
 
 Todo agente del pipeline registra su ejecución en `executions.yaml`. El **Skill Manager** es el responsable último: si el canal del agente no expone métricas, el orquestador las estima y registra (marcando `source: estimate`).
 
+> **Automatización:** `scripts/finish-phase.sh` registra la ejecución (con `source: estimate` por defecto; `--source measured` si hay telemetría real) junto con la entrada de `workflow-log.md` y la regeneración del snapshot.
+
 ### Fase 2 — Agregar (al final de sesión, Skill Manager)
 
 1. Lee `executions.yaml` y agrupa por `phase`, `role` y `initiative`.

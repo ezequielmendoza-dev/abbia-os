@@ -125,6 +125,8 @@ Es la puerta de entrada a la memoria. Generado por el **Skill Manager** al inici
 
 Todo agente del pipeline, al terminar su participación, **escribe una entrada en `workflow-log.md`** según §3.1. Esto incluye los no-productor de artefactos (Tech Lead agrega su veredicto y el resultado).
 
+> **Automatización:** el script `scripts/finish-phase.sh` cierra la fase registrando la entrada en `workflow-log.md`, la ejecución en `metrics/executions.yaml` y regenerando `context-snapshot.md` (ver `docs/repository-structure.md`). Es la vía recomendada para no depender de que cada agente recuerde registrarse.
+
 ### Fase 2 — Compactar (al iniciar la sesión, Skill Manager)
 
 1. Lee los 3 archivos de origen.

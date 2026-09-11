@@ -147,6 +147,7 @@ Los scripts se encuentran en `scripts/` y automatizan tareas repetitivas de setu
 | [`setup-ide.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/setup-ide.sh) | Inicializa `.ai/`, seeds de memoria/métricas/KG, genera reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
 | [`update-ai-agents.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/update-ai-agents.sh) | Actualiza el framework (submodule + setup en un comando) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | [`new-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/new-initiative.sh) | Bootstrap automático de feature, bug, auditoría o refactor | `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
+| [`finish-phase.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/finish-phase.sh) | Cierre de fase: registra memory, metrics y snapshot automáticamente | `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` |
 | [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
 | [`common.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/common.sh) | Librería compartida de soporte (interno, DRY) | *(Interno)* |
 
