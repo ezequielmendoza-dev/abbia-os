@@ -4,6 +4,16 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.2.2] — 2026-09-11
+
+### Agregado
+- **`scripts/update-ai-agents.sh`** — Actualización del framework en un solo comando. Detecta la raíz del proyecto, actualiza el submodule `.ai/agents` al último commit (o a un tag pasado como argumento, ej. `bash .ai/agents/scripts/update-ai-agents.sh v3.2.2`), commitea el puntero del submódulo en el proyecto y ejecuta `setup-ide.sh --auto` para activar los sistemas v3.x que falten. Reemplaza el proceso manual de 4 pasos (cd submodule → checkout → git add/commit → setup).
+
+### Modificado
+- **`setup-ide.sh` (v1.8.0) — modo no-interactivo `--auto`** — Añadido el flag `--auto`: inicializa la estructura `.ai/` (incl. sistemas v3.2.0), configura `.gitignore` y omite la generación de reglas de IDEs (evita sobrescribir copias del proyecto). Usado por `update-ai-agents.sh`; también puede ejecutarse manualmente con `bash setup-ide.sh --auto`.
+
+---
+
 ## [3.2.1] — 2026-09-11
 
 ### Corregido
