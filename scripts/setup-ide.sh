@@ -20,7 +20,7 @@ fi
 
 echo -e "${BLUE}====================================================${NC}"
 echo -e "${BLUE}   🤖 Instalador de Configuración de IDEs de IA      ${NC}"
-echo -e "${BLUE}            ai-agents OS v1.6.6                     ${NC}"
+echo -e "${BLUE}            ai-agents OS v1.7.0                     ${NC}"
 echo -e "${BLUE}====================================================${NC}"
 
 # 1. Determinar rutas y directorios
@@ -144,6 +144,146 @@ EOF
     else
         echo -e "  - .ai/glossary.md ya existe. Omitido."
     fi
+
+    # Crear los sistemas de v3.2.0: memoria persistente, métricas y knowledge graph
+    echo -e "\n${BLUE}  → Sistemas v3.2.0: memoria persistente, métricas y knowledge graph${NC}"
+
+    # Sistema de Memoria Persistente (.ai/memory/)
+    mkdir -p "$PROJECT_ROOT/.ai/memory"
+    echo -e "  - .ai/memory/ creada."
+
+    # workflow-log.md — memoria episódica append-only
+    if [ ! -f "$PROJECT_ROOT/.ai/memory/workflow-log.md" ]; then
+        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/workflow-log.md"
+# Memoria Episódica — Workflow Log (append-only)
+
+Registro cronológico de las ejecuciones del pipeline. Cada agente, al terminar su
+participación, agrega una entrada con fecha ISO-8601. **Nunca se reescribe una
+entrada existente**; se agrega o se marca como `OBSOLETA`.
+
+Formato por entrada:
+
+## [FEAT-XXX] S# — Rol (YYYY-MM-DDTHH:MMZ)
+
+- **Insumos consumidos:** [artefactos aprobados que se leyeron]
+- **Decisión:** [qué se decidió, de forma precisa]
+- **Razón:** [criterio detrás de la decisión]
+- **Alternativas descartadas:** [opciones evaluadas y por qué se descartaron]
+- **Riesgo detectado:** [RT-XX o ninguno]
+- **Outputs producidos:** [vínculo al artefacto resultante]
+
+Reglas:
+1. Máximo ~6 bullets por entrada (~10 líneas).
+2. Decisiones ≠ opiniones: registrar decisión, razón y alternativas.
+3. `⚖️ OBSOLETA` para corregir, nunca borrar.
+
+Referencia: docs/workflow-memory.md (framework ai-agents).
+EOF
+        echo -e "${GREEN}✓ Creado .ai/memory/workflow-log.md (memoria episódica).${NC}"
+    else
+        echo -e "  - .ai/memory/workflow-log.md ya existe. Omitido."
+    fi
+
+    # decisions-catalog.md — memoria semántica (índice de decisiones vigentes)
+    if [ ! -f "$PROJECT_ROOT/.ai/memory/decisions-catalog.md" ]; then
+        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/decisions-catalog.md"
+# Catálogo de Decisiones — Memoria Semántica
+
+Índice de decisiones **vigentes** con referencia al detalle en `decisions.md`
+(que sigue siendo la fuente de verdad). El Architect mantiene este índice; el
+Tech Lead lo consulta antes de cada gate.
+
+| ID | Decisión | Estado | Referencia | Última revisión |
+|:---|:---|:---|:---|:---|
+| DEC-001 | [Decisión] | ⚖️ Vigente / 🔄 En evaluación / ✖️ Descartada | [decisions.md](../../decisions.md#dec-001) | YYYY-MM-DD |
+
+Reglas:
+1. No duplica decisiones: cada fila referencia `decisions.md`.
+2. Cambio de estado: `🔄 En evaluación` cuando hay propuesta, `⚖️ Vigente`/`✖️ Descartada` al resolver.
+
+Referencia: docs/workflow-memory.md (framework ai-agents).
+EOF
+        echo -e "${GREEN}✓ Creado .ai/memory/decisions-catalog.md (memoria semántica).${NC}"
+    else
+        echo -e "  - .ai/memory/decisions-catalog.md ya existe. Omitido."
+    fi
+
+    # patterns-learned.md — memoria procedimental
+    if [ ! -f "$PROJECT_ROOT/.ai/memory/patterns-learned.md" ]; then
+        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/patterns-learned.md"
+# Patrones Aprendidos — Memoria Procedimental
+
+Lecciones y patrones reutilizables que aceleran el trabajo futuro. Solo patrones
+que aplican a más de una ocasión; un one-off va al workflow-log.
+
+Formato problema → causa → solución → aplica a:
+
+## Problema: [Descripción breve]
+
+- **Síntoma:** [comportamiento observado]
+- **Causa raíz:** [por qué ocurría]
+- **Solución aplicada:** [qué se hizo para resolverlo]
+- **Aplica a:** [tipo de tarea futura donde aplica]
+
+Referencia: docs/workflow-memory.md (framework ai-agents).
+EOF
+        echo -e "${GREEN}✓ Creado .ai/memory/patterns-learned.md (memoria procedimental).${NC}"
+    else
+        echo -e "  - .ai/memory/patterns-learned.md ya existe. Omitido."
+    fi
+
+    # context-snapshot.md — memoria compactada (generada por Skill Manager)
+    if [ ! -f "$PROJECT_ROOT/.ai/memory/context-snapshot.md" ]; then
+        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/context-snapshot.md"
+# Context Snapshot — Memoria Compactada
+
+> Generado por el **Skill Manager** al iniciar cada sesión.
+> Este archivo se regenera (compacta `workflow-log.md` + `decisions-catalog.md` +
+> `patterns-learned.md`) — **no se edita a mano**. Máximo ~30-50 líneas.
+
+## Estado del proyecto
+
+[Resumen ejecutivo de la sesión]
+
+## Decisiones vigentes
+
+[Índice rápido de decisiones ⚖️/🔄]
+
+## Patrones relevantes
+
+[Patrones aún aplicables]
+
+Referencia: docs/workflow-memory.md (framework ai-agents).
+EOF
+        echo -e "${GREEN}✓ Creado .ai/memory/context-snapshot.md. Lo regenerará el Skill Manager.${NC}"
+    else
+        echo -e "  - .ai/memory/context-snapshot.md ya existe. Omitido."
+    fi
+
+    # Sistema de Métricas (.ai/metrics/executions.yaml)
+    mkdir -p "$PROJECT_ROOT/.ai/metrics"
+    if [ ! -f "$PROJECT_ROOT/.ai/metrics/executions.yaml" ]; then
+        if [ -f "$TEMPLATES_DIR/metrics-executions.yaml" ]; then
+            cp "$TEMPLATES_DIR/metrics-executions.yaml" "$PROJECT_ROOT/.ai/metrics/executions.yaml"
+            echo -e "${GREEN}✓ Creado .ai/metrics/executions.yaml (registro de métricas por ejecución).${NC}"
+        else
+            echo -e "${YELLOW}! No se encontró templates/metrics-executions.yaml. Se omite el seed de métricas.${NC}"
+        fi
+    else
+        echo -e "  - .ai/metrics/executions.yaml ya existe. Omitido."
+    fi
+
+    # Knowledge Graph (.ai/knowledge-graph.yaml)
+    if [ ! -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
+        if [ -f "$TEMPLATES_DIR/knowledge-graph.yaml" ]; then
+            cp "$TEMPLATES_DIR/knowledge-graph.yaml" "$PROJECT_ROOT/.ai/knowledge-graph.yaml"
+            echo -e "${GREEN}✓ Creado .ai/knowledge-graph.yaml (grafo de decisiones arquitectónicas).${NC}"
+        else
+            echo -e "${YELLOW}! No se encontró templates/knowledge-graph.yaml. Se omite el seed del grafo.${NC}"
+        fi
+    else
+        echo -e "  - .ai/knowledge-graph.yaml ya existe. Omitido."
+    fi
 else
     echo -e "Omitiendo inicialización de estructura documental .ai/"
 fi
@@ -242,5 +382,11 @@ echo -e "${GREEN}   🎉 ¡Configuración de ai-agents OS Completada!      ${NC}
 echo -e "${GREEN}====================================================${NC}"
 echo -e "Siguientes pasos recomendados:"
 echo -e "1. Abre y edita ${YELLOW}.ai/context.md${NC} con la información técnica de tu proyecto."
-echo -e "2. Abre tu IDE de IA y comienza a trabajar siguiendo los agentes en ${YELLOW}AGENTS.md${NC}."
+echo -e "2. Completa los sistemas v3.2.0 recién creados:"
+echo -e "   • ${YELLOW}.ai/knowledge-graph.yaml${NC} — indexa los ADRs ya vigentes en decisions.md"
+echo -e "   • ${YELLOW}.ai/memory/workflow-log.md${NC} y ${YELLOW}.ai/memory/decisions-catalog.md${NC} — primer uso del pipeline"
+echo -e "   • ${YELLOW}.ai/metrics/executions.yaml${NC} — se registra automáticamente en cada ejecución"
+echo -e "3. Abre tu IDE de IA y comienza a trabajar siguiendo los agentes en ${YELLOW}AGENTS.md${NC}."
+echo -e "4. Para proyectos que actualizan desde una versión previa: ver la guía de"
+echo -e "   actualización en ${YELLOW}.ai/agents/docs/project-integration.md${NC} (§ Actualización)."
 echo -e "===================================================="

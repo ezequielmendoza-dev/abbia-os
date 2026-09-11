@@ -69,7 +69,42 @@ for f in "${PERMANENT_FILES[@]}"; do
     fi
 done
 
-# 3. Validar Estructura de Características Activas (.ai/features/)
+# 3. Validar Sistemas de v3.2.0 (memoria, métricas, knowledge graph) — WARN no bloqueante
+# Compatible con proyectos anteriores a v3.2.0: la ausencia se reporta como advertencia.
+echo -e "\n${BLUE}Verificando sistemas opcionales de v3.2.0 en .ai/...${NC}"
+
+if [ -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
+    echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado."
+else
+    warning_found "No existe .ai/knowledge-graph.yaml. El grafo de decisiones está inactivo (opcional v3.2.0)."
+fi
+
+MEMORY_DIR="$PROJECT_ROOT/.ai/memory"
+if [ -d "$MEMORY_DIR" ]; then
+    MEM_FILES=("workflow-log.md" "decisions-catalog.md" "patterns-learned.md" "context-snapshot.md")
+    MEM_OK=true
+    for mf in "${MEM_FILES[@]}"; do
+        if [ ! -f "$MEMORY_DIR/$mf" ]; then
+            MEM_OK=false
+            break
+        fi
+    done
+    if [ "$MEM_OK" = true ]; then
+        echo -e "  [${GREEN}OK${NC}]    .ai/memory/ verificado (workflow-log, decisions-catalog, patterns-learned, context-snapshot)."
+    else
+        warning_found "La carpeta .ai/memory/ existe pero le faltan archivos seed (workflow-log.md, decisions-catalog.md, patterns-learned.md, context-snapshot.md)."
+    fi
+else
+    warning_found "No existe la carpeta .ai/memory/. La memoria persistente está inactiva (opcional v3.2.0)."
+fi
+
+if [ -f "$PROJECT_ROOT/.ai/metrics/executions.yaml" ]; then
+    echo -e "  [${GREEN}OK${NC}]    .ai/metrics/executions.yaml verificado."
+else
+    warning_found "No existe .ai/metrics/executions.yaml. Las métricas del pipeline están inactivas (opcional v3.2.0)."
+fi
+
+# 4. Validar Estructura de Características Activas (.ai/features/)
 FEATURES_DIR="$PROJECT_ROOT/.ai/features"
 if [ -d "$FEATURES_DIR" ]; then
     echo -e "\n${BLUE}Verificando iniciativas activas en .ai/features/...${NC}"
@@ -84,7 +119,8 @@ if [ -d "$FEATURES_DIR" ]; then
         echo -e "  [${GREEN}INFO${NC}]  No hay iniciativas activas en progreso."
     fi
 
-    for dir in "${dirs[@]}"; do
+    if [ ${#dirs[@]} -gt 0 ]; then
+        for dir in "${dirs[@]}"; do
         # Obtener el nombre de la carpeta (sin barra final)
         folder_name=$(basename "$dir")
         
@@ -125,11 +161,12 @@ if [ -d "$FEATURES_DIR" ]; then
             done
         fi
     done
+    fi
 else
     error_found "No existe el directorio .ai/features/. Es requerido por el sistema documental."
 fi
 
-# 4. Validar Estructura de Historial (.ai/archive/)
+# 5. Validar Estructura de Historial (.ai/archive/)
 ARCHIVE_DIR="$PROJECT_ROOT/.ai/archive"
 if [ -d "$ARCHIVE_DIR" ]; then
     echo -e "\n${BLUE}Verificando iniciativas archivadas en .ai/archive/...${NC}"
@@ -138,6 +175,11 @@ if [ -d "$ARCHIVE_DIR" ]; then
     archived_dirs=("$ARCHIVE_DIR"/*/)
     shopt -u nullglob
     
+    if [ ${#archived_dirs[@]} -eq 0 ]; then
+        echo -e "  [${GREEN}INFO${NC}]  No hay iniciativas archivadas."
+    fi
+
+    if [ ${#archived_dirs[@]} -gt 0 ]; then
     for dir in "${archived_dirs[@]}"; do
         folder_name=$(basename "$dir")
         
@@ -146,11 +188,12 @@ if [ -d "$ARCHIVE_DIR" ]; then
             error_found "Archivo: El nombre de la carpeta archivada '$folder_name' no sigue el patrón '<FEAT|BUG>-<ID>-<slug>'."
         fi
     done
+    fi
 else
     warning_found "No existe el directorio .ai/archive/. Se recomienda crearlo para almacenar el historial de features cerradas."
 fi
 
-# 5. Reporte Final
+# 6. Reporte Final
 echo -e "\n${BLUE}====================================================${NC}"
 echo -e "${BLUE}   📊 Resumen de Validación                         ${NC}"
 echo -e "${BLUE}====================================================${NC}"
