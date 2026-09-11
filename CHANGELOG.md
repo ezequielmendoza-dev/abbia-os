@@ -4,6 +4,20 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.2.4] — 2026-09-11
+
+### Agregado
+- **Tipos de iniciativa `AUDIT` y `REF`** — Además de `FEAT` y `BUG`, el sistema documental soporta iniciativas de auditoría/seguridad (`AUDIT-NNN-slug`) y refactors (`REF-NNN-slug`). Ambos tienen **estructura libre**: el validador no exige documentos concretos, solo verifica que la carpeta no esté vacía. Se registran en `.ai/context.md` junto a los demás IDs.
+
+### Modificado
+- **`scripts/common.sh`** — Nueva teoría central de iniciativas: `INITIATIVE_TYPES` ("FEAT BUG AUDIT REF"), patrón de nomenclatura dinámico (`initiative_name_pattern`), archivos obligatorios por tipo (`required_files_for`, vacío = estructura libre) y versión legible para mensajes (`initiative_types_readable`). DRY: validador y bootstrap consumen estos helpers en lugar de hardcodear el patrón.
+- **`scripts/validate-project.sh`** — Usa el patrón de nomenclatura central; `FEAT` y `BUG` siguen exigiendo sus documentos (spec/ui-design/architecture/qa/decision y bug-report/qa respectivamente); `AUDIT`/`REF` se validan como estructura libre (error solo si la carpeta está vacía). Aplica también a `.ai/archive/`.
+- **`scripts/new-initiative.sh`** — Modo interactivo extendido (1-4) y crea estructura libre (README.md de inicio) para `AUDIT`/`REF`. Seed de `## Registro de IDs` en context.md ampliado con AUDIT y REF.
+- **`docs/naming-conventions.md`** — Nueva sección de identificadores especiales (AUDIT/REF) con reglas de estructura libre y ejemplos.
+- **`docs/project-integration.md` §4.5**, `README.md`, `AGENTS.md` y `templates/ide-configs/AGENTS.md` — Actualizadas las referencias a nomenclatura y al uso de `new-initiative.sh` con los tipos nuevos.
+
+---
+
 ## [3.2.3] — 2026-09-11
 
 ### Agregado
