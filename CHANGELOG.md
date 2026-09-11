@@ -4,6 +4,17 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.2.1] — 2026-09-11
+
+### Corregido
+- **`setup-ide.sh` no creaba estructuras de los sistemas v3.2.0** — Al ejecutar la inicialización de la carpeta `.ai/`, el script solo creaba los 5 documentos permanentes originales (`context.md`, `business-rules.md`, `architecture.md`, `decisions.md`, `glossary.md`). Los sistemas nuevos de v3.2.0 quedaban dormidos hasta que el usuario los creara manualmente. Ahora `setup-ide.sh` (v1.7.0) crea automáticamente: `.ai/memory/` con sus 4 archivos seed, `.ai/metrics/executions.yaml` y `.ai/knowledge-graph.yaml`. Todos los archivos se saltan si ya existen (idempotente).
+- **`validate-project.sh` fallaba con carpetas vacías** — Con bash 3.2 (macOS) y `set -u`, iterar `"${dirs[@]}"`/`"${archived_dirs[@]}"` sobre un array vacío lanzaba *unbound variable* (exit 1) cuando `.ai/features/` o `.ai/archive/` estaban vacíos — el caso exacto de un proyecto recién inicializado. Los loops sobre iniciativas activas y archivadas se guardan ahora con `if [ ${#dirs[@]} -gt 0 ]` (con mensaje `INFO` cuando no hay iniciativas).
+
+### Modificado
+- **`validate-project.sh` — validación de sistemas v3.2.0** — Añadidos chequeos tipo `WARN` (no bloqueantes) para `.ai/knowledge-graph.yaml`, `.ai/memory/` (verificando los 4 archivos seed) y `.ai/metrics/executions.yaml`. La ausencia de estos archivos no rompe la validación existente, compatible con proyectos anteriores a v3.2.0.
+
+---
+
 ## [3.2.0] — 2026-09-11
 
 ### Agregado
