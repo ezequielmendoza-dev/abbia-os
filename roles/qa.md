@@ -308,5 +308,17 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 
 ---
 
+## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+
+Una vez completada la validación y generado `qa.md` con su veredicto explícito (`APROBADO` o `RECHAZADO`), **debes ejecutar el cierre de tu fase**:
+
+```bash
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>
+```
+
+Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
+
+---
+
 *Agente versión 3.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
 

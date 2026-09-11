@@ -274,5 +274,17 @@ Por favor, lee el diseño técnico en .ai/features/FEAT-NNN-slug/architecture.md
 
 ---
 
+## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+
+Una vez completada la implementación de código, los tests unitarios y registrado `decision.md`, **debes ejecutar el cierre de tu fase**:
+
+```bash
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer
+```
+
+Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
+
+---
+
 *Agente versión 3.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
 

@@ -7,6 +7,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 ## [3.3.0] — 2026-09-11
 
 ### Agregado
+- **`scripts/sync-initiatives.sh` (Auto-Reconciliador)** — Herramienta para escanear `.ai/features/` y sincronizar automáticamente cualquier iniciativa histórica o activa pendiente en `workflow-log.md`, `decisions-catalog.md`, `knowledge-graph.yaml`, `executions.yaml` y regenerar `context-snapshot.md`.
+- **Protocolo de Cierre Mandatorio (Hand-off) en Roles (`roles/*.md`)** — Instrucción explícita de fin de fase en cada rol (`analyst`, `architect`, `developer`, `qa`, etc.) para ejecutar `finish-phase.sh` y evitar la omisión de registros.
 - **Reglas Modulares de Cursor (`.cursor/rules/*.mdc`)** — Nuevo directorio de plantillas `templates/ide-configs/cursor-rules/` con archivos `.mdc` (`general.mdc`, `architect.mdc`, `developer.mdc`, `qa.mdc`) que aprovechan el sistema de activación contextual (`globs`, `alwaysApply`, `description`) de Cursor IDE.
 - **Custom Modes para Roo-Code / Cline (`.roomodes`)** — Plantilla `templates/ide-configs/roomodes` con la definición JSON de los 8 roles del framework y sus restricciones de herramientas (`read`, `edit`, `command`, `browser`, `mcp`) para ejecución controlada.
 - **Localization Step en Workflows (`new-feature.md`, `bug-fix.md`)** — Sub-paso formal previo a la implementación donde el Developer identifica explícitamente los archivos, módulos y símbolos a modificar/crear antes de escribir código, reduciendo el consumo de tokens y evitando modificaciones colaterales.
@@ -16,7 +18,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ### Modificado
 - **`scripts/setup-ide.sh`** — Actualizado a v3.3.0 con nuevas opciones de menú interactivo para instalar las reglas modulares de Cursor (`.cursor/rules/*.mdc`) y los modos personalizados de Roo-Code (`.roomodes`).
-- **`scripts/validate-project.sh`** — Añadida validación semántica de dependencias en `knowledge-graph.yaml` (verificación de formato `[ARCH-NNN]`) y validación de sintaxis de veredicto obligatorio (`APROBADO` / `RECHAZADO`) en los reportes `qa.md` de iniciativas activas.
+- **`scripts/validate-project.sh`** — Añadida validación de dependencias en `knowledge-graph.yaml`, sintaxis de veredictos en `qa.md`, y chequeo de registro en `workflow-log.md` por cada iniciativa en `.ai/features/`.
 - **`README.md`, `AGENTS.md`, `templates/ide-configs/AGENTS.md`** — Actualizados con las nuevas capacidades y plantillas de la versión 3.3.0.
 
 ---

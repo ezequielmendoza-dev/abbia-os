@@ -195,6 +195,14 @@ if [ -d "$FEATURES_DIR" ]; then
                 fi
             fi
         fi
+
+        # Verificación de sincronización con el sistema de memoria
+        if [ -f "$PROJECT_ROOT/.ai/memory/workflow-log.md" ]; then
+            INITIATIVE_SHORT_ID=$(echo "$folder_name" | cut -d'-' -f1,2)
+            if ! grep -q "## \[$INITIATIVE_SHORT_ID\]" "$PROJECT_ROOT/.ai/memory/workflow-log.md" 2>/dev/null; then
+                warning_found "Iniciativa '$folder_name' no tiene entradas en .ai/memory/workflow-log.md. Registrar con finish-phase.sh o sincronizar con sync-initiatives.sh."
+            fi
+        fi
     done
     fi
 else

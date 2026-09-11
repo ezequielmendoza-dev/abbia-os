@@ -326,5 +326,17 @@ Pasos a seguir:
 
 ---
 
+## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+
+Una vez generado y verificado el artefacto (`discovery.md` o `spec.md`), **debes ejecutar el cierre de tu fase** para sincronizar la memoria persistente y la telemetría del proyecto:
+
+```bash
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst
+```
+
+Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
+
+---
+
 *Agente versión 3.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
 
