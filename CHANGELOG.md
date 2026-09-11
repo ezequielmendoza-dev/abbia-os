@@ -4,6 +4,16 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.2.3] — 2026-09-11
+
+### Agregado
+- **Guía de migración desde la v1.x del framework** (`docs/project-integration.md` §4.5) — Documenta cómo actualizar un proyecto heredado que se integró en la era v1.x/v2.0 (antes del `update-ai-agents.sh` y del salto a v3.0): actualización manual del submódulo, activación de los sistemas v3.2.0, regeneración de reglas IDE, adaptación de features existentes (requisito nuevo de `ui-design.md`) y limpieza del sparse-checkout obsoleto (`agents/` → `roles/`).
+
+### Modificado
+- **`docs/project-integration.md` §8** — Corregido el ejemplo de sparse-checkout que referenciaba `agents templates` (estructura de la era v1 que ya no existe; el directorio pasó a llamarse `roles/`). Ahora lista los directorios actuales (`roles templates workflows checklists scripts docs`) y advierte sobre el patrón antiguo.
+
+---
+
 ## [3.2.2] — 2026-09-11
 
 ### Agregado

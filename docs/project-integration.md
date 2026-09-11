@@ -243,6 +243,78 @@ Los sistemas v3.2.0 son **archivos YAML tabulares**, no gráficos renderizados:
 
 No existe herramienta de renderizado visual incluida.
 
+### 4.5 Migrar desde la v1.x del framework (proyecto heredado)
+
+Aplica si tu proyecto se integró cuando `ai-agents` estaba en **v1.x/v2.0** (antes del salto a v3.0 y del actualizador de un comando). El submódulo ya apunta a este mismo repositorio, así que **no necesitas el script nuevo para migrar**: basta con actualizar el submódulo "a mano" una vez. El script `update-ai-agents.sh` vive **dentro** del submódulo, así que queda disponible automáticamente tras la actualización.
+
+#### Paso 1 — Actualizar el submódulo al último commit
+
+```bash
+# Desde la raíz del proyecto
+cd .ai/agents
+git checkout main
+git pull origin main        # trae el contenido de v3.x
+cd ../..
+git add .ai/agents
+git commit -m "chore: update ai-agents submodule to v3.2.x"
+```
+
+> **Si usaste sparse-checkout:** la v1 documentaba `git sparse-checkout set agents templates` para traer "solo lo necesario". Esa estructura no existe en v3 (`agents/` pasó a llamarse `roles/`), y además sin `scripts/` no tendrás acceso al validador ni al actualizador. Desactívalo antes de actualizar:
+> ```bash
+> cd .ai/agents
+> git sparse-checkout disable
+> git checkout main && git pull origin main
+> ```
+
+#### Paso 2 — Activar los sistemas nuevos (memoria, métricas, knowledge graph)
+
+```bash
+# El setup-ide.sh v1.8.0 ahora existe dentro del submódulo actualizado.
+# Forma interactiva (recomendada si quieres regenerar reglas IDE):
+bash .ai/agents/scripts/setup-ide.sh
+# Forma sin preguntas (solo crea seeds, no toca reglas IDE):
+bash .ai/agents/scripts/setup-ide.sh --auto
+```
+
+Esto crea (idempotente, no toca lo existente): `.ai/memory/` con sus 4 seeds, `.ai/metrics/executions.yaml` y `.ai/knowledge-graph.yaml`.
+
+#### Paso 3 — Regenerar las reglas IDE con las nuevas referencias
+
+Si eliges la forma interactiva del Paso 2 (Opción 7 "Instalar TODOS"), los archivos `.cursorrules`, `CLAUDE.md`, etc. se regeneran apuntando a las rutas nuevas de v3 (`roles/`, `skills/`, `workflows/`).
+
+#### Paso 4 — Adaptar las features existentes de v1
+
+| Aspecto | v1.x | v3.x | ¿Qué cambia? |
+|:---|:---|:---|:---|
+| Archivos requeridos por feature | `spec.md`, `architecture.md`, `qa.md`, `decision.md` | + `ui-design.md` | Las features de v1 **fallan** la validación hasta tener `ui-design.md` |
+| Nomenclatura | `FEAT-NNN-slug` | `FEAT-NNN-slug` | Sin cambios |
+
+```bash
+# Para cada feature existente (si no lo tiene ya):
+touch .ai/features/FEAT-NNN-slug/ui-design.md
+```
+
+Luego verifica con el validador:
+```bash
+bash .ai/agents/scripts/validate-project.sh
+```
+Los WARN de sistemas v3.2.0 desaparecen tras el Paso 2; los ERROR de `ui-design.md` desaparecen tras el Paso 4.
+
+#### Qué NO es retroactivo
+
+| Sistema | Situación |
+|:---|:---|
+| **Memoria** (`.ai/memory/`) | Arranca vacía; las sesiones de la era v1 no se recuperan |
+| **Métricas** (`.ai/metrics/`) | Arrancan vacías; no miden ejecuciones pasadas |
+| **Knowledge Graph** (`.ai/knowledge-graph.yaml`) | Arranca vacío; los ADRs de `decisions.md` se indexan solo con backfill manual (ver §4.4) |
+
+#### A partir de aquí, las próximas actualizaciones
+
+```bash
+bash .ai/agents/scripts/update-ai-agents.sh                 # último commit
+bash .ai/agents/scripts/update-ai-agents.sh v3.2.2          # pin a un tag
+```
+
 ---
 
 ## 5. Configurar el Contexto del Proyecto
@@ -453,12 +525,17 @@ mi-app-movil/
 
 ```bash
 # Para proyectos simples, el submodule puede ser más ligero
-# Usar sparse checkout para traer solo lo necesario
+# Usar sparse checkout para traer solo lo necesario (VERSIÓN v3.x)
 git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
 cd .ai/agents
 git sparse-checkout init --cone
-git sparse-checkout set agents templates
+git sparse-checkout set roles templates workflows checklists scripts docs
+ 
+# IMPORTANTE: si ya creaste el submodule con sparse-checkout en la era v1
+# (patrón `agents templates`), actualiza el patrón ANTES de migrar a v3:
+git sparse-checkout set roles templates workflows checklists scripts docs
 ```
+> En v1 la carpeta de agentes era `agents/`; desde v2.x se llama `roles/`. Si usas sparse-checkout, el patrón debe listar los directorios actuales (roles, templates, workflows, checklists, scripts, docs). Ver §4.5 para la migración completa.
 
 ---
 
