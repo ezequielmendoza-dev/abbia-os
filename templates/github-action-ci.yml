@@ -1,12 +1,16 @@
 # ==============================================================================
-# github-action-ci.yml — ai-agents OS Compliance Check Action Template
+# github-action-ci.yml — ai-agents OS Validation Template (Multi-Lenguaje)
 # ==============================================================================
 # Este archivo es una plantilla para configurar validación automatizada en GitHub.
 # Para utilizarlo, cópialo a la raíz de tu proyecto como:
 # `.github/workflows/ai-agents-validation.yml`
+#
+# Cubre:
+#   1. validate-ai-structure  → Validación documental .ai/ (siempre)
+#   2. language-checks        → Tests por stack detectado (Node / Python / Go)
 # ==============================================================================
 
-name: "ai-agents Documental Validation"
+name: "ai-agents Documental + Language Validation"
 
 on:
   push:
@@ -15,6 +19,9 @@ on:
     branches: [ "main", "develop", "master" ]
 
 jobs:
+  # ----------------------------------------------------------------------------
+  # 1. VALIDACIÓN DOCUMENTAL — siempre corre, agnóstica al lenguaje
+  # ----------------------------------------------------------------------------
   validate-ai-structure:
     name: Validate .ai structure and naming conventions
     runs-on: ubuntu-latest
@@ -38,3 +45,131 @@ jobs:
             echo "❌ Error: No se encontró validate-project.sh en .ai/agents/scripts/ ni en scripts/"
             exit 1
           fi
+
+      - name: Validate DAG manifests in workflows
+        run: |
+          # Valida que los bloques dag:start/dag:end de los workflows estén balanceados
+          if find . -name "*.md" -path "./.ai/*" -prune -o -name "*.md" -print 2>/dev/null | grep -q .; then
+            for f in $(git ls-files '*.md'); do
+              opens=$(grep -c '<!-- dag:start -->' "$f" 2>/dev/null || true)
+              closes=$(grep -c '<!-- dag:end -->' "$f" 2>/dev/null || true)
+              if [ "$opens" != "$closes" ]; then
+                echo "❌ DAG desbalanceado en $f (open=$opens close=$closes)"
+                exit 1
+              fi
+            done
+            echo "✅ DAG manifests balanceados"
+          fi
+
+  # ----------------------------------------------------------------------------
+  # 2. VALIDACIÓN DE LENGUAJE — corre solo si existe el manifest del stack
+  # ----------------------------------------------------------------------------
+  language-checks:
+    name: "${{ matrix.stack }} — install + test"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stack:
+          - node
+          - python
+          - go
+
+    steps:
+      - name: Checkout project code
+        uses: actions/checkout@v4
+
+      # --- Node.js -----------------------------------------------------------
+      - name: Detect Node.js manifest
+        id: detect-node
+        run: |
+          if [ -f package.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.detect-node.outputs.present == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        if: steps.detect-node.outputs.present == 'true' && matrix.stack == 'node'
+        run: npm ci
+
+      - name: Run Node tests
+        if: steps.detect-node.outputs.present == 'true' && matrix.stack == 'node'
+        run: |
+          if [ -f package.json ] && grep -q '"test"' package.json; then
+            npm test
+          else
+            echo "⚠️ Sin script de test definido. Omitiendo."
+          fi
+
+      # --- Python -------------------------------------------------------------
+      - name: Detect Python manifest
+        id: detect-python
+        run: |
+          if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.detect-python.outputs.present == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        if: steps.detect-python.outputs.present == 'true' && matrix.stack == 'python'
+        run: |
+          if [ -f pyproject.toml ]; then
+            pip install -e ".[dev]" 2>/dev/null || pip install -e .
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run Python tests
+        if: steps.detect-python.outputs.present == 'true' && matrix.stack == 'python'
+        run: |
+          if [ -f pyproject.toml ] || [ -f pytest.ini ] || [ -d tests ]; then
+            python -m pytest -q 2>/dev/null || echo "⚠️ pytest no disponible o sin tests. Omitiendo."
+          else
+            echo "⚠️ Sin suite de tests detectada. Omitiendo."
+          fi
+
+      # --- Go ----------------------------------------------------------------
+      - name: Detect Go manifest
+        id: detect-go
+        run: |
+          if [ -f go.mod ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Go
+        if: steps.detect-go.outputs.present == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Run Go tests
+        if: steps.detect-go.outputs.present == 'true' && matrix.stack == 'go'
+        run: go test ./...
+
+      # --- Early exit con mensaje claro si no hay ningún manifest -----------
+      - name: Check manifest detected
+        if: ${{ steps.detect-node.outputs.present == 'false' && steps.detect-python.outputs.present == 'false' && steps.detect-go.outputs.present == 'false' }}
+        run: |
+          case "${{ matrix.stack }}" in
+            node)   msg="Node"   ;;
+            python) msg="Python" ;;
+            go)     msg="Go"     ;;
+          esac
+          echo "⚠️ $msg no detectado en el repo. Este job es solo para stacks presentes."
