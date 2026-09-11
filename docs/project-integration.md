@@ -142,10 +142,10 @@ git commit -m "chore: update ai-agents submodule to latest"
 
 ```bash
 cd .ai/agents
-git checkout v2.1.0       # apuntar a un tag específico
+git checkout v3.2.1       # apuntar a un tag específico
 cd ../..
 git add .ai/agents
-git commit -m "chore: pin ai-agents to v2.1.0"
+git commit -m "chore: pin ai-agents to v3.2.1"
 ```
 
 ### 4.3 Estrategia recomendada por tipo de proyecto
@@ -155,6 +155,88 @@ git commit -m "chore: pin ai-agents to v2.1.0"
 | En desarrollo activo | Usar `main` branch, actualizar frecuentemente | Beneficiarse de mejoras |
 | En producción estable | Pinear a un tag | Estabilidad ante cambios inesperados |
 | Proyecto crítico | Pinear + revisar CHANGELOG antes de actualizar | Control total |
+
+### 4.4 Actualizar desde v3.0 a v3.2.x — Qué cambia y qué hacer
+
+Este apartado aplica a proyectos que ya usaban `ai-agents` v3.0.x y quieren aprovechar los sistemas nuevos (v3.1.0 → v3.2.1).
+
+#### Qué se actualiza automáticamente (vía submodule)
+
+Al actualizar el submodule, todo esto se aplica **sin intervención manual**:
+
+| Componente | Cambio |
+|:---|:---|
+| 8 agentes (roles/*.md) | Alineados a **v3.0** (incl. skill-manager v1.2 → v3.0) |
+| 15 framework skills (skills/) | 5 existentes + 10 nuevas metodológicas |
+| 5 workflows (workflows/*.md) | Contienen DAG embebido (bloque `<!-- dag:start -->`/`<!-- dag:end -->`) |
+| Skill Manager | Nuevo rol orquestador de memoria, DAG y skills |
+| scripts/ | `setup-ide.sh` v1.7.0 y `validate-project.sh` actualizados |
+
+#### Qué requiere activación manual
+
+Los sistemas nuevos de v3.2.0 **no se crean solos** al actualizar el submodule. Hay dos opciones:
+
+**Opción A — Rerun del setup (recomendado):**
+```bash
+bash .ai/agents/scripts/setup-ide.sh
+```
+Este comando es idempotente: solo crea archivos que no existen. Al ejecutarlo:
+- Se crea `.ai/memory/` con sus 4 archivos seed
+- Se crea `.ai/metrics/executions.yaml` (seed de métricas)
+- Se crea `.ai/knowledge-graph.yaml` (grafo vacío para indexar decisiones)
+- Se regeneran los archivos de reglas IDE (`.cursorrules`, `CLAUDE.md`, etc.) con las nuevas referencias
+
+**Opción B — Creación manual:**
+```bash
+mkdir -p .ai/memory .ai/metrics
+# Copiar seeds desde los templates del submodule
+cp .ai/agents/templates/metrics-executions.yaml .ai/metrics/executions.yaml
+cp .ai/agents/templates/knowledge-graph.yaml .ai/knowledge-graph.yaml
+# Memoria: ver contratos en .ai/agents/docs/workflow-memory.md
+```
+
+#### Qué NO es retroactivo (no se puede recuperar)
+
+| Sistema | Situación | Consecuencia |
+|:---|:---|:---|
+| **Memoria persistente** (`.ai/memory/`) | Arranca vacía al crearse | Las sesiones anteriores al upgrade no aparecen en el log |
+| **Métricas** (`.ai/metrics/`) | Arranca vacía al crearse | No se miden ejecuciones pasadas |
+| **Knowledge Graph** (`.ai/knowledge-graph.yaml`) | Arranca vacío | Los ADRs existentes en `decisions.md` no se indexan automáticamente |
+
+**Backfill manual de ADRs en el Knowledge Graph** (recomendado para proyectos con historial):
+```bash
+# Abrir .ai/knowledge-graph.yaml y agregar un nodo por cada ARCH-NNN vigente en decisions.md
+# Formato del nodo (ver templates/knowledge-graph.yaml):
+nodes:
+  - id: ARCH-001
+    title: "Nombre corto"
+    status: ACTIVE
+    root: true
+    depends_on: []
+    supersedes: []
+    related: []
+    conflicts_with: []
+    ref: "../decisions.md#arch-001"
+```
+
+Los ADRs marcados `Supersedida por ARCH-XXX` llevan `status: SUPERSEDED` y `supersedes` apunta al reemplazante.
+
+#### Qué NO cambia
+
+| Archivo | ¿Cambiarlo? |
+|:---|:---|
+| `spec.md`, `architecture.md`, `qa.md`, `decision.md` de features existentes | No — el formato de artefactos es idéntico |
+| `decisions.md` (ADRs históricos) | No — sigue siendo la fuente de verdad |
+| `context.md`, `business-rules.md`, `glossary.md` | No — sin cambios de contrato |
+
+#### Nota sobre visualización de gráficos
+
+Los sistemas v3.2.0 son **archivos YAML tabulares**, no gráficos renderizados:
+- **DAG** de workflows: describe la estructura de dependencias del pipeline; no se renderiza a gráfico
+- **Knowledge Graph**: nodos indexados con aristas; se consulta por transitividad en el CLI con el Skill Manager
+- **Métricas**: se agregan en `executions.yaml`; el Skill Manager genera un resumen en `aggregates.yaml` al cierre de sesión
+
+No existe herramienta de renderizado visual incluida.
 
 ---
 
