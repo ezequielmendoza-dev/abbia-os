@@ -1,0 +1,28 @@
+# ==============================================================================
+# knowledge-graph.yaml — Knowledge Graph Ligero de Decisiones Arquitectónicas
+# ==============================================================================
+# Copiar a `.ai/knowledge-graph.yaml` del proyecto. Mantenido por el Architect.
+# El texto completo de cada decisión vive en `decisions.md` — el grafo solo indexa.
+# Documentación: docs/knowledge-graph.md (framework ai-agents).
+# ==============================================================================
+
+version: 1
+updated: YYYY-MM-DD
+maintained_by: architect
+
+nodes:
+  - id: ARCH-001
+    title: "Nombre corto de la decisión"
+    status: ACTIVE            # ACTIVE | DEPRECATED | SUPERSEDED | PENDING
+    root: true                # true si no depende de ninguna decisión previa
+    supersedes: []            # IDs de decisiones que esta reemplaza
+    depends_on: []            # IDs de decisiones que esta asume vigentes
+    related: []               # IDs de decisiones compatibles y relacionadas
+    conflicts_with: []        # IDs de decisiones incompatibles bajo condiciones
+    ref: "../decisions.md#arch-001"
+
+edges: []                     # Opcional: relaciones etiquetadas no cubiertas por los campos
+#  - from: ARCH-012
+#    to: ARCH-015
+#    type: conflicts-with
+#    note: "Explicación corta de la incompatibilidad"
