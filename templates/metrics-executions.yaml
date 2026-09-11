@@ -1,0 +1,20 @@
+# ==============================================================================
+# executions.yaml — Registro de Métricas por Ejecución de Agente
+# ==============================================================================
+# Copiar a `.ai/metrics/executions.yaml` del proyecto. Append-only:
+# cada ejecución de un agente agrega una entrada; nunca se reescribe una previa.
+# Documentación: docs/agent-metrics.md (framework ai-agents).
+# ==============================================================================
+
+executions:
+  - ts: YYYY-MM-DDTHH:MM:SSZ        # ISO-8601
+    initiative: FEAT-001            # FEAT-NNN | BUG-NNN
+    role: architect                 # analyst | ui-designer | architect | developer | qa | tech-lead | devops
+    phase: architecture              # fase del DAG (ver docs/workflow-dag.md)
+    mode: estandar                  # rapido | estandar | profundo
+    tokens_in: 0                    # tokens de entrada de la invocación (null si no medible)
+    tokens_out: 0                   # tokens de salida producidos
+    duration_s: 0                   # duración en segundos
+    attempts: 1                     # 1 + número de back-edges sufridos por el nodo
+    verdict: null                   # PASS | FAIL | APROBADO | RECHAZADO — solo si la fase es un gate
+    source: measured                # measured | estimate (lo determina el Skill Manager)
