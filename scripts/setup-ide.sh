@@ -3,11 +3,23 @@
 # ==============================================================================
 # setup-ide.sh — ai-agents OS Installer
 # ==============================================================================
-# Este script inicializa la estructura .ai/ y genera los archivos de reglas
-# para diferentes IDEs de IA en el proyecto donde se ejecuta.
+# Este script inicializa la estructura .ai/ (incl. sistemas v3.x: memoria,
+# métricas y knowledge graph) y genera los archivos de reglas para diferentes
+# IDEs de IA en el proyecto donde se ejecuta.
+# Uso:
+#   bash setup-ide.sh             # interactivo
+#   bash setup-ide.sh --auto      # no-interactivo (inicializa .ai/ y .gitignore;
+#                                 #  no regenera reglas IDE; usado por update-ai-agents.sh)
 # ==============================================================================
 
 set -euo pipefail
+
+# Modo no-interactivo: salta preguntas, inicializa .ai/ y no regenera reglas IDE.
+# Uso: setup-ide.sh --auto   (usado por update-ai-agents.sh)
+AUTO_MODE=false
+if [ "${1:-}" = "--auto" ]; then
+    AUTO_MODE=true
+fi
 
 # Determinar directorio del script e importar utilidades comunes
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -20,7 +32,7 @@ fi
 
 echo -e "${BLUE}====================================================${NC}"
 echo -e "${BLUE}   🤖 Instalador de Configuración de IDEs de IA      ${NC}"
-echo -e "${BLUE}            ai-agents OS v1.7.0                     ${NC}"
+echo -e "${BLUE}            ai-agents OS v1.8.0                     ${NC}"
 echo -e "${BLUE}====================================================${NC}"
 
 # 1. Determinar rutas y directorios
@@ -52,7 +64,12 @@ fi
 echo -e "\n${BLUE}--- Paso 1: Inicialización de Estructura Documental .ai/ ---${NC}"
 
 # Preguntar si desea inicializar la estructura .ai/
-read -p "¿Deseas inicializar la estructura de carpetas .ai/? (s/n): " init_ai
+if [ "$AUTO_MODE" = true ]; then
+    init_ai="s"
+    echo -e "${YELLOW}! Modo automático: inicializando estructura .ai/ (sistemas v3.x).${NC}"
+else
+    read -p "¿Deseas inicializar la estructura de carpetas .ai/? (s/n): " init_ai
+fi
 if [[ "$init_ai" =~ ^[sS]$ ]]; then
     # Crear carpetas
     mkdir -p "$PROJECT_ROOT/.ai/features"
@@ -289,17 +306,22 @@ else
 fi
 
 echo -e "\n${BLUE}--- Paso 2: Generación de Archivos de Reglas para IDEs ---${NC}"
-echo "Selecciona qué archivos de reglas deseas generar en la raíz de tu proyecto:"
-echo "1) Cursor IDE (.cursorrules)"
-echo "2) Claude Code (CLAUDE.md)"
-echo "3) Windsurf IDE (.windsurfrules)"
-echo "4) Cline / Roo-Code (.clinerules)"
-echo "5) GitHub Copilot (.github/copilot-instructions.md)"
-echo "6) Guía General de Agentes (AGENTS.md)"
-echo "7) Instalar TODOS los anteriores"
-echo "8) Ninguno"
 
-read -p "Ingresa tu opción (1-8): " ide_choice
+ide_choice=8
+if [ "$AUTO_MODE" = true ]; then
+    echo -e "${YELLOW}! Modo automático: omitiendo generación de reglas de IDEs (ejecuta setup-ide.sh interactivo si lo necesitas).${NC}"
+else
+    echo "Selecciona qué archivos de reglas deseas generar en la raíz de tu proyecto:"
+    echo "1) Cursor IDE (.cursorrules)"
+    echo "2) Claude Code (CLAUDE.md)"
+    echo "3) Windsurf IDE (.windsurfrules)"
+    echo "4) Cline / Roo-Code (.clinerules)"
+    echo "5) GitHub Copilot (.github/copilot-instructions.md)"
+    echo "6) Guía General de Agentes (AGENTS.md)"
+    echo "7) Instalar TODOS los anteriores"
+    echo "8) Ninguno"
+    read -p "Ingresa tu opción (1-8): " ide_choice
+fi
 
 copy_rule_file() {
     local src="$1"
@@ -351,7 +373,12 @@ esac
 
 echo -e "\n${BLUE}--- Paso 3: Configuración de .gitignore ---${NC}"
 # Preguntar si desea configurar el .gitignore
-read -p "¿Deseas agregar las carpetas de sesiones locales de IA y temporales al .gitignore del proyecto? (s/n): " configure_git
+if [ "$AUTO_MODE" = true ]; then
+    configure_git="s"
+    echo -e "${YELLOW}! Modo automático: configurando .gitignore (.ai/sessions/).${NC}"
+else
+    read -p "¿Deseas agregar las carpetas de sesiones locales de IA y temporales al .gitignore del proyecto? (s/n): " configure_git
+fi
 
 if [[ "$configure_git" =~ ^[sS]$ ]]; then
     GITIGNORE_PATH="$PROJECT_ROOT/.gitignore"
