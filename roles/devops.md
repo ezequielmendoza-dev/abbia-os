@@ -1,6 +1,6 @@
 # DevOps / Infrastructure Engineer
 
-> **Versión:** 1.0  
+> **Versión:** 3.0  
 > **Rol en el pipeline:** Agente especializado — infraestructura, CI/CD, deployment  
 > **Se activa:** Bajo demanda del Tech Lead, no en el flujo estándar  
 > **Interactúa con:** Tech Lead, Developer
@@ -253,4 +253,4 @@ Tarea:
 
 ---
 
-*Agente versión 1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Agente versión 3.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*

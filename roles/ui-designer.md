@@ -1,6 +1,6 @@
 # UI Designer
 
-> **Versión:** 1.0  
+> **Versión:** 3.0  
 > **Rol en el pipeline:** Tercer agente — define el diseño de interfaz de usuario y la experiencia visual  
 > **Agente anterior:** Product Analyst / Tech Lead (aprobación de la especificación funcional)  
 > **Siguiente agente:** Software Architect (diseño técnico) / Senior Developer (implementación)  

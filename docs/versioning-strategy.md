@@ -42,27 +42,60 @@ Ejemplos:
 Cada agente tiene su versión declarada en el encabezado:
 
 ```markdown
-> **Versión:** 2.0
+> **Versión:** 3.0
 ```
 
 Los agentes usan versionado de dos números `[MAJOR].[MINOR]`:
 
 | Cambio | Versión |
 |--------|---------|
-| Corrección de constraint mal redactado | `2.0` → `2.1` |
-| Nueva sección (ej: Chain of Thought agregado) | `1.0` → `2.0` |
-| Rediseño completo del Output Format | `2.x` → `3.0` |
+| Corrección de constraint mal redactado | `3.0` → `3.1` |
+| Nueva sección (ej: Chain of Thought agregado) | `2.0` → `3.0` |
+| Rediseño completo del Output Format | `X.x` → `X+1.0` |
 
 ### Historial actual de versiones por agente
 
-| Agente | Versión actual | Cambio principal de v1→v2 |
-|--------|---------------|--------------------------|
-| `analyst.md` | `2.0` | Chain of Thought + Output estructurado + guía de activación |
-| `architect.md` | `2.0` | Chain of Thought + Output estructurado + guía de activación |
-| `tech-lead.md` | `2.0` | Decision Framework + Output tabular + veredictos formales |
-| `developer.md` | `2.0` | Chain of Thought + Output de implementación estructurado |
-| `qa.md` | `2.0` | Clasificación de bugs + Chain of Thought + Output estructurado |
-| `devops.md` | `1.0` | Agente nuevo |
+Todos los agentes del pipeline están alineados a la **MAJOR del framework** (`v3.x`). Cuando el framework publica una nueva MAJOR, todos los agentes la acompañan — no existe divergencia de versiones entre roles sin justificación documentada.
+
+| Agente | Versión actual | Cambio principal manteniendo la MAJOR |
+|--------|---------------|--------------------------------------|
+| `analyst.md` | `3.0` | Spec-Driven: discovery + consumo de artefactos |
+| `architect.md` | `3.0` | Spec-Driven: ADR + consumo de artefactos |
+| `tech-lead.md` | `3.0` | Decision Framework + veredictos formales + gates |
+| `developer.md` | `3.0` | Spec-Driven: consumo de artefactos |
+| `qa.md` | `3.0` | Clasificación de bugs + veredictos PASS/FAIL |
+| `ui-designer.md` | `3.0` | Diseño con tokens + guía de activación |
+| `devops.md` | `3.0` | Infraestructura, CI/CD y deployment |
+| `skill-manager.md` | `3.0` | Orquestador: skills + memoria + DAG |
+
+> **Nota:** El campo `**Versión:** \`1.0\`` que aparece dentro del *output format* de algunos agentes (ej. `ui-design.md`, `architecture.md`) se refiere a la **versión del documento de salida**, no a la versión del agente. Las versión del documento de salida evoluciona de forma semántica (PATCH) independientemente de la del agente.
+
+---
+
+## Versionado de Skills
+
+Cada skill declara su versión en el **frontmatter YAML** de su archivo:
+
+```markdown
+---
+id: frontend-patterns
+category: development
+version: 1.0
+---
+```
+
+Las skills usan versionado de dos números `[MAJOR].[MINOR]` (misma semántica que los agentes):
+
+| Cambio | Versión |
+|--------|---------|
+| Corrección de error en el contenido / patrón | `1.0` → `1.1` |
+| Nueva sección, patrón o checklist dentro del skill | `1.x` → `2.0` |
+| Cambio que rompe la interfaz de consumo (frontmatter, id, output) | `X.0` → `X+1.0` |
+
+**Reglas:**
+- El `version` se actualiza **cada vez** que se modifica el contenido del skill (R4: todo cambio se refleja en `CHANGELOG.md`).
+- El catálogo en `skills/README.md` se mantiene sincronizado con la versión vigente de cada skill.
+- Al publicar una MAJOR nueva del framework, los skills pueden conservar su versión interna propia — **no tienen obligación de alinearse** a la MAJOR del framework (a diferencia de los agentes). El salto de MAJOR solo ocurre si el skill en sí cambia su contrato de consumo.
 
 ---
 
@@ -133,15 +166,16 @@ Para este repositorio (solo docs, sin código compilado), es suficiente trabajar
 
 | Versión de ai-agents | Compatibilidad |
 |---------------------|----------------|
-| `v2.x.x` | Los output formats son estables dentro de la misma MAJOR |
-| `v3.0.0` | Breaking — revisar CHANGELOG antes de actualizar |
+| `v2.x.x` | Output formats estables dentro de la misma MAJOR |
+| `v3.x.x` | MAJOR vigente (SDD). Cambios menores no rompen contratos escalonados |
+| `v3.0.0` | Breaking desde v2 — revisar CHANGELOG antes de actualizar |
 
 ### Recomendación para proyectos en producción
 
 ```bash
 # Pinear a una versión específica para estabilidad
 cd .ai/agents
-git checkout v2.0.1
+git checkout v3.1.0
 
 # Solo actualizar cuando hayas revisado el CHANGELOG
 ```
