@@ -4,6 +4,19 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.2.5] — 2026-09-11
+
+### Agregado
+- **`scripts/finish-phase.sh`** — Cierre de fase automatizado. Registra una entrada append-only en `.ai/memory/workflow-log.md`, una ejecución en `.ai/metrics/executions.yaml` (mode, tokens, duration, attempts, verdict, `source: estimate|measured`) y regenera `.ai/memory/context-snapshot.md` de forma automática. Resuelve el hueco de enforcement por el cual los sistemas v3.2.0 quedaban con templates vacíos si no intervenía el orquestador. Uso: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [OPCIONES]` — el rol se infiere de la fase si se omite.
+- **`common.sh`** — Nuevos helpers reutilizables: `initiative_id_pattern` (patrón de ID sin slug), `AGENT_ROLES` (roles del pipeline) y `regenerate_context_snapshot <PROJECT_ROOT>` (compacía workflow-log + decisions-catalog + patterns-learned en el snapshot).
+
+### Modificado
+- **`scripts/validate-project.sh`** — Los sistemas v3.2.0 ahora validan **contenido**, no solo existencia: `workflow-log.md` sin entradas de sesión, `executions.yaml` sin ejecuciones reales y `knowledge-graph.yaml` sin nodos (solo template) reportan WARN "existe pero vacío/template". Así se distingue "tiene el archivo" de "tiene datos".
+- **README.md, AGENTS.md, `templates/ide-configs/AGENTS.md`, `docs/repository-structure.md`** — Tabla de scripts ampliada con `finish-phase.sh`.
+- **`docs/workflow-memory.md` (Fase 1), `docs/agent-metrics.md` (Fase 1)** — Documentan el cierre de fase via `finish-phase.sh` como vía recomendada para garantizar el registro.
+
+---
+
 ## [3.2.4] — 2026-09-11
 
 ### Agregado
