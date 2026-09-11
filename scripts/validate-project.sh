@@ -71,10 +71,19 @@ done
 
 # 3. Validar Sistemas de v3.2.0 (memoria, métricas, knowledge graph) — WARN no bloqueante
 # Compatible con proyectos anteriores a v3.2.0: la ausencia se reporta como advertencia.
+# Además de existencia, se valida CONTENIDO: un sistema seedeado pero nunca usado (template
+# o archivo vacío) se reporta como advertencia para distinguir "existe" de "tiene datos".
 echo -e "\n${BLUE}Verificando sistemas opcionales de v3.2.0 en .ai/...${NC}"
 
 if [ -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
-    echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado."
+    # Contenido: un grafo útil tiene al menos un nodo ARCH-NNN y no conserva marcadores del template
+    KG_NODES=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3} ' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
+    KG_TEMPLATE=$(grep -cE '^updated: YYYY-MM-DD|^[[:space:]]*title: "Nombre corto de la decisión"' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
+    if [ "$KG_NODES" -gt 0 ] && [ "$KG_TEMPLATE" -eq 0 ]; then
+        echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado ($KG_NODES nodo(s))."
+    else
+        warning_found ".ai/knowledge-graph.yaml existe pero sin nodos reales (solo el template). Registrar los ARCH-NNN (o usar finish-phase.sh)."
+    fi
 else
     warning_found "No existe .ai/knowledge-graph.yaml. El grafo de decisiones está inactivo (opcional v3.2.0)."
 fi
@@ -90,7 +99,12 @@ if [ -d "$MEMORY_DIR" ]; then
         fi
     done
     if [ "$MEM_OK" = true ]; then
-        echo -e "  [${GREEN}OK${NC}]    .ai/memory/ verificado (workflow-log, decisions-catalog, patterns-learned, context-snapshot)."
+        # Contenido: validar que workflow-log tenga al menos una entrada de sesión real
+        if grep -qE '^## \[(FEAT|BUG|AUDIT|REF)-[0-9]{3}\]' "$MEMORY_DIR/workflow-log.md"; then
+            echo -e "  [${GREEN}OK${NC}]    .ai/memory/ verificado (con entradas en workflow-log)."
+        else
+            warning_found ".ai/memory/ existe pero workflow-log.md no tiene entradas de sesión (solo el template). Registrar cada fase con finish-phase.sh."
+        fi
     else
         warning_found "La carpeta .ai/memory/ existe pero le faltan archivos seed (workflow-log.md, decisions-catalog.md, patterns-learned.md, context-snapshot.md)."
     fi
@@ -99,7 +113,12 @@ else
 fi
 
 if [ -f "$PROJECT_ROOT/.ai/metrics/executions.yaml" ]; then
-    echo -e "  [${GREEN}OK${NC}]    .ai/metrics/executions.yaml verificado."
+    # Contenido: una ejecución real tiene `ts: AAAA-MM-DD` (no el placeholder YYYY-MM-DD)
+    if grep -qE '^  - ts: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$PROJECT_ROOT/.ai/metrics/executions.yaml"; then
+        echo -e "  [${GREEN}OK${NC}]    .ai/metrics/executions.yaml verificado (con ejecuciones)."
+    else
+        warning_found ".ai/metrics/executions.yaml existe pero no tiene ejecuciones registradas (solo el template). Registrarlas con finish-phase.sh."
+    fi
 else
     warning_found "No existe .ai/metrics/executions.yaml. Las métricas del pipeline están inactivas (opcional v3.2.0)."
 fi

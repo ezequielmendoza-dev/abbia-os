@@ -54,6 +54,76 @@ initiative_types_readable() {
     echo "$INITIATIVE_TYPES" | tr ' ' '|'
 }
 
+# Patrón de ID de iniciativa sin slug: <TIPO>-<NNN> (ej: FEAT-114)
+initiative_id_pattern() {
+    printf '^(%s)-[0-9]{3}$' "$(echo "$INITIATIVE_TYPES" | tr ' ' '|')"
+}
+
+# Roles del pipeline que cierran fases y registran ejecuciones en metrics
+AGENT_ROLES="analyst ui-designer architect developer qa tech-lead devops"
+
+# Re-genera .ai/memory/context-snapshot.md compactando workflow-log + catalog + patterns.
+# Uso: regenerate_context_snapshot <PROJECT_ROOT>  (destructivo: reescribe el snapshot)
+regenerate_context_snapshot() {
+    local project_root="${1:-$CWD}"
+    local mem_dir="$project_root/.ai/memory"
+    local log="$mem_dir/workflow-log.md"
+    local catalog="$mem_dir/decisions-catalog.md"
+    local patterns="$mem_dir/patterns-learned.md"
+    local out="$mem_dir/context-snapshot.md"
+
+    # --- Últimas entradas del workflow-log (hasta 8) ---
+    local recent=""
+    if [ -f "$log" ]; then
+        recent=$(grep -E '^## \[(FEAT|BUG|AUDIT|REF)-[0-9]{3}\]' "$log" | tail -8 || true)
+    fi
+    if [ -z "$recent" ]; then
+        recent="(sin entradas aún en workflow-log.md)"
+    fi
+
+    # --- Decisiones vigentes del catálogo (filas reales, sin la fila de ejemplo DEC-001) ---
+    local decisions=""
+    if [ -f "$catalog" ]; then
+        decisions=$(grep -E '^\| (ARCH|RN|DEC)-[0-9]{3} ' "$catalog" | grep -v '^| DEC-001 ' | tail -8 || true)
+    fi
+    if [ -z "$decisions" ]; then
+        decisions="(sin decisiones registradas en decisions-catalog.md)"
+    fi
+
+    # --- Patrones aprendidos (encabezados ##, sin el template Problema:) ---
+    local pats=""
+    if [ -f "$patterns" ]; then
+        pats=$(grep -E '^## ' "$patterns" | grep -v '^## Problema:' | tail -5 || true)
+    fi
+    if [ -z "$pats" ]; then
+        pats="(sin patrones aún en patterns-learned.md)"
+    fi
+
+    cat > "$out" << EOF
+# Context Snapshot — Memoria Compactada
+
+> Generado automáticamente por el Skill Manager / finish-phase.sh al cerrar una fase.
+> Compacta \`workflow-log.md\` + \`decisions-catalog.md\` + \`patterns-learned.md\` —
+> **no se edita a mano**. Máximo ~30-50 líneas.
+
+## Estado del proyecto
+
+Últimas fases cerradas:
+
+$recent
+
+## Decisiones vigentes
+
+$decisions
+
+## Patrones relevantes
+
+$pats
+
+Referencia: docs/workflow-memory.md (framework ai-agents).
+EOF
+}
+
 # Función para detectar la raíz del proyecto
 detect_project_root() {
     if [ -d "$CWD/.ai" ]; then
