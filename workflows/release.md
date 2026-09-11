@@ -50,6 +50,122 @@ flowchart TD
 
 ---
 
+<!-- dag:start -->
+**Modos de ejecución:** `rápido` | `estándar` (default) | `profundo` (ver `docs/workflow-dag.md`)
+
+```yaml
+name: release
+modes:
+  rapido:
+    truncate: [staging, smoke-staging]
+    note: Para hotfixes unda — deploy directo con smoke en producción
+  estandar: {}
+  profundo:
+    extra: [post-release-monitoring]
+nodes:
+  pre-release-check:
+    agent: tech-lead
+    input: [features QA PASS, contexto]
+    output: [checklist verificado]
+    gate: true
+  resolve-blockers:
+    agent: tech-lead
+    input: [issues bloqueantes]
+    output: [blockers resueltos]
+    parallel: false
+  scope-release:
+    agent: tech-lead
+    input: [checklist verificado]
+    output: [scope RELEASE vX.Y.Z]
+    parallel: false
+  prepare-release:
+    agent: devops
+    input: [scope, contexto]
+    output: [plan de deploy y rollback]
+    parallel: false
+  staging:
+    agent: devops
+    input: [plan de deploy]
+    output: [staging desplegado]
+    parallel: false
+  smoke-staging:
+    agent: qa
+    input: [staging desplegado]
+    output: [smoke-test]
+    parallel: false
+  fix-in-staging:
+    agent: developer
+    input: [fallos del smoke-test]
+    output: [fix en staging]
+    parallel: false
+  approve-release:
+    agent: tech-lead
+    input: [smoke-test]
+    output: [verdict]
+    gate: true
+  deploy-prod:
+    agent: devops
+    input: [aprobación, plan de rollback]
+    output: [producción desplegada]
+    parallel: false
+  post-deploy-health:
+    agent: devops
+    input: [producción desplegada]
+    output: [health report]
+    parallel: false
+  post-release-monitoring:
+    agent: devops
+    input: [producción desplegada]
+    output: [monitor 15-min]
+    parallel: false
+  rollback:
+    agent: devops
+    input: [plan de rollback]
+    output: [versión anterior restaurada]
+    parallel: false
+  post-mortem:
+    agent: tech-lead
+    input: [rollback aplicado]
+    output: [post-mortem.md]
+    parallel: false
+  confirm-release:
+    agent: tech-lead
+    input: [health report]
+    output: [release confirmado]
+    gate: true
+  cierre:
+    agent: tech-lead
+    input: [release confirmado]
+    output: [CHANGELOG, tags, archivado]
+    parallel: false
+edges:
+  - { from: pre-release-check,  to: resolve-blockers,    on: ISSUES }
+  - { from: resolve-blockers,   to: pre-release-check,   retry: 1, back: true }
+  - { from: pre-release-check,  to: scope-release,       on: OK }
+  - { from: scope-release,      to: prepare-release }
+  - { from: prepare-release,    to: staging }
+  - { from: staging,            to: smoke-staging }
+  - { from: smoke-staging,      to: fix-in-staging,      on: FALLO }
+  - { from: fix-in-staging,     to: staging,             retry: 1, back: true }
+  - { from: smoke-staging,      to: approve-release,     on: OK }
+  - { from: approve-release,    to: deploy-prod,         on: APROBADO }
+  - { from: approve-release,    to: fix-in-staging,      on: RECHAZADO, retry: 1, back: true }
+  - { from: deploy-prod,        to: post-deploy-health }
+  - { from: post-deploy-health, to: rollback,            on: UNHEALTHY }
+  - { from: post-deploy-health, to: confirm-release,     on: HEALTHY }
+  - { from: post-deploy-health, to: post-release-monitoring, type: fan-out }   # solo profundo
+  - { from: rollback,           to: post-mortem }
+  - { from: confirm-release,    to: cierre,              on: CONFIRMADO }
+hotfix:
+  enabled: true
+  from: [deploy-prod]
+  to: [main]
+  note: Hotfix = deploy directo a producción sin staging; ver sección "Flujo — Hotfix"
+```
+<!-- dag:end -->
+
+---
+
 ## Pasos Detallados
 
 ### Paso 0 — Leer el estado actual

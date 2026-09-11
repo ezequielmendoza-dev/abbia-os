@@ -44,6 +44,98 @@ flowchart TD
 
 ---
 
+<!-- dag:start -->
+**Modos de ejecución:** `rápido` | `estándar` | `profundo` (ver `docs/workflow-dag.md`)
+
+```yaml
+name: new-feature
+modes:
+  rapido:
+    truncate: [discovery, ui-design, architecture]
+    note: Para bugs bien definidos o cambios de bajo riesgo en features existentes
+  estandar: {}
+  profundo:
+    extra: [adversarial-review]
+    note: Para features críticas o arquitectónicas
+nodes:
+  discovery:
+    agent: analyst
+    input: [context.md, feature-request]
+    output: [discovery.md]
+    parallel: false
+  spec:
+    agent: analyst
+    input: [context.md, discovery.md (opcional)]
+    output: [spec.md]
+    parallel: false
+  tech-review-1:
+    agent: tech-lead
+    input: [spec.md]
+    output: [verdict]
+    gate: true
+  ui-design:
+    agent: ui-designer
+    input: [spec.md, context.md]
+    output: [ui-design.md]
+    parallel: false
+  architecture:
+    agent: architect
+    input: [spec.md, ui-design.md, context.md, architecture.md]
+    output: [architecture.md]
+    parallel: false
+  tech-review-2:
+    agent: tech-lead
+    input: [spec.md, ui-design.md, architecture.md]
+    output: [verdict]
+    gate: true
+  implement:
+    agent: developer
+    input: [task.md, spec.md, ui-design.md, architecture.md]
+    parallel: true
+  qa:
+    agent: qa
+    input: [spec.md, ui-design.md, architecture.md, code]
+    output: [qa.md]
+    parallel: false
+  tech-review-3:
+    agent: tech-lead
+    input: [qa.md]
+    output: [verdict]
+    gate: true
+  deploy:
+    agent: devops
+    input: [architecture.md]
+    output: [release]
+    parallel: false
+  adversarial-review:
+    agent: qa
+    input: [spec.md, architecture.md, code]
+    output: [adversarial-review.md]
+    parallel: false
+edges:
+  - { from: discovery,      to: spec }
+  - { from: spec,           to: tech-review-1 }
+  - { from: tech-review-1,  to: ui-design,     on: APROBADO }
+  - { from: tech-review-1,  to: spec,          on: RECHAZADO, retry: 1, back: true }
+  - { from: ui-design,      to: architecture }
+  - { from: architecture,   to: tech-review-2 }
+  - { from: tech-review-2,  to: implement,     on: APROBADO }
+  - { from: tech-review-2,  to: ui-design,     on: RECHAZADO_UI,       retry: 1, back: true }
+  - { from: tech-review-2,  to: architecture,  on: RECHAZADO_TECNICO,  retry: 1, back: true }
+  - { from: implement,      to: qa }
+  - { from: qa,             to: tech-review-3 }
+  - { from: qa,             to: implement,     on: FAIL, retry: 1, back: true }
+  - { from: tech-review-3,  to: deploy,        on: PASS }
+  - { from: tech-review-3,  to: implement,     on: FAIL, retry: 1, back: true }
+  - { from: tech-review-3,  to: adversarial-review, type: fan-out }   # solo en modo profundo
+  - { from: adversarial-review, to: deploy,    on: PASS, type: fan-in }
+hotfix:
+  enabled: false
+```
+<!-- dag:end -->
+
+---
+
 ## Pasos Detallados
 
 ### Paso 0 — Preparación

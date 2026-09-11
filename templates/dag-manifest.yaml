@@ -1,0 +1,91 @@
+# Workflow DAG Manifest — Plantilla de Dependencias
+# Copia este archivo como .ai/workflow.yaml (o incrusta el bloque en un workflow)
+# y adapta los nodos/aristas a tu proceso. Ver docs/workflow-dag.md.
+
+name: my-workflow
+
+# Modos de ejecución (transformaciones del DAG)
+modes:
+  rapido:
+    truncate:
+      - discovery
+      - ui-design
+  estandar: {}
+  profundo:
+    extra:
+      - adversarial-review
+
+# Nodos: unidades de trabajo ejecutadas por un agente
+nodes:
+  discovery:
+    agent: analyst            # rol que ejecuta (roles/*.md)
+    input: [context.md, feature-request]
+    output: [discovery.md]
+    parallel: false           # false = instancia única; true = fan-out por task
+  ui-design:
+    agent: ui-designer
+    input: [spec.md, context.md]
+    output: [ui-design.md]
+    parallel: false
+  architecture:
+    agent: architect
+    input: [spec.md, ui-design.md]
+    output: [architecture.md]
+    parallel: false
+  tech-review-1:
+    agent: tech-lead
+    input: [spec.md, architecture.md]
+    output: [verdict]
+    gate: true                # veredicto humano que ramifica el flujo
+  tasks:
+    agent: architect
+    input: [architecture.md]
+    output: [task-*.md]
+    parallel: false
+  implement:
+    agent: developer
+    input: [task.md, architecture.md]
+    parallel: true            # fan-out: se instancia por cada task
+  qa:
+    agent: qa
+    input: [spec.md, code]
+    output: [qa.md]
+    parallel: false
+  tech-review-2:
+    agent: tech-lead
+    input: [qa.md]
+    output: [verdict]
+    gate: true
+  deploy:
+    agent: devops
+    input: [architecture.md]
+    output: [release]
+    parallel: false
+  adversarial-review:
+    agent: qa                 # crítico independiente (modo profundo)
+    input: [spec.md, architecture.md, code]
+    output: [adversarial-review.md]
+    parallel: false
+
+# Aristas: dependencias dirigidas con condiciones
+edges:
+  - { from: discovery,       to: ui-design }
+  - { from: ui-design,       to: architecture }
+  - { from: architecture,    to: tech-review-1 }
+  - { from: tech-review-1,   to: tasks,         on: APROBADO }
+  - { from: tech-review-1,   to: discovery,     on: RECHAZADO,       retry: 1, back: true }
+  - { from: tech-review-1,   to: ui-design,     on: APROBADO_CON_OBSERVACIONES, back: true }
+  - { from: tasks,           to: implement,     type: fan-out }
+  - { from: implement,       to: qa,            type: fan-in, all: true }
+  - { from: qa,              to: tech-review-2 }
+  - { from: qa,              to: adversarial-review, type: fan-out }   # modo profundo
+  - { from: adversarial-review, to: tech-review-2, type: fan-in, all: true }
+  - { from: tech-review-2,   to: deploy,        on: PASS }
+  - { from: tech-review-2,   to: implement,     on: FAIL,       back: true }
+
+# Atajos de emergencia (hotfix) válidos para este workflow
+hotfix:
+  enabled: true
+  from: [deploy]
+  to: [main]
+  note: Bypass directo para arreglos críticos; ver workflows/bug-fix.md

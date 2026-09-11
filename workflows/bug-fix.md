@@ -51,6 +51,110 @@ flowchart TD
 
 ---
 
+<!-- dag:start -->
+**Modos de ejecución:** `rápido` (default para bugs) | `estándar` | `profundo` (ver `docs/workflow-dag.md`)
+
+```yaml
+name: bug-fix
+modes:
+  rapido:
+    note: Default para bugs — el sub-DAG se selecciona por categoría en el triaje
+  estandar: {}
+  profundo:
+    extra: [adversarial-review]
+nodes:
+  bug-triage:
+    agent: tech-lead
+    input: [bug-report.md, context.md]
+    output: [clasificación]
+    gate: true
+  spec-fix:
+    agent: analyst
+    input: [bug-report.md, spec.md (existente)]
+    output: [spec.md (actualizada)]
+    parallel: false
+  ui-fix:
+    agent: ui-designer
+    input: [bug-report.md, ui-design.md (existente)]
+    output: [ui-design.md (actualizado)]
+    parallel: false
+  architecture-fix:
+    agent: architect
+    input: [bug-report.md, architecture.md (existente)]
+    output: [architecture.md (actualizado)]
+    parallel: false
+  tech-review-fix:
+    agent: tech-lead
+    input: [spec.md o architecture.md (según categoría)]
+    output: [verdict]
+    gate: true
+  implement-fix:
+    agent: developer
+    input: [bug-report.md, documentos corregidos]
+    parallel: false
+  qa-fix:
+    agent: qa
+    input: [bug-report.md, código]
+    output: [qa.md]
+    parallel: false
+  tech-review-final:
+    agent: tech-lead
+    input: [qa.md]
+    output: [verdict]
+    gate: true
+  hotfix-deploy:
+    agent: devops
+    input: [código]
+    output: [release directo]
+    parallel: false
+  deploy:
+    agent: devops
+    input: [bug-report.md]
+    output: [release]
+    parallel: false
+  adversarial-review:
+    agent: qa
+    input: [bug-report.md, código]
+    output: [adversarial-review.md]
+    parallel: false
+edges:
+  # Sub-DAG 1: Negocio
+  - { from: bug-triage, to: spec-fix,           on: "Categoria: Negocio" }
+  - { from: spec-fix,   to: tech-review-fix }
+  - { from: tech-review-fix, to: implement-fix, on: APROBADO }
+  - { from: tech-review-fix, to: spec-fix,      on: RECHAZADO, retry: 1, back: true }
+  # Sub-DAG 2: Visual
+  - { from: bug-triage, to: ui-fix,             on: "Categoria: Visual" }
+  - { from: ui-fix,     to: implement-fix }
+  # Sub-DAG 3: Arquitectura
+  - { from: bug-triage, to: architecture-fix,   on: "Categoria: Arquitectura" }
+  - { from: architecture-fix, to: tech-review-fix }
+  - { from: tech-review-fix, to: implement-fix, on: APROBADO }
+  - { from: tech-review-fix, to: architecture-fix, on: RECHAZADO, retry: 1, back: true }
+  # Sub-DAG 4: Implementación pura
+  - { from: bug-triage, to: implement-fix,      on: "Categoria: Implementacion" }
+  # Sub-DAG 5: Hotfix (crítico)
+  - { from: bug-triage, to: implement-fix,      on: "Severidad: Critico" }
+  - { from: implement-fix, to: qa-fix }
+  - { from: qa-fix, to: hotfix-deploy,          on: PASS }
+  # Flujo normal
+  - { from: implement-fix, to: qa-fix }
+  - { from: qa-fix, to: tech-review-final }
+  - { from: qa-fix, to: implement-fix,          on: FAIL, retry: 1, back: true }
+  - { from: tech-review-final, to: deploy,      on: PASS }
+  - { from: tech-review-final, to: implement-fix, on: FAIL, retry: 1, back: true }
+  - { from: tech-review-final, to: adversarial-review, type: fan-out }
+  - { from: adversarial-review, to: deploy,     on: PASS, type: fan-in }
+hotfix:
+  enabled: true
+  from: [qa-fix]
+  to: [hotfix-deploy]
+  note: Hotfix bypassa el pipeline normal; ver sección "Flujo de Emergencia"
+```
+<!-- dag:end -->
+
+---
+
 ## Pasos Detallados
 
 ### Paso 0 — Triaje y Clasificación (QA / Tech Lead)

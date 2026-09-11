@@ -51,6 +51,89 @@ flowchart TD
 
 ---
 
+<!-- dag:start -->
+**Modos de ejecución:** `rápido` | `estándar` | `profundo` (default para cambios arquitectónicos; ver `docs/workflow-dag.md`)
+
+```yaml
+name: architecture-change
+modes:
+  rapido:
+    note: No recomendado para cambios de arquitectura (riesgo alto)
+  estandar: {}
+  profundo:
+    extra: [adversarial-review]
+    note: Default — los cambios arquitectónicos siempre requieren revisión adversarial
+nodes:
+  evaluate-change:
+    agent: tech-lead
+    input: [decisions.md, architecture.md, context.md]
+    output: [decisión de necesidad/riesgo]
+    gate: true
+  document-proposal:
+    agent: architect
+    input: [evaluación NO_NECESARIO]
+    output: [propuesta registrada en decisions.md]
+    parallel: false
+  architect-design:
+    agent: architect
+    input: [context.md, architecture.md, decisions.md]
+    output: [ADR ARCH-NNN, plan de migración]
+    parallel: false
+  tech-review-deep:
+    agent: tech-lead
+    input: [ADR, plan de migración]
+    output: [verdict]
+    gate: true
+  update-docs:
+    agent: architect
+    input: [ADR aprobado]
+    output: [architecture.md actualizado, decisions.md actualizado]
+    parallel: false
+  implement-phase:
+    agent: developer
+    input: [fase del plan de migración]
+    parallel: true       # fan-out por fase
+  qa-phase:
+    agent: qa
+    input: [fase implementada]
+    output: [validación por fase]
+    parallel: false
+  tech-review-final:
+    agent: tech-lead
+    input: [validad de fases]
+    output: [verdict]
+    gate: true
+  deploy:
+    agent: devops
+    input: [fases completas]
+    output: [release planificado]
+    parallel: false
+  adversarial-review:
+    agent: qa
+    input: [ADR, código de fases, arquitectura previa]
+    output: [adversarial-review.md]
+    parallel: false
+edges:
+  - { from: evaluate-change,   to: architect-design,    on: NECESARIO }
+  - { from: evaluate-change,   to: document-proposal,   on: NO_NECESARIO }
+  - { from: architect-design,  to: tech-review-deep }
+  - { from: tech-review-deep,  to: update-docs,         on: APROBADO }
+  - { from: tech-review-deep,  to: architect-design,    on: RECHAZADO, retry: 1, back: true }
+  - { from: update-docs,       to: implement-phase }
+  - { from: implement-phase,   to: qa-phase }
+  - { from: qa-phase,          to: tech-review-final }
+  - { from: qa-phase,          to: implement-phase,     on: REGRESION, retry: 1, back: true }
+  - { from: tech-review-final, to: deploy,              on: APROBADO }
+  - { from: tech-review-final, to: implement-phase,     on: RECHAZADO, retry: 1, back: true }
+  - { from: tech-review-final, to: adversarial-review,  type: fan-out }   # siempre en profundo
+  - { from: adversarial-review, to: deploy,             on: PASS, type: fan-in }
+hotfix:
+  enabled: false
+```
+<!-- dag:end -->
+
+---
+
 ## Pasos Detallados
 
 ### Paso 0 — Contexto y Evaluación Inicial

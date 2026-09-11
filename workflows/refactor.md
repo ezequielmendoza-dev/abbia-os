@@ -42,6 +42,79 @@ flowchart TD
 
 ---
 
+<!-- dag:start -->
+**Modos de ejecución:** `rápido` | `estándar` (default) | `profundo` (ver `docs/workflow-dag.md`)
+
+```yaml
+name: refactor
+modes:
+  rapido:
+    truncate: [architect-design]
+    note: Para refactors locales de un módulo sin impacto global
+  estandar: {}
+  profundo:
+    extra: [adversarial-review]
+    note: Para refactors de alto riesgo o globales
+nodes:
+  evaluate-refactor:
+    agent: tech-lead
+    input: [context.md, architecture.md, decisions.md]
+    output: [decisión de alcance]
+    gate: true
+  architect-design:
+    agent: architect
+    input: [decisions.md, architecture.md]
+    output: [diseño post-refactor]
+    parallel: false
+  tech-review-design:
+    agent: tech-lead
+    input: [diseño post-refactor]
+    output: [verdict]
+    gate: true
+  implement-refactor:
+    agent: developer
+    input: [diseño post-refactor (o decisión)]
+    parallel: true       # fan-out por módulo si el Tech Lead los declara independientes
+  qa-regression:
+    agent: qa
+    input: [código refactorizado]
+    output: [qa.md]
+    parallel: false
+  tech-review-final:
+    agent: tech-lead
+    input: [qa.md]
+    output: [verdict]
+    gate: true
+  deploy:
+    agent: devops
+    input: [código]
+    output: [release]
+    parallel: false
+  adversarial-review:
+    agent: qa
+    input: [código refactorizado, arquitectura previa]
+    output: [adversarial-review.md]
+    parallel: false
+edges:
+  - { from: evaluate-refactor,  to: architect-design, on: "ARQUITECTURA_GLOBAL" }
+  - { from: evaluate-refactor,  to: implement-refactor, on: "LOCAL" }
+  - { from: architect-design,   to: tech-review-design }
+  - { from: tech-review-design, to: implement-refactor, on: APROBADO }
+  - { from: tech-review-design, to: architect-design,   on: RECHAZADO, retry: 1, back: true }
+  - { from: implement-refactor, to: qa-regression,      type: fan-in }
+  - { from: qa-regression,      to: tech-review-final }
+  - { from: qa-regression,      to: implement-refactor, on: REGRESION, retry: 1, back: true }
+  - { from: tech-review-final,  to: deploy,             on: APROBADO }
+  - { from: tech-review-final,  to: implement-refactor, on: RECHAZADO, retry: 1, back: true }
+  - { from: tech-review-final,  to: adversarial-review, type: fan-out }   # solo profundo
+  - { from: adversarial-review, to: deploy,             on: PASS, type: fan-in }
+hotfix:
+  enabled: false
+```
+<!-- dag:end -->
+
+---
+
 ## Pasos Detallados
 
 ### Paso 0 — Evaluación de Necesidad (Tech Lead)
