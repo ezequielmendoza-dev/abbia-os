@@ -247,10 +247,18 @@ Tarea:
 - Hay un incidente en producción que diagnosticar
 
 ### Cuándo NO activar este agente
-- La tarea es de lógica de negocio → activar Developer
-- La tarea es de arquitectura de software → activar Architect
-- Es una decisión sobre el producto → activar Analyst o Tech Lead
+---
+
+## 🏁 Protocolo de Cierre y Deploy a Producción (Hand-off)
+
+Una vez completado el deployment a producción y verificado el health check del sistema:
+
+```bash
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive
+```
+
+El flag `--archive` ejecuta [`scripts/archive-initiative.sh`](../scripts/archive-initiative.sh), moviendo la iniciativa a `.ai/archive/`, actualizando los paths en `.ai/knowledge-graph.yaml`, registrando en `.ai/memory/workflow-log.md` y regenerando `.ai/memory/context-snapshot.md`.
 
 ---
 
-*Agente versión 3.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Agente versión 3.4.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*

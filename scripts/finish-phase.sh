@@ -28,6 +28,8 @@
 #   --verdict V     PASS|FAIL|APROBADO|RECHAZADO (solo si la fase es un gate)
 #   --source S      measured|estimate (default: estimate)
 #   --note "..."    Decisión/resumen breve para workflow-log
+#   --archive       Archiva automáticamente la iniciativa en .ai/archive/ tras cerrar la fase
+#   --ask-archive   Pregunta interactivamente si archivar la iniciativa tras cerrar la fase
 #   --no-snapshot   No regenerar context-snapshot (útil en procesos por lotes)
 # ==============================================================================
 
@@ -67,6 +69,8 @@ ATTEMPTS=1
 VERDICT="null"
 SOURCE="estimate"
 NOTE=""
+ARCHIVE=false
+ASK_ARCHIVE=false
 NO_SNAPSHOT=false
 
 # Flags (a partir del 4º argumento o desde el 3º si no hay rol explícito)
@@ -82,6 +86,8 @@ while [ $i -lt ${#ARGS[@]} ]; do
         --verdict)    VERDICT="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
         --source)     SOURCE="${ARGS[$((i+1))]:-estimate}"; i=$((i+2)) ;;
         --note)       NOTE="${ARGS[$((i+1))]:-}"; i=$((i+2)) ;;
+        --archive)    ARCHIVE=true; i=$((i+1)) ;;
+        --ask-archive) ASK_ARCHIVE=true; i=$((i+1)) ;;
         --no-snapshot) NO_SNAPSHOT=true; i=$((i+1)) ;;
         --) i=$((i+1)) ;;
         -*) echo -e "${RED}Error: Opción desconocida '${ARGS[$i]}'.${NC}"; exit 1 ;;
@@ -207,6 +213,15 @@ echo -e "${GREEN}✓ Ejecución registrada en executions.yaml.${NC}"
 if [ "${NO_SNAPSHOT:-false}" != "true" ]; then
     regenerate_context_snapshot "$PROJECT_ROOT"
     echo -e "${GREEN}✓ context-snapshot.md regenerado.${NC}"
+fi
+
+# ---------- 6. Archivado Automático / Interactivo (si aplica) ----------
+if [ "$ARCHIVE" = true ]; then
+    echo -e "\n${BLUE}➔ Ejecutando archivado automático...${NC}"
+    bash "$SCRIPT_DIR/archive-initiative.sh" "$INITIATIVE" ${NOTE:+--note "$NOTE"}
+elif [ "$ASK_ARCHIVE" = true ]; then
+    echo -e "\n${YELLOW}➔ Solicitando confirmación de archivado...${NC}"
+    bash "$SCRIPT_DIR/archive-initiative.sh" "$INITIATIVE" --prompt ${NOTE:+--note "$NOTE"}
 fi
 
 echo -e "\n${GREEN}====================================================${NC}"

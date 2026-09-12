@@ -367,22 +367,28 @@ Si el resultado es **RECHAZADO / FAIL**:
 
 ---
 
-### Paso 10 — Cierre de Feature
+### Paso 10 — Cierre y Archivado de Feature
 
-Cuando la feature está en producción:
+Cuando la feature está validada por QA y lista para producción:
 
-1. **Mover** la carpeta al archivo histórico:
+1. **Validación en Entorno de Pruebas (Staging):**  
+   El Tech Lead presenta el resultado al usuario para que realice pruebas funcionales si lo desea.
+2. **Archivado Automático al Pasar a Producción:**  
+   Al confirmar el pase a producción, se ejecuta el archivado seguro:
    ```bash
-   mv .ai/features/FEAT-NNN-slug .ai/archive/FEAT-NNN-slug
+   bash .ai/agents/scripts/archive-initiative.sh FEAT-NNN-slug
+   # o en un solo paso durante el cierre de fase:
+   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO --archive
    ```
+   *Esto valida QA, mueve la carpeta a `.ai/archive/`, actualiza `knowledge-graph.yaml`, registra en `workflow-log.md` y regenera `context-snapshot.md`.*
 
-2. **Actualizar** los documentos permanentes si la feature cambió algo global:
+3. **Actualizar documentos permanentes si aplica:**
    - `.ai/architecture.md` si cambió la arquitectura del sistema
    - `.ai/business-rules.md` si se incorporaron nuevas reglas permanentes
    - `.ai/glossary.md` si aparecieron nuevos términos del dominio
    - `.ai/decisions.md` si hay decisiones que aplican globalmente
 
-3. **Actualizar** el `CHANGELOG.md` del proyecto con la feature completada (esto ya se hizo automáticamente en el Paso 8 con `npm run bump:minor`).
+4. **Actualizar** el `CHANGELOG.md` del proyecto con la feature completada.
 
 ---
 
@@ -391,15 +397,16 @@ Cuando la feature está en producción:
 - [ ] `spec.md` en estado `Aprobada`
 - [ ] `ui-design.md` en estado `Aprobado`
 - [ ] `architecture.md` en estado `Aprobado`
-- [ ] `qa.md` en estado `PASS` o `PASS WITH OBSERVATIONS` resueltas
+- [ ] `qa.md` en estado `PASS` / `APROBADO`
 - [ ] Veredicto del Tech Lead: `APROBADO`
+- [ ] Usuario validó en entorno de pruebas / staging
 - [ ] Código en rama principal / producción
 - [ ] Documentos permanentes actualizados si fue necesario
-- [ ] Feature movida a `archive/`
+- [ ] Feature archivada automáticamente a `.ai/archive/` (`archive-initiative.sh`)
 - [ ] `CHANGELOG.md` actualizado
 - [ ] Versión bumpeda (`npm run bump:minor`)
 - [ ] Git tag `vX.Y.Z` creado y pusheado
 
 ---
 
-*Workflow Nueva Feature v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow Nueva Feature v3.4.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*

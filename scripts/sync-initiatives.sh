@@ -32,10 +32,20 @@ echo -e "${BLUE}====================================================${NC}"
 echo -e "Raíz del proyecto: ${YELLOW}$PROJECT_ROOT${NC}\n"
 
 FIX_MODE=false
-if [ "${1:-}" = "--fix" ] || [ "${1:-}" = "-f" ] || [ "${1:-}" = "--repair" ]; then
-    FIX_MODE=true
-    echo -e "${YELLOW}🔧 Modo reparación activado (--fix): auto-reparando artefactos legacy y placeholders.${NC}\n"
-fi
+ARCHIVE_APPROVED=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --fix|-f|--repair)
+            FIX_MODE=true
+            echo -e "${YELLOW}🔧 Modo reparación activado (--fix): auto-reparando artefactos legacy y placeholders.${NC}\n"
+            ;;
+        --archive-approved)
+            ARCHIVE_APPROVED=true
+            echo -e "${YELLOW}📦 Modo auto-archivado activado (--archive-approved): archivando iniciativas con QA Aprobado.${NC}\n"
+            ;;
+    esac
+done
 
 FEATURES_DIR="$PROJECT_ROOT/.ai/features"
 if [ ! -d "$FEATURES_DIR" ]; then
@@ -302,6 +312,25 @@ EOF
     fi
 done
 
+# --- Modo Auto-Archivado en Lote (--archive-approved) ---
+ARCHIVED_COUNT=0
+if [ "$ARCHIVE_APPROVED" = true ]; then
+    echo -e "\n${BLUE}➔ Evaluando iniciativas listas para archivar...${NC}"
+    shopt -s nullglob
+    active_dirs=("$FEATURES_DIR"/*/)
+    shopt -u nullglob
+    for dir in "${active_dirs[@]}"; do
+        fname=$(basename "$dir")
+        qa_f="$dir/qa.md"
+        if [ -f "$qa_f" ] && grep -iqE '(veredicto|estado|resultado)[[:space:]]*[:—–-][[:space:]]*(APROBADO|PASS)' "$qa_f"; then
+            echo -e "  - Archivando: ${YELLOW}$fname${NC} (QA: APROBADO)"
+            if bash "$SCRIPT_DIR/archive-initiative.sh" "$fname" --no-snapshot > /dev/null 2>&1; then
+                ARCHIVED_COUNT=$((ARCHIVED_COUNT + 1))
+            fi
+        fi
+    done
+fi
+
 # Regenerar context-snapshot
 regenerate_context_snapshot "$PROJECT_ROOT"
 
@@ -311,5 +340,8 @@ echo -e "${GREEN}====================================================${NC}"
 echo -e "Iniciativas reconciliadas: ${YELLOW}$SYNCED_COUNT${NC}"
 if [ "$FIX_MODE" = true ]; then
     echo -e "Iniciativas reparadas:     ${YELLOW}$HEALED_COUNT${NC}"
+fi
+if [ "$ARCHIVE_APPROVED" = true ]; then
+    echo -e "Iniciativas archivadas:    ${YELLOW}$ARCHIVED_COUNT${NC}"
 fi
 echo -e "Memoria, Telemetría, Grafo y Snapshot actualizados con éxito."

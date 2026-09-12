@@ -138,8 +138,9 @@ El proyecto cuenta con herramientas en `.ai/agents/scripts/` para simplificar fl
 | `setup-ide.sh` | Regenerar configuraciones de IDEs o inicializar carpetas: `bash .ai/agents/scripts/setup-ide.sh` |
 | `update-ai-agents.sh` | Actualizar el framework en un comando (submodule + setup + auto-fix + validación): `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | `new-initiative.sh` | Crear nueva iniciativa (FEAT/BUG/AUDIT/REF) automáticamente: `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
-| `finish-phase.sh` | Cierre de fase: registra memory, metrics y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` |
-| `sync-initiatives.sh` | Sincroniza, auto-repara (`--fix`) y reconcilia iniciativas con memory, metrics y KG: `bash .ai/agents/scripts/sync-initiatives.sh [--fix]` |
+| `finish-phase.sh` | Cierre de fase: registra memory, metrics y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [--archive]` |
+| `archive-initiative.sh` | Archivar iniciativa a `.ai/archive/` con validación QA y reconciliación KG: `bash .ai/agents/scripts/archive-initiative.sh <INICIATIVA>` |
+| `sync-initiatives.sh` | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`): `bash .ai/agents/scripts/sync-initiatives.sh [--fix] [--archive-approved]` |
 | `validate-project.sh` | Validar conformidad del proyecto local con las reglas documentales: `bash .ai/agents/scripts/validate-project.sh` |
 | `dashboard.sh` | Visualizador interactivo en el navegador (Proyecto, Grafo ADR, Telemetría de tokens, Memoria): `bash .ai/agents/scripts/dashboard.sh` |
 | `common.sh` | Librería compartida de soporte (interno, DRY) |

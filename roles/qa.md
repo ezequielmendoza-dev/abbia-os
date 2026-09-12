@@ -316,9 +316,12 @@ Una vez completada la validación y generado `qa.md` con su veredicto explícito
 bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>
 ```
 
+> **💡 Orientación al Usuario:**  
+> Si el veredicto es **`APROBADO`**, informa al usuario que la iniciativa ha superado las pruebas técnicas y está lista para que pueda realizar sus pruebas funcionales en el **entorno de pruebas/staging** antes de la revisión final del Tech Lead y el pase a producción.
+
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 
 ---
 
-*Agente versión 3.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Agente versión 3.4.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
 

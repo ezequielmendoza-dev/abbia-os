@@ -295,23 +295,25 @@ Si la severidad es **Crítica** y el sistema o datos están comprometidos, el fl
 
 ---
 
-## Checklist de Cierre de Bug Fix
+## Checklist de Cierre y Archivado de Bug Fix
 
 - [ ] Identificado e incrementado el ID del bug `BUG-NNN` en `.ai/context.md`.
 - [ ] Bug clasificado por Severidad y Categoría en el triaje.
 - [ ] **Documentación ajustada:**
   - [ ] `spec.md` modificada por el Analyst (si el bug fue de Negocio).
   - [ ] `ui-design.md` modificada por el UI Designer (si el bug fue Visual).
-  - [ ] `architecture.md` modificada por el Architect (si el bug fue Técnico).
+  - [ ] `architecture.md` / `decision.md` modificada por el Architect / Tech Lead (si el bug fue Técnico).
 - [ ] Corrección de código enfocada y sin adición de código externo o refactores.
-- [ ] QA validó el fix y aplicó el checklist de revisión respectivo (`ui-review`, `frontend-review`, `backend-review`).
+- [ ] QA validó el fix con veredicto `APROBADO`.
 - [ ] Veredicto del Tech Lead: `APROBADO`.
-- [ ] Despliegue completado con éxito.
-- [ ] Memoria del proyecto (`.ai/`) actualizada con las modificaciones definitivas.
+- [ ] Usuario validó en entorno de pruebas / staging.
+- [ ] Despliegue a producción completado con éxito.
+- [ ] Bug archivado automáticamente a `.ai/archive/` (`bash .ai/agents/scripts/archive-initiative.sh BUG-NNN`).
+- [ ] Memoria del proyecto (`.ai/memory/workflow-log.md`, `context-snapshot.md`) y Knowledge Graph actualizados.
 - [ ] `CHANGELOG.md` del proyecto actualizado.
 - [ ] Versión bumpeda (`npm run bump:patch`).
 - [ ] Git tag `vX.Y.Z` creado y pusheado.
 
 ---
 
-*Workflow bug-fix v2.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow bug-fix v3.4.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
