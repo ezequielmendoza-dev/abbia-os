@@ -7,6 +7,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 ## [3.3.0] — 2026-09-11
 
 ### Agregado
+- **`scripts/dashboard.sh` (Visualizador Interactivo)** — Generador y visor HTML autónomo en el navegador para explorar de forma interactiva el Knowledge Graph de decisiones (canvas Vis.js con filtros y zoom), Telemetría de consumo de tokens y costos (gráficos Chart.js por rol y fase), línea de tiempo de memoria (`workflow-log.md`, catálogo, patrones) y matriz de iniciativas activas sin dependencias de backend.
 - **`scripts/sync-initiatives.sh` (Auto-Reconciliador)** — Herramienta para escanear `.ai/features/` y sincronizar automáticamente cualquier iniciativa histórica o activa pendiente en `workflow-log.md`, `decisions-catalog.md`, `knowledge-graph.yaml`, `executions.yaml` y regenerar `context-snapshot.md`.
 - **Protocolo de Cierre Mandatorio (Hand-off) en Roles (`roles/*.md`)** — Instrucción explícita de fin de fase en cada rol (`analyst`, `architect`, `developer`, `qa`, etc.) para ejecutar `finish-phase.sh` y evitar la omisión de registros.
 - **Reglas Modulares de Cursor (`.cursor/rules/*.mdc`)** — Nuevo directorio de plantillas `templates/ide-configs/cursor-rules/` con archivos `.mdc` (`general.mdc`, `architect.mdc`, `developer.mdc`, `qa.mdc`) que aprovechan el sistema de activación contextual (`globs`, `alwaysApply`, `description`) de Cursor IDE.

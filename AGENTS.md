@@ -150,6 +150,7 @@ Los scripts se encuentran en `scripts/` y automatizan tareas repetitivas de setu
 | [`finish-phase.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/finish-phase.sh) | Cierre de fase: registra memory, metrics y snapshot automáticamente | `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` |
 | [`sync-initiatives.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/sync-initiatives.sh) | Sincroniza y reconcilia iniciativas pendientes con memory, metrics y KG | `bash .ai/agents/scripts/sync-initiatives.sh` |
 | [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
+| [`dashboard.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/dashboard.sh) | Genera y abre el visualizador interactivo (Grafo, Telemetría, Memoria) | `bash .ai/agents/scripts/dashboard.sh` |
 | [`common.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/common.sh) | Librería compartida de soporte (interno, DRY) | *(Interno)* |
 
 ---

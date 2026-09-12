@@ -141,6 +141,7 @@ El proyecto cuenta con herramientas en `.ai/agents/scripts/` para simplificar fl
 | `finish-phase.sh` | Cierre de fase: registra memory, metrics y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` |
 | `sync-initiatives.sh` | Sincroniza y reconcilia iniciativas pendientes con memory, metrics y KG: `bash .ai/agents/scripts/sync-initiatives.sh` |
 | `validate-project.sh` | Validar conformidad del proyecto local con las reglas documentales: `bash .ai/agents/scripts/validate-project.sh` |
+| `dashboard.sh` | Visualizador interactivo en el navegador (Grafo ADR, Telemetría de tokens, Memoria): `bash .ai/agents/scripts/dashboard.sh` |
 | `common.sh` | Librería compartida de soporte (interno, DRY) |
 
 ---

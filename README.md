@@ -174,6 +174,22 @@ Ver [`docs/agent-metrics.md`](docs/agent-metrics.md) + [`templates/metrics-execu
 
 ---
 
+### 📊 Visualizador Interactivo (Dashboard Web Autónomo)
+
+Para explorar visualmente el estado completo de tu proyecto sin instalar servidores backend ni dependencias pesadas:
+
+```bash
+bash .ai/agents/scripts/dashboard.sh
+```
+
+Genera y abre de forma instantánea `.ai/dashboard.html` en tu navegador, ofreciendo:
+- **🕸️ Grafo Interactivo (Knowledge Graph):** Canvas interactivo (Vis.js) de ADRs con nodos coloreados por estado (`ACTIVE`, `PENDING`, `SUPERSEDED`), aristas tipadas (`depends_on`, `conflicts_with`, `supersedes`), buscador y panel de detalle.
+- **📈 Telemetría & Tokens:** Tarjetas de KPIs (Tokens totales in/out, estimación de costos USD, sesiones, reintentos de gate) y gráficos interactivos (Chart.js) de consumo por rol y fase.
+- **🧠 Workflow Memory:** Vista compactada del snapshot, línea de tiempo episódica (`workflow-log.md`), catálogo de decisiones y patrones aprendidos.
+- **📁 Iniciativas (.ai/features):** Tablero de seguimiento con inversión de tokens acumulada por iniciativa.
+
+---
+
 ### 📂 Sistema Documental con 5 Reglas
 
 El framework estructura el conocimiento del proyecto en dos niveles:
@@ -185,9 +201,9 @@ El framework estructura el conocimiento del proyecto en dos niveles:
 .ai/architecture.md     ← Arquitectura actual en producción
 .ai/decisions.md        ← Log histórico de ADRs
 .ai/glossary.md         ← Términos del dominio
-.ai/memory/             ← Memoria del pipeline (NUEVO)
-.ai/metrics/            ← Métricas del pipeline (NUEVO)
-.ai/knowledge-graph.yaml← Grafo de decisiones (NUEVO)
+.ai/memory/             ← Memoria del pipeline
+.ai/metrics/            ← Métricas del pipeline
+.ai/knowledge-graph.yaml← Grafo de decisiones
 ```
 
 **Trabajo por feature** (`.ai/features/FEAT-NNN-slug/`):
@@ -245,6 +261,7 @@ cp .ai/agents/templates/github-action-ci.yml .github/workflows/ai-agents-validat
 | [`finish-phase.sh`](scripts/finish-phase.sh) | Cierra una fase registrando memory, metrics y snapshot (append-only) | `bash .ai/agents/scripts/finish-phase.sh FEAT-114 qa` |
 | [`sync-initiatives.sh`](scripts/sync-initiatives.sh) | Sincroniza y reconcilia iniciativas pendientes con memory, metrics y KG | `bash .ai/agents/scripts/sync-initiatives.sh` |
 | [`validate-project.sh`](scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
+| [`dashboard.sh`](scripts/dashboard.sh) | Genera y abre el dashboard visual interactivo (.ai/dashboard.html) | `bash .ai/agents/scripts/dashboard.sh` |
 
 ---
 

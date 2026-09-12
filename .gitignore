@@ -72,3 +72,4 @@ yarn-error.log*
 # ai-agents OS — Ignorar carpetas temporales y de sesión local de IA
 # ==============================================================================
 .ai/sessions/
+.ai/dashboard.html
