@@ -77,7 +77,7 @@ echo -e "\n${BLUE}Verificando sistemas opcionales de v3.2.0 en .ai/...${NC}"
 
 if [ -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
     # Contenido: un grafo útil tiene al menos un nodo ARCH-NNN y no conserva marcadores del template
-    KG_NODES=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3} ' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
+    KG_NODES=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3}' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
     KG_TEMPLATE=$(grep -cE '^updated: YYYY-MM-DD|^[[:space:]]*title: "Nombre corto de la decisión"' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
     if [ "$KG_NODES" -gt 0 ] && [ "$KG_TEMPLATE" -eq 0 ]; then
         echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado ($KG_NODES nodo(s))."
