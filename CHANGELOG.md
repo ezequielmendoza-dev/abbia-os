@@ -14,7 +14,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
   - **Modo Interactivo:** Soporte de confirmación interactiva en consola (`--prompt`).
 - **Soporte `--archive` y `--ask-archive` en `scripts/finish-phase.sh`** — Permite que la fase de aprobación final (`approval` / `deploy` / `release`) archive la iniciativa directamente o consulte al usuario de forma interactiva en un solo comando.
 - **Modo Batch Auto-Archive en `scripts/sync-initiatives.sh --archive-approved`** — Escanea `.ai/features/` y archiva en lote todas las iniciativas completadas que cuenten con QA `APROBADO`.
-- **Protocolo Interactivo de Aprobación Final y Staging** — Actualizados los roles (`tech-lead.md`, `qa.md`, `devops.md`) y workflows (`new-feature.md`, `bug-fix.md`) para que el Tech Lead/QA instruya al usuario a realizar pruebas en el entorno de staging y confirme el pase a producción antes de ejecutar el archivado.
+### Corregido
+- **Eliminación de Estimaciones Sintéticas (6,500 tokens mock)** — Se eliminó la inyección arbitraria de ejecuciones de prueba (`tokens_in: 4500, tokens_out: 2000`) en `scripts/sync-initiatives.sh`.
+- **Integridad y Precisión de Telemetría en `scripts/dashboard.sh`** — El dashboard ahora distingue de forma estricta entre métricas reales medidas (`measured` con valores reales) y ejecuciones sin medición (`null` o sin telemetría), mostrando guiones (`—`) o indicadores claros de "sin telemetría" en lugar de inventar o inflar números artificiales.
+- **Limpieza de Caracteres en Títulos de Proyecto (BSD sed)** — Corregida la expresión regular en `scripts/dashboard.sh` para evitar truncar caracteres finales en macOS.
 
 ---
 

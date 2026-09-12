@@ -254,31 +254,13 @@ EOF
 
 ## [$INITIATIVE_ID] S1 — Pipeline Sync ($CURRENT_TS)
 
-- **Insumos consumidos:** Documentos de iniciativa en \`.ai/features/$folder_name\`.
+- **Insumos consumidos:** Documentos de iniciativa en `.ai/features/$folder_name`.
 - **Decisión:** Implementación y cierre de iniciativa '$TITLE'.
 - **Razón:** Sincronización histórica y auto-reconciliación del pipeline.
 - **Outputs producidos:** [$folder_name](../features/$folder_name)
 EOF
 
-        # 3. Registrar en executions.yaml si no está
-        if ! grep -q "initiative: $INITIATIVE_ID" "$METRICS_FILE" 2>/dev/null; then
-            cat >> "$METRICS_FILE" << EOF
-
-  - ts: $CURRENT_TS
-    initiative: $INITIATIVE_ID
-    role: qa
-    phase: qa
-    mode: estandar
-    tokens_in: 4500
-    tokens_out: 2000
-    duration_s: 900
-    attempts: 1
-    verdict: APROBADO
-    source: estimate
-EOF
-        fi
-
-        # 4. Registrar ADR en Knowledge Graph y Decisions Catalog si tiene arquitectura/decisión/spec
+        # 3. Registrar ADR en Knowledge Graph y Decisions Catalog si tiene arquitectura/decisión/spec
         ARCH_ID="ARCH-$NUM"
         if [ -f "$dir/decision.md" ] || [ -f "$dir/architecture.md" ] || [ -f "$dir/spec.md" ]; then
             if ! grep -q "id: $ARCH_ID" "$KG_FILE" 2>/dev/null; then

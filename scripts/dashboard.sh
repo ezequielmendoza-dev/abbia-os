@@ -1967,54 +1967,71 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
     function initMetrics() {
       const executions = metricsData.executions || [];
       let totalIn = 0, totalOut = 0, totalSec = 0, retries = 0;
+      let measuredExecsCount = 0;
       const roleTokens = {};
       const phaseTokens = {};
 
       executions.forEach(ex => {
-        const inTok = Number(ex.tokens_in) || 0;
-        const outTok = Number(ex.tokens_out) || 0;
+        const hasTokIn = ex.tokens_in !== null && ex.tokens_in !== undefined && ex.tokens_in !== '' && !isNaN(Number(ex.tokens_in));
+        const hasTokOut = ex.tokens_out !== null && ex.tokens_out !== undefined && ex.tokens_out !== '' && !isNaN(Number(ex.tokens_out));
+        const inTok = hasTokIn ? Number(ex.tokens_in) : 0;
+        const outTok = hasTokOut ? Number(ex.tokens_out) : 0;
         const sum = inTok + outTok;
-        totalIn += inTok;
-        totalOut += outTok;
-        totalSec += (Number(ex.duration_s) || 0);
+
+        if (sum > 0 || (hasTokIn && inTok > 0) || (hasTokOut && outTok > 0)) {
+          totalIn += inTok;
+          totalOut += outTok;
+          measuredExecsCount++;
+
+          const role = ex.role || 'desconocido';
+          const phase = ex.phase || 'otras';
+
+          roleTokens[role] = (roleTokens[role] || 0) + sum;
+          phaseTokens[phase] = (phaseTokens[phase] || 0) + sum;
+        }
+
+        if (ex.duration_s !== null && ex.duration_s !== undefined && ex.duration_s !== '' && !isNaN(Number(ex.duration_s)) && Number(ex.duration_s) > 0) {
+          totalSec += Number(ex.duration_s);
+        }
         if (Number(ex.attempts) > 1) retries += (Number(ex.attempts) - 1);
-
-        const role = ex.role || 'desconocido';
-        const phase = ex.phase || 'otras';
-
-        roleTokens[role] = (roleTokens[role] || 0) + sum;
-        phaseTokens[phase] = (phaseTokens[phase] || 0) + sum;
       });
 
       const totalTokens = totalIn + totalOut;
-      const avgTokens = executions.length > 0 ? Math.round(totalTokens / executions.length) : 0;
+      const avgTokens = measuredExecsCount > 0 ? Math.round(totalTokens / measuredExecsCount) : 0;
       const ratioIn = totalTokens > 0 ? Math.round((totalIn / totalTokens) * 100) : 0;
       const ratioOut = totalTokens > 0 ? (100 - ratioIn) : 0;
 
-      document.getElementById('kpi-tokens-total').textContent = totalTokens.toLocaleString();
-      document.getElementById('kpi-tokens-in').textContent = totalIn.toLocaleString();
-      document.getElementById('kpi-tokens-out').textContent = totalOut.toLocaleString();
-      document.getElementById('kpi-tokens-avg').textContent = avgTokens.toLocaleString();
-      document.getElementById('kpi-tokens-ratio').textContent = `${ratioIn}% in · ${ratioOut}% out`;
+      document.getElementById('kpi-tokens-total').textContent = totalTokens > 0 ? totalTokens.toLocaleString() : '—';
+      document.getElementById('kpi-tokens-in').textContent = totalIn > 0 ? totalIn.toLocaleString() : '—';
+      document.getElementById('kpi-tokens-out').textContent = totalOut > 0 ? totalOut.toLocaleString() : '—';
+      document.getElementById('kpi-tokens-avg').textContent = avgTokens > 0 ? avgTokens.toLocaleString() : '—';
+      document.getElementById('kpi-tokens-ratio').textContent = totalTokens > 0 ? `${ratioIn}% in · ${ratioOut}% out` : '—';
       document.getElementById('kpi-sessions').textContent = executions.length;
       document.getElementById('kpi-retries').textContent = retries;
-      document.getElementById('kpi-time').textContent = Math.round(totalSec / 60) + ' min';
+      document.getElementById('kpi-time').textContent = totalSec > 0 ? (Math.round(totalSec / 60) + ' min') : '—';
 
       // Render Charts
+      const roleLabels = Object.keys(roleTokens).length > 0 ? Object.keys(roleTokens) : ['Sin telemetría'];
+      const roleValues = Object.keys(roleTokens).length > 0 ? Object.values(roleTokens) : [1];
+      const roleColors = Object.keys(roleTokens).length > 0 ? ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'] : ['#334155'];
+
       new Chart(document.getElementById('chart-roles'), {
         type: 'doughnut',
         data: {
-          labels: Object.keys(roleTokens),
-          datasets: [{ data: Object.values(roleTokens), backgroundColor: ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'] }]
+          labels: roleLabels,
+          datasets: [{ data: roleValues, backgroundColor: roleColors }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } } }
       });
 
+      const phaseLabels = Object.keys(phaseTokens).length > 0 ? Object.keys(phaseTokens) : ['Sin telemetría'];
+      const phaseValues = Object.keys(phaseTokens).length > 0 ? Object.values(phaseTokens) : [0];
+
       new Chart(document.getElementById('chart-phases'), {
         type: 'bar',
         data: {
-          labels: Object.keys(phaseTokens),
-          datasets: [{ label: 'Tokens Totales', data: Object.values(phaseTokens), backgroundColor: '#38bdf8', borderRadius: 6 }]
+          labels: phaseLabels,
+          datasets: [{ label: 'Tokens Totales', data: phaseValues, backgroundColor: '#38bdf8', borderRadius: 6 }]
         },
         options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }, plugins: { legend: { display: false } } }
       });
@@ -2027,9 +2044,13 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-800/40 transition';
         const tsFormatted = formatTimestamp(ex.ts);
-        const tokIn = Number(ex.tokens_in) || 0;
-        const tokOut = Number(ex.tokens_out) || 0;
-        const dur = Number(ex.duration_s) || 0;
+        const hasTokIn = ex.tokens_in !== null && ex.tokens_in !== undefined && ex.tokens_in !== '' && !isNaN(Number(ex.tokens_in));
+        const hasTokOut = ex.tokens_out !== null && ex.tokens_out !== undefined && ex.tokens_out !== '' && !isNaN(Number(ex.tokens_out));
+        const hasDur = ex.duration_s !== null && ex.duration_s !== undefined && ex.duration_s !== '' && !isNaN(Number(ex.duration_s)) && Number(ex.duration_s) > 0;
+        
+        const tokInFormatted = hasTokIn ? Number(ex.tokens_in).toLocaleString() : '—';
+        const tokOutFormatted = hasTokOut ? Number(ex.tokens_out).toLocaleString() : '—';
+        const durFormatted = hasDur ? `${Number(ex.duration_s)}s` : '—';
         const verdict = ex.verdict || '-';
         let verdictClass = 'bg-slate-800 text-slate-400';
         if (verdict === 'APROBADO' || verdict === 'PASS') verdictClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
@@ -2040,9 +2061,9 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <td class="py-3 px-4 font-bold text-sky-400 whitespace-nowrap">${ex.initiative || '-'}</td>
           <td class="py-3 px-4 text-slate-300 capitalize">${ex.role || '-'}</td>
           <td class="py-3 px-4 text-slate-400">${ex.phase || '-'}</td>
-          <td class="py-3 px-4 text-slate-400">${tokIn.toLocaleString()}</td>
-          <td class="py-3 px-4 text-slate-400">${tokOut.toLocaleString()}</td>
-          <td class="py-3 px-4 text-slate-400">${dur}s</td>
+          <td class="py-3 px-4 text-slate-400">${tokInFormatted}</td>
+          <td class="py-3 px-4 text-slate-400">${tokOutFormatted}</td>
+          <td class="py-3 px-4 text-slate-400">${durFormatted}</td>
           <td class="py-3 px-4"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${verdictClass}">${verdict}</span></td>
         `;
         tbody.appendChild(tr);
@@ -2140,24 +2161,36 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         
         [normKey, rawKey].forEach(k => {
           if (!k) return;
-          if (!initMetrics[k]) initMetrics[k] = { count: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0, executions: [], lastTs: ex.ts };
+          if (!initMetrics[k]) initMetrics[k] = { count: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0, hasMeasuredTokens: false, executions: [], lastTs: ex.ts };
         });
 
+        const hasTokIn = ex.tokens_in !== null && ex.tokens_in !== undefined && ex.tokens_in !== '' && !isNaN(Number(ex.tokens_in));
+        const hasTokOut = ex.tokens_out !== null && ex.tokens_out !== undefined && ex.tokens_out !== '' && !isNaN(Number(ex.tokens_out));
+        const inTok = hasTokIn ? Number(ex.tokens_in) : 0;
+        const outTok = hasTokOut ? Number(ex.tokens_out) : 0;
+        const sum = inTok + outTok;
+        const isMeasured = (sum > 0 || (hasTokIn && inTok > 0) || (hasTokOut && outTok > 0));
+
         const target = initMetrics[normKey];
-        const sum = (Number(ex.tokens_in) || 0) + (Number(ex.tokens_out) || 0);
         target.count++;
-        target.tokensIn += (Number(ex.tokens_in) || 0);
-        target.tokensOut += (Number(ex.tokens_out) || 0);
-        target.totalTokens += sum;
+        if (isMeasured) {
+          target.tokensIn += inTok;
+          target.tokensOut += outTok;
+          target.totalTokens += sum;
+          target.hasMeasuredTokens = true;
+        }
         target.executions.push(ex);
         target.lastTs = ex.ts;
 
         if (rawKey !== normKey) {
           const rawTarget = initMetrics[rawKey];
           rawTarget.count++;
-          rawTarget.tokensIn += (Number(ex.tokens_in) || 0);
-          rawTarget.tokensOut += (Number(ex.tokens_out) || 0);
-          rawTarget.totalTokens += sum;
+          if (isMeasured) {
+            rawTarget.tokensIn += inTok;
+            rawTarget.tokensOut += outTok;
+            rawTarget.totalTokens += sum;
+            rawTarget.hasMeasuredTokens = true;
+          }
           rawTarget.executions.push(ex);
           rawTarget.lastTs = ex.ts;
         }
@@ -2166,7 +2199,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       // Asignar métricas a la lista de iniciativas
       allInitiatives.forEach(init => {
         const normId = normalizeInitId(init.id);
-        const met = initMetrics[normId] || initMetrics[init.id] || { count: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0, executions: [], lastTs: '-' };
+        const met = initMetrics[normId] || initMetrics[init.id] || { count: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0, hasMeasuredTokens: false, executions: [], lastTs: '-' };
         init.metrics = met;
       });
 
@@ -2314,8 +2347,15 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <!-- Card Footer & Actions -->
           <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs">
             <div class="text-[11px] text-slate-400">
-              <span class="font-bold text-slate-200">${(init.metrics.totalTokens || 0).toLocaleString()}</span> tokens
-              <span class="text-slate-500">(${init.metrics.count || 0} fases)</span>
+              ${init.metrics.hasMeasuredTokens ? `
+                <span class="font-bold text-slate-200">${(init.metrics.totalTokens || 0).toLocaleString()}</span> tokens
+                <span class="text-slate-500">(${init.metrics.count || 0} fases)</span>
+              ` : (init.metrics.count > 0 ? `
+                <span class="text-slate-500 font-medium">— tokens</span>
+                <span class="text-slate-600">(${init.metrics.count} fases)</span>
+              ` : `
+                <span class="text-slate-500 font-medium">— sin telemetría</span>
+              `)}
             </div>
             <button onclick="openInitiativeModalById('${init.id}')" class="px-3.5 py-1.5 bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-200 font-medium rounded-xl text-xs transition border border-slate-700/80 shadow-sm flex items-center gap-1.5">
               <span>Ver Detalle</span>
@@ -2495,10 +2535,16 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         document.getElementById('modal-telemetry-content').classList.remove('hidden');
         
         let initDurationSec = 0;
-        execs.forEach(ex => { initDurationSec += (Number(ex.duration_s) || 0); });
-        const durFormatted = initDurationSec >= 60 ? `${Math.round(initDurationSec / 60)} min` : `${initDurationSec}s`;
+        let hasMeasuredDur = false;
+        execs.forEach(ex => {
+          if (ex.duration_s !== null && ex.duration_s !== undefined && ex.duration_s !== '' && !isNaN(Number(ex.duration_s)) && Number(ex.duration_s) > 0) {
+            initDurationSec += Number(ex.duration_s);
+            hasMeasuredDur = true;
+          }
+        });
+        const durFormatted = hasMeasuredDur ? (initDurationSec >= 60 ? `${Math.round(initDurationSec / 60)} min` : `${initDurationSec}s`) : '—';
 
-        document.getElementById('modal-tokens-total').textContent = (init.metrics.totalTokens || 0).toLocaleString();
+        document.getElementById('modal-tokens-total').textContent = init.metrics.hasMeasuredTokens ? (init.metrics.totalTokens || 0).toLocaleString() : '—';
         document.getElementById('modal-phases-count').textContent = init.metrics.count || 0;
         document.getElementById('modal-duration-total').textContent = durFormatted;
 
@@ -2506,14 +2552,22 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         tbody.innerHTML = '';
         execs.forEach(ex => {
           const tr = document.createElement('tr');
-          const tokIn = Number(ex.tokens_in) || 0;
-          const tokOut = Number(ex.tokens_out) || 0;
+          const hasTokIn = ex.tokens_in !== null && ex.tokens_in !== undefined && ex.tokens_in !== '' && !isNaN(Number(ex.tokens_in));
+          const hasTokOut = ex.tokens_out !== null && ex.tokens_out !== undefined && ex.tokens_out !== '' && !isNaN(Number(ex.tokens_out));
+          const hasDur = ex.duration_s !== null && ex.duration_s !== undefined && ex.duration_s !== '' && !isNaN(Number(ex.duration_s)) && Number(ex.duration_s) > 0;
+
+          const tokIn = hasTokIn ? Number(ex.tokens_in) : 0;
+          const tokOut = hasTokOut ? Number(ex.tokens_out) : 0;
+          const tokensCell = (hasTokIn || hasTokOut) && (tokIn > 0 || tokOut > 0)
+            ? `${tokIn.toLocaleString()} in / ${tokOut.toLocaleString()} out`
+            : '<span class="text-slate-500">—</span>';
+          const durCell = hasDur ? `${Number(ex.duration_s)}s` : '<span class="text-slate-500">—</span>';
           const tsFormatted = formatTimestamp(ex.ts);
           tr.className = 'hover:bg-slate-900/80 transition';
           tr.innerHTML = `
             <td class="p-2.5 text-slate-300 font-semibold">${ex.role || '-'}<span class="block text-[9px] text-slate-500 font-normal">${ex.phase || '-'} · ${tsFormatted}</span></td>
-            <td class="p-2.5 text-slate-400">${tokIn.toLocaleString()} in / ${tokOut.toLocaleString()} out</td>
-            <td class="p-2.5 text-slate-400">${ex.duration_s || 0}s</td>
+            <td class="p-2.5 text-slate-400">${tokensCell}</td>
+            <td class="p-2.5 text-slate-400">${durCell}</td>
             <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[9px] font-bold ${ex.verdict === 'APROBADO' ? 'bg-emerald-500/20 text-emerald-400' : (ex.verdict === 'RECHAZADO' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-800 text-slate-400')}">${ex.verdict || '-'}</span></td>
           `;
           tbody.appendChild(tr);
