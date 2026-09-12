@@ -7,6 +7,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 ## [3.3.1] — 2026-09-12
 
 ### Agregado
+- **Panel de Proyecto & Contexto en `scripts/dashboard.sh`** — Nueva pestaña `🏢 Proyecto` y encabezado dinámico en la barra de navegación que muestra el nombre del proyecto, estado del ciclo de vida, tipo de sistema, repositorio, ruta local, objetivos de negocio, actores/permisos, stack tecnológico y visor completo de `.ai/context.md`.
 - **`scripts/sync-initiatives.sh --fix` (Auto-Healer de Migración Legacy)** — Modo de auto-reparación documental que detecta iniciativas creadas en versiones previas a v3.2 o con artefactos faltantes (`decision.md`, `ui-design.md`, `qa.md`, etc.), scaffolds automáticos, normalización de veredictos semánticos en `qa.md` y depuración automática de placeholders del template en `.ai/knowledge-graph.yaml`.
 - **Flujo de Actualización Resiliente en `scripts/update-ai-agents.sh`** — Integración automática de `sync-initiatives.sh --fix` y `validate-project.sh` dentro del actualizador de un solo comando, permitiendo que cualquier proyecto heredado o con discrepancias documentales se actualice y auto-sane de manera transparente.
 

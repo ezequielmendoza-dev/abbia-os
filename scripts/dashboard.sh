@@ -164,6 +164,43 @@ RULES_RAW=$(read_file_or_default "$RULES_FILE" "(sin business-rules.md)")
 GLOSSARY_RAW=$(read_file_or_default "$GLOSSARY_FILE" "(sin glossary.md)")
 INITIATIVES_RAW=$(scan_initiatives_json "$FEATURES_DIR" "$ARCHIVE_DIR")
 
+# Extraer metadata de alto nivel del proyecto para el header y tab de proyecto
+PROJECT_BASENAME="$(basename "$PROJECT_ROOT")"
+PROJECT_TITLE=""
+PROJECT_TYPE=""
+PROJECT_STATUS=""
+PROJECT_START=""
+PROJECT_UPDATED=""
+PROJECT_REPO=""
+
+if [ -f "$CONTEXT_FILE" ]; then
+    PROJECT_TITLE=$(grep -E '\|\s*\*\*Nombre del Proyecto\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    if [ -z "$PROJECT_TITLE" ] || [[ "$PROJECT_TITLE" =~ ^\[.*\]$ ]]; then
+        PROJECT_TITLE=$(grep -E '^# ' "$CONTEXT_FILE" | head -1 | sed 's/^# //' | sed 's/ — Contexto del Proyecto//' | sed 's/ - Contexto del Proyecto//' | sed 's/ — Project Context//' | sed 's/ - Project Context//' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    fi
+    PROJECT_TYPE=$(grep -E '\|\s*\*\*Tipo\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    PROJECT_STATUS=$(grep -E '\|\s*\*\*Estado\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    PROJECT_START=$(grep -E '\|\s*\*\*Fecha de inicio\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    PROJECT_UPDATED=$(grep -E '\|\s*\*\*Última actualización\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    PROJECT_REPO=$(grep -E '\|\s*\*\*Repositorio principal\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+fi
+
+[ -z "$PROJECT_TITLE" ] && PROJECT_TITLE="$PROJECT_BASENAME"
+[ -z "$PROJECT_TYPE" ] || [[ "$PROJECT_TYPE" =~ ^\[.*\]$ ]] && PROJECT_TYPE="Aplicación / Software"
+[ -z "$PROJECT_STATUS" ] || [[ "$PROJECT_STATUS" =~ ^\[.*\]$ ]] && PROJECT_STATUS="Activo"
+[ -z "$PROJECT_UPDATED" ] || [[ "$PROJECT_UPDATED" =~ ^\[.*\]$ ]] && PROJECT_UPDATED="$(date -u +"%Y-%m-%d")"
+
+# Sanitizar comillas para JSON seguro
+PROJECT_TITLE_ESC=$(echo "$PROJECT_TITLE" | sed 's/"/\\"/g')
+PROJECT_TYPE_ESC=$(echo "$PROJECT_TYPE" | sed 's/"/\\"/g')
+PROJECT_STATUS_ESC=$(echo "$PROJECT_STATUS" | sed 's/"/\\"/g')
+PROJECT_REPO_ESC=$(echo "$PROJECT_REPO" | sed 's/"/\\"/g')
+PROJECT_ROOT_ESC=$(echo "$PROJECT_ROOT" | sed 's/"/\\"/g')
+PROJECT_START_ESC=$(echo "$PROJECT_START" | sed 's/"/\\"/g')
+PROJECT_UPDATED_ESC=$(echo "$PROJECT_UPDATED" | sed 's/"/\\"/g')
+
+PROJECT_META_JSON="{\"name\": \"$PROJECT_TITLE_ESC\", \"type\": \"$PROJECT_TYPE_ESC\", \"status\": \"$PROJECT_STATUS_ESC\", \"repo\": \"$PROJECT_REPO_ESC\", \"root\": \"$PROJECT_ROOT_ESC\", \"startDate\": \"$PROJECT_START_ESC\", \"updatedDate\": \"$PROJECT_UPDATED_ESC\", \"basename\": \"$PROJECT_BASENAME\"}"
+
 OUTPUT_HTML="$AI_DIR/dashboard.html"
 
 # Generar archivo HTML interactivo autónomo
@@ -206,22 +243,33 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
-  <!-- Navbar -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">🤖</span>
-        <div>
-          <h1 class="text-lg font-bold bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">ai-agents OS</h1>
-          <p class="text-xs text-slate-400">Panel de Control & Estado del Repositorio</p>
+  <!-- Navbar con Datos del Proyecto -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <!-- Project Info Brand -->
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="text-2xl flex-shrink-0">🤖</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 id="nav-project-name" class="text-base sm:text-lg font-black bg-gradient-to-r from-sky-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent truncate">ai-agents OS</h1>
+            <span id="nav-project-status" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex-shrink-0">Activo</span>
+          </div>
+          <p id="nav-project-subtitle" class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+            <span id="nav-project-type" class="truncate">Software</span>
+            <span class="text-slate-600">•</span>
+            <span id="nav-project-path" class="font-mono text-slate-500 text-[10px] truncate"></span>
+          </p>
         </div>
       </div>
-      <nav class="flex space-x-1 bg-slate-800/60 p-1 rounded-xl border border-slate-700/50">
-        <button onclick="switchTab('features')" id="tab-btn-features" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all bg-sky-500 text-white shadow-lg shadow-sky-500/20">🚀 Iniciativas</button>
-        <button onclick="switchTab('graph')" id="tab-btn-graph" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🕸️ Arquitectura ADR</button>
-        <button onclick="switchTab('rules')" id="tab-btn-rules" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">⚖️ Reglas de Negocio</button>
-        <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🧠 Memoria Técnica</button>
-        <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">📊 Telemetría</button>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 bg-slate-800/60 p-1 rounded-xl border border-slate-700/50 flex-shrink-0 overflow-x-auto">
+        <button onclick="switchTab('project')" id="tab-btn-project" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🏢 Proyecto</button>
+        <button onclick="switchTab('features')" id="tab-btn-features" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-sky-500 text-white shadow-lg shadow-sky-500/20">🚀 Iniciativas</button>
+        <button onclick="switchTab('graph')" id="tab-btn-graph" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🕸️ Arquitectura ADR</button>
+        <button onclick="switchTab('rules')" id="tab-btn-rules" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">⚖️ Reglas</button>
+        <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🧠 Memoria</button>
+        <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">📊 Telemetría</button>
       </nav>
     </div>
   </header>
@@ -233,6 +281,12 @@ HTML_HEADER
 # Inyectar datos en el HTML como scripts JSON seguros
 cat << HTML_DATA >> "$OUTPUT_HTML"
   <!-- Raw Data Payload -->
+  <script type="application/json" id="raw-project">
+$PROJECT_META_JSON
+  </script>
+  <script type="text/plain" id="raw-context">
+$CONTEXT_RAW
+  </script>
   <script type="text/plain" id="raw-kg">
 $KG_RAW
   </script>
@@ -263,6 +317,152 @@ $INITIATIVES_RAW
 HTML_DATA
 
 cat << 'HTML_BODY' >> "$OUTPUT_HTML"
+    <!-- ==================== TAB 0: DATOS DEL PROYECTO & CONTEXTO ==================== -->
+    <section id="tab-project" class="tab-content space-y-6">
+      <!-- Project Hero Card -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-2 max-w-3xl">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span id="hero-project-type-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">SaaS</span>
+              <span id="hero-project-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">En producción</span>
+              <span class="text-xs text-slate-500">Actualizado: <span id="hero-project-updated" class="text-slate-400 font-mono">2026-09-12</span></span>
+            </div>
+            <h2 id="hero-project-title" class="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">Nombre del Proyecto</h2>
+            <p id="hero-project-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">Descripción general y objetivos del proyecto.</p>
+          </div>
+          
+          <div class="flex flex-col sm:flex-row md:flex-col gap-2.5 flex-shrink-0 justify-center">
+            <a id="hero-project-repo-link" href="#" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-xl border border-slate-700 transition shadow-sm">
+              <span>🌐</span>
+              <span id="hero-project-repo-text">Ver Repositorio</span>
+            </a>
+            <button onclick="switchTab('features')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-xs font-semibold text-white rounded-xl transition shadow-lg shadow-sky-600/20">
+              <span>🚀</span>
+              <span>Explorar Iniciativas</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metadata Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-xl flex-shrink-0">🏢</div>
+          <div class="min-w-0">
+            <div class="text-[11px] font-medium text-slate-400">Tipo de Aplicación</div>
+            <div id="meta-project-type" class="text-xs font-bold text-slate-200 mt-0.5 truncate">-</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xl flex-shrink-0">🏷️</div>
+          <div class="min-w-0">
+            <div class="text-[11px] font-medium text-slate-400">Estado del Proyecto</div>
+            <div id="meta-project-status" class="text-xs font-bold text-emerald-400 mt-0.5 truncate">-</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl flex-shrink-0">📁</div>
+          <div class="min-w-0">
+            <div class="text-[11px] font-medium text-slate-400">Ruta Raíz Local</div>
+            <div id="meta-project-path" class="text-xs font-mono font-semibold text-slate-300 mt-0.5 truncate">-</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl flex-shrink-0">🤖</div>
+          <div class="min-w-0">
+            <div class="text-[11px] font-medium text-slate-400">Framework AI</div>
+            <div class="text-xs font-bold text-amber-300 mt-0.5">ai-agents OS v3.3.1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Project Information Sections -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left 2 Cols: Description, Business Goals & Actors -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Business Goals Card -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
+                <span>🎯</span> Objetivos de Negocio
+              </h3>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md (§2)</span>
+            </div>
+            <div id="project-goals-content" class="prose prose-invert prose-sm text-xs mt-4 text-slate-300 leading-relaxed"></div>
+          </div>
+
+          <!-- Actors / Users Table Card -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+                <span>👥</span> Usuarios, Actores & Permisos
+              </h3>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md (§3)</span>
+            </div>
+            <div id="project-actors-content" class="prose prose-invert prose-sm text-xs mt-4 text-slate-300 overflow-x-auto"></div>
+          </div>
+
+          <!-- Full Context Markdown Viewer -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div>
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                  <span>📖</span> Memoria Permanente del Proyecto
+                </h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Documento fuente de verdad que consumen todos los agentes.</p>
+              </div>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md</span>
+            </div>
+            <div id="project-context-full-content" class="prose prose-invert prose-sm text-xs mt-4 max-h-[500px] overflow-y-auto pr-2"></div>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Tech Stack & System Status -->
+        <div class="space-y-6">
+          <!-- Tech Stack Card -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                <span>⚡</span> Stack Tecnológico
+              </h3>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md (§4)</span>
+            </div>
+            <div id="project-stack-content" class="prose prose-invert prose-xs text-xs mt-4 text-slate-300 overflow-x-auto"></div>
+          </div>
+
+          <!-- Project Repository & Metadata Card -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-3.5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider pb-2 border-b border-slate-800">
+              <span>📋</span> Ficha Técnica
+            </h3>
+            <div class="space-y-2.5 text-xs">
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Repositorio Git</span>
+                <span id="meta-detail-repo" class="font-mono text-slate-300 break-all">-</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Submódulo de Agentes</span>
+                <span class="font-mono text-sky-400">.ai/agents/</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Directorio de Iniciativas</span>
+                <span class="font-mono text-indigo-400">.ai/features/</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Memoria & Métricas</span>
+                <span class="font-mono text-emerald-400">.ai/memory/ & .ai/metrics/</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ==================== TAB 1: INICIATIVAS & PIPELINE SDD ==================== -->
     <section id="tab-features" class="tab-content active space-y-6">
       <!-- Quick Summary Cards -->
@@ -646,9 +846,23 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
 
   <script>
     // --- Data Parsing ---
+    let projectMeta = {
+      name: "Proyecto",
+      type: "Software",
+      status: "Activo",
+      repo: "-",
+      root: "-",
+      startDate: "-",
+      updatedDate: "-",
+      basename: "project"
+    };
     let kgData = { nodes: [], edges: [] };
     let metricsData = { executions: [] };
     let allInitiatives = [];
+
+    try {
+      projectMeta = JSON.parse(document.getElementById('raw-project').textContent.trim() || '{}');
+    } catch (e) { console.error('Error parseando Project Meta JSON:', e); }
 
     try {
       const kgRaw = document.getElementById('raw-kg').textContent.trim();
@@ -664,12 +878,96 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       allInitiatives = JSON.parse(document.getElementById('raw-initiatives').textContent.trim() || '[]');
     } catch (e) { console.error('Error parseando Iniciativas JSON:', e); }
 
+    const contextRaw = document.getElementById('raw-context').textContent;
     const logRaw = document.getElementById('raw-log').textContent;
     const catalogRaw = document.getElementById('raw-catalog').textContent;
     const patternsRaw = document.getElementById('raw-patterns').textContent;
     const snapshotRaw = document.getElementById('raw-snapshot').textContent;
     const rulesRaw = document.getElementById('raw-rules').textContent;
     const glossaryRaw = document.getElementById('raw-glossary').textContent;
+
+    // --- Project Data Rendering ---
+    function initProject() {
+      // 1. Navbar
+      if (document.getElementById('nav-project-name')) document.getElementById('nav-project-name').textContent = projectMeta.name || projectMeta.basename || 'ai-agents OS';
+      if (document.getElementById('nav-project-status')) document.getElementById('nav-project-status').textContent = projectMeta.status || 'Activo';
+      if (document.getElementById('nav-project-type')) document.getElementById('nav-project-type').textContent = projectMeta.type || 'Software';
+      if (document.getElementById('nav-project-path')) document.getElementById('nav-project-path').textContent = projectMeta.root || '';
+
+      // 2. Hero Card
+      if (document.getElementById('hero-project-title')) document.getElementById('hero-project-title').textContent = projectMeta.name || projectMeta.basename || 'Proyecto';
+      if (document.getElementById('hero-project-type-badge')) document.getElementById('hero-project-type-badge').textContent = projectMeta.type || 'Software';
+      if (document.getElementById('hero-project-status-badge')) document.getElementById('hero-project-status-badge').textContent = projectMeta.status || 'Activo';
+      if (document.getElementById('hero-project-updated')) document.getElementById('hero-project-updated').textContent = projectMeta.updatedDate || '-';
+
+      // Repo Link
+      const repoLinkEl = document.getElementById('hero-project-repo-link');
+      const repoTextEl = document.getElementById('hero-project-repo-text');
+      const detailRepoEl = document.getElementById('meta-detail-repo');
+      if (projectMeta.repo && projectMeta.repo !== '-' && !projectMeta.repo.startsWith('[')) {
+        if (repoLinkEl) {
+          repoLinkEl.href = projectMeta.repo.startsWith('http') ? projectMeta.repo : 'https://' + projectMeta.repo;
+          repoLinkEl.classList.remove('hidden');
+        }
+        if (repoTextEl) repoTextEl.textContent = 'Ver Repositorio';
+        if (detailRepoEl) detailRepoEl.textContent = projectMeta.repo;
+      } else {
+        if (repoLinkEl) repoLinkEl.classList.add('hidden');
+        if (detailRepoEl) detailRepoEl.textContent = projectMeta.root || 'Local';
+      }
+
+      // 3. Metadata Grid
+      if (document.getElementById('meta-project-type')) document.getElementById('meta-project-type').textContent = projectMeta.type || '-';
+      if (document.getElementById('meta-project-status')) document.getElementById('meta-project-status').textContent = projectMeta.status || '-';
+      if (document.getElementById('meta-project-path')) document.getElementById('meta-project-path').textContent = projectMeta.root || '-';
+
+      // 4. Parse Sections from contextRaw
+      // Extract Description (§1)
+      let descText = "Sin descripción definida.";
+      const descMatch = contextRaw.match(/## 1\.\s*Descripción del Proyecto([\s\S]*?)(?=## 2\.|$)/i);
+      if (descMatch && descMatch[1]) {
+        descText = descMatch[1].trim();
+        const cleanHeroDesc = descText.replace(/^>\s*/gm, '').replace(/\n/g, ' ').substring(0, 280);
+        if (document.getElementById('hero-project-desc')) {
+          document.getElementById('hero-project-desc').textContent = cleanHeroDesc + (cleanHeroDesc.length >= 280 ? '...' : '');
+        }
+      }
+
+      // Extract Goals (§2)
+      let goalsHtml = "<p class='text-slate-500 italic'>Sin objetivos documentados en context.md.</p>";
+      const goalsMatch = contextRaw.match(/## 2\.\s*Objetivos de Negocio([\s\S]*?)(?=## 3\.|$)/i);
+      if (goalsMatch && goalsMatch[1]) {
+        goalsHtml = marked.parse(goalsMatch[1].trim());
+      }
+      if (document.getElementById('project-goals-content')) {
+        document.getElementById('project-goals-content').innerHTML = goalsHtml;
+      }
+
+      // Extract Actors (§3)
+      let actorsHtml = "<p class='text-slate-500 italic'>Sin actores documentados en context.md.</p>";
+      const actorsMatch = contextRaw.match(/## 3\.\s*Usuarios \/ Actores([\s\S]*?)(?=## 4\.|$)/i);
+      if (actorsMatch && actorsMatch[1]) {
+        actorsHtml = marked.parse(actorsMatch[1].trim());
+      }
+      if (document.getElementById('project-actors-content')) {
+        document.getElementById('project-actors-content').innerHTML = actorsHtml;
+      }
+
+      // Extract Tech Stack (§4)
+      let stackHtml = "<p class='text-slate-500 italic'>Sin stack tecnológico documentado en context.md.</p>";
+      const stackMatch = contextRaw.match(/## 4\.\s*Stack Tecnológico([\s\S]*?)(?=## 5\.|$)/i);
+      if (stackMatch && stackMatch[1]) {
+        stackHtml = marked.parse(stackMatch[1].trim());
+      }
+      if (document.getElementById('project-stack-content')) {
+        document.getElementById('project-stack-content').innerHTML = stackHtml;
+      }
+
+      // Full Context Markdown
+      if (document.getElementById('project-context-full-content')) {
+        document.getElementById('project-context-full-content').innerHTML = marked.parse(contextRaw);
+      }
+    }
 
     // --- Tab Navigation ---
     function switchTab(tabId) {
@@ -1180,6 +1478,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      initProject();
       initInitiatives();
       initGraph();
       initDocsAndMemory();
