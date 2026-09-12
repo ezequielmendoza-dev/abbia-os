@@ -325,10 +325,19 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <div id="kpi-tokens-total" class="text-2xl font-black text-sky-400 mt-1">0</div>
           <div class="text-[10px] text-slate-500 mt-1"><span id="kpi-tokens-in">0</span> in · <span id="kpi-tokens-out">0</span> out</div>
         </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div class="text-xs text-slate-400 font-medium">Costo Estimado (USD)</div>
-          <div id="kpi-cost" class="text-2xl font-black text-emerald-400 mt-1">$0.00</div>
-          <div class="text-[10px] text-slate-500 mt-1">Tarifa Claude / GPT-4o est.</div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-1">
+            <div class="text-xs text-slate-400 font-medium">Costo Estimado</div>
+            <select id="pricing-model-select" onchange="updateSelectedPricingModel(this.value)" class="bg-slate-950 border border-slate-700 text-[10px] text-sky-400 font-mono rounded px-1.5 py-0.5 focus:outline-none focus:border-sky-500">
+              <option value="sonnet" selected>Sonnet 3.5 / GPT-4o</option>
+              <option value="haiku">Haiku 3.5 / Mini</option>
+              <option value="gemini-flash">Gemini 1.5 Flash</option>
+              <option value="gemini-pro">Gemini 1.5 Pro</option>
+              <option value="opus">Opus 3</option>
+            </select>
+          </div>
+          <div id="kpi-cost" class="text-2xl font-black text-emerald-400 mt-1">$0.00 USD</div>
+          <div class="text-[10px] text-slate-500 mt-1" id="kpi-cost-breakdown">In: $0.00 · Out: $0.00</div>
         </div>
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
           <div class="text-xs text-slate-400 font-medium">Sesiones de Agente</div>
@@ -749,6 +758,37 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       if (network) network.fit();
     }
 
+    // --- Pricing Models & Currency Formatting ---
+    const PRICING_MODELS = {
+      'sonnet': { in: 3.00, out: 15.00, name: 'Claude 3.5 Sonnet / GPT-4o' },
+      'haiku': { in: 0.25, out: 1.25, name: 'Claude 3.5 Haiku / GPT-4o-mini' },
+      'gemini-flash': { in: 0.075, out: 0.30, name: 'Gemini 1.5 Flash' },
+      'gemini-pro': { in: 1.25, out: 5.00, name: 'Gemini 1.5 Pro' },
+      'opus': { in: 15.00, out: 75.00, name: 'Claude 3 Opus' }
+    };
+
+    let globalTotalIn = 0;
+    let globalTotalOut = 0;
+
+    function formatCurrencyUSD(val) {
+      if (val === 0 || isNaN(val)) return '$0.00 USD';
+      if (val < 0.01) return '< $0.01 USD';
+      return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+    }
+
+    function calculateCostUSD(tokensIn, tokensOut, modelKey = 'sonnet') {
+      const model = PRICING_MODELS[modelKey] || PRICING_MODELS['sonnet'];
+      const costIn = (tokensIn * model.in) / 1000000;
+      const costOut = (tokensOut * model.out) / 1000000;
+      return { costIn, costOut, total: costIn + costOut, model };
+    }
+
+    function updateSelectedPricingModel(modelKey) {
+      const calc = calculateCostUSD(globalTotalIn, globalTotalOut, modelKey);
+      document.getElementById('kpi-cost').textContent = formatCurrencyUSD(calc.total);
+      document.getElementById('kpi-cost-breakdown').textContent = `In: $${calc.costIn.toFixed(2)} · Out: $${calc.costOut.toFixed(2)} ($${calc.model.in}/$${calc.model.out} por 1M)`;
+    }
+
     // --- Telemetría & Charts (Chart.js) ---
     function initMetrics() {
       const executions = metricsData.executions || [];
@@ -772,6 +812,9 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         phaseTokens[phase] = (phaseTokens[phase] || 0) + sum;
       });
 
+      globalTotalIn = totalIn;
+      globalTotalOut = totalOut;
+
       const totalTokens = totalIn + totalOut;
       document.getElementById('kpi-tokens-total').textContent = totalTokens.toLocaleString();
       document.getElementById('kpi-tokens-in').textContent = totalIn.toLocaleString();
@@ -780,9 +823,8 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       document.getElementById('kpi-retries').textContent = retries;
       document.getElementById('kpi-time').textContent = Math.round(totalSec / 60) + ' min';
 
-      // Costo estimado ($3 / 1M in, $15 / 1M out)
-      const costEst = ((totalIn * 3 / 1000000) + (totalOut * 15 / 1000000));
-      document.getElementById('kpi-cost').textContent = '$' + costEst.toFixed(3);
+      const initialModel = document.getElementById('pricing-model-select').value || 'sonnet';
+      updateSelectedPricingModel(initialModel);
 
       // Render Charts
       new Chart(document.getElementById('chart-roles'), {
@@ -1097,9 +1139,9 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         document.getElementById('modal-telemetry-content').classList.remove('hidden');
         
         document.getElementById('modal-tokens-total').textContent = (init.metrics.totalTokens || 0).toLocaleString();
-        document.getElementById('modal-phases-count').textContent = init.metrics.count || 0;
-        const costEst = ((init.metrics.tokensIn * 3 / 1000000) + (init.metrics.tokensOut * 15 / 1000000));
-        document.getElementById('modal-cost-est').textContent = '$' + costEst.toFixed(3);
+        const modelKey = document.getElementById('pricing-model-select') ? document.getElementById('pricing-model-select').value : 'sonnet';
+        const initCost = calculateCostUSD(init.metrics.tokensIn || 0, init.metrics.tokensOut || 0, modelKey);
+        document.getElementById('modal-cost-est').textContent = formatCurrencyUSD(initCost.total);
 
         const tbody = document.getElementById('modal-executions-tbody');
         tbody.innerHTML = '';
