@@ -7,11 +7,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 ## [3.3.1] — 2026-09-12
 
 ### Agregado
-- **Panel de Proyecto & Contexto en `scripts/dashboard.sh`** — Nueva pestaña `🏢 Proyecto` y encabezado dinámico en la barra de navegación que muestra el nombre del proyecto, estado del ciclo de vida, tipo de sistema, repositorio, ruta local, objetivos de negocio, actores/permisos, stack tecnológico y visor completo de `.ai/context.md`.
+- **Panel de Proyecto & Contexto en `scripts/dashboard.sh`** — Nueva pestaña `🏢 Proyecto` y encabezado dinámico en la barra de navegación que muestra el nombre del proyecto, estado del ciclo de vida, tipo de sistema, repositorio, ruta local, objetivos de negocio (§2), actores/permisos (§3), stack tecnológico (§4), ficha técnica y visor completo de `.ai/context.md`.
+- **Modal "Acerca de ai-agents OS" (About Modal)** — Diálogo interactivo accesible desde el navbar y la ficha técnica que documenta la arquitectura del framework, la metodología Spec-Driven Development (SDD), los 8 roles especializados, workflows con DAG, los 4 sistemas de memoria persistente y la referencia rápida de comandos CLI.
 - **`scripts/sync-initiatives.sh --fix` (Auto-Healer de Migración Legacy)** — Modo de auto-reparación documental que detecta iniciativas creadas en versiones previas a v3.2 o con artefactos faltantes (`decision.md`, `ui-design.md`, `qa.md`, etc.), scaffolds automáticos, normalización de veredictos semánticos en `qa.md` y depuración automática de placeholders del template en `.ai/knowledge-graph.yaml`.
 - **Flujo de Actualización Resiliente en `scripts/update-ai-agents.sh`** — Integración automática de `sync-initiatives.sh --fix` y `validate-project.sh` dentro del actualizador de un solo comando, permitiendo que cualquier proyecto heredado o con discrepancias documentales se actualice y auto-sane de manera transparente.
 
 ### Modificado
+- **Rediseño UI/UX Completo en `scripts/dashboard.sh`** — Arquitectura de visualización 100% full-width (`w-full max-w-[1600px]`):
+  - Organización modular por **Sub-Tabs** en Proyecto (5 tabs), Reglas (2 tabs) y Memoria (4 tabs) eliminando columnas estrechas y scrolls horizontales en tablas Markdown.
+  - **Grafo ADR 2D**: Modo dual (Lienzo interactivo / Catálogo tabular), chips de filtrado (Todas, Features, Bugs), barra de herramientas de zoom (➕, ➖, 100%, 🎯 Ajustar, 📐 Cuadrícula), estilizado dark-modern con `drawThreshold: 0` y parser resiliente de YAML.
+  - **Iniciativas**: Resumen de 6 KPIs, búsqueda en vivo, selector de ordenamiento, cuadrícula responsiva, paginación configurable y modal de detalle enriquecido con matriz de artefactos SDD, telemetría y snippets CLI.
+  - **Telemetría**: Normalización de identificadores (`normalizeInitId`) para cruce consistente entre IDs cortos y nombres de carpetas de iniciativas.
 - **`scripts/validate-project.sh`** — Verificación del Knowledge Graph mejorada para descontar placeholders de ejemplo del template y advertir con tip accionable para auto-reparar con `sync-initiatives.sh --fix` ante discrepancias documentales.
 - **`docs/project-integration.md`** — Documentación del comando `sync-initiatives.sh --fix` en las secciones de actualización y migración de proyectos legados.
 
