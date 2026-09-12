@@ -1,520 +1,295 @@
-# 🤖 ai-agents — Framework de Specification-Driven Development
+<div align="center">
 
-> **Ciclo de vida completo desde una idea hasta producción.**
-> Documentos como fuente de verdad. Agentes como transformadores de conocimiento. Pipeline con memoria.
+# 🤖 ai-agents OS
+### *Framework de Specification-Driven Development (SDD) para Ingeniería Asistida por IA*
+
+[![Version](https://img.shields.io/badge/version-v3.4.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-stable-success.svg?style=for-the-badge)](README.md)
+[![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-purple.svg?style=for-the-badge)](docs/sdd-philosophy.md)
+[![Memory](https://img.shields.io/badge/memory-4--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
+
+**Transforma tu IDE en un equipo de ingeniería de software autónomo y coordinado.**  
+*Documentos como fuente de verdad · Agentes especializados · Workflows con DAG · Memoria persistente · Grafo de decisiones · Dashboard visual*
 
 ---
 
-## Qué es esto
+</div>
 
-`ai-agents` es un **framework de desarrollo asistido por IA** que convierte tu IDE en un equipo de especialistas coordinados. No es una herramienta más de código — es un **sistema operativo de desarrollo** que pone orden en cómo la IA trabaja: roles con responsabilidades claras, workflows con dependencias explícitas, memoria que sobrevive entre sesiones, y un grafo de decisiones que modela el impacto de cada cambio.
+## 📑 Tabla de Contenidos
 
-**Lo que no es:** no es un agente monolítico, no es un chatbot, no reemplaza tu stack tecnológico. Es la capa de proceso que hace que la IA trabaje como un equipo de ingeniería profesional.
+1. [✨ ¿Qué es ai-agents OS?](#-qué-es-ai-agents-os)
+2. [⚡ Quick Start (3 Minutos)](#-quick-start-3-minutos)
+3. [🏛️ Arquitectura del Sistema](#️-arquitectura-del-sistema)
+   - [👥 8 Agentes Especializados](#-8-agentes-especializados)
+   - [🧩 15 Framework Skills](#-15-framework-skills)
+   - [🔄 5 Workflows con DAG](#-5-workflows-con-dag)
+   - [🧠 Memoria Persistente (4-Tier Memory)](#-memoria-persistente-4-tier-memory)
+   - [🕸️ Knowledge Graph de Decisiones (ADR)](#️-knowledge-graph-de-decisiones-adr)
+   - [📦 Sistema de Archivado Automático e Interactivo](#-sistema-de-archivado-automático-e-interactivo)
+   - [📊 Visualizador Interactivo (Dashboard Web)](#-visualizador-interactivo-dashboard-web)
+4. [🛠️ Suite de Automatización CLI](#️-suite-de-automatización-cli)
+5. [📂 Estructura Documental y Convenciones](#-estructura-documental-y-convenciones)
+6. [💡 Filosofía y Principios SDD](#-filosofía-y-principios-sdd)
+7. [📚 Documentación del Repositorio](#-documentación-del-repositorio)
 
 ---
 
-## Quick Start — 3 pasos
+## ✨ ¿Qué es ai-agents OS?
 
-```bash
-# 1. Agregar como submódulo en tu proyecto
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+`ai-agents` es un **sistema operativo de desarrollo asistido por IA** diseñado para elevar el desarrollo de software con modelos de lenguaje a un estándar de ingeniería riguroso y profesional.
 
-# 2. Ejecutar el instalador (crea .ai/, configura IDE, genera context)
-bash .ai/agents/scripts/setup-ide.sh
-
-# 3. Abrir tu IDE y empezar a trabajar — la IA ya tiene contexto del proyecto
+```mermaid
+flowchart LR
+    A["💡 Requerimiento / Idea"] --> B["📝 Spec-Driven Discovery"]
+    B --> C["🏗️ Arquitectura & ADRs"]
+    C --> D["💻 Implementación Enfocada"]
+    D --> E["🧪 QA & Self-Healing Loop"]
+    E --> F["🚀 Deploy & Archivado Seguro"]
 ```
 
-El instalador te guía para:
-- Crear la estructura `.ai/` con los documentos permanentes del proyecto
-- Configurar las reglas de tu IDE (Cursor, Claude Code, Windsurf, Cline, Copilot)
-- Generar `AGENTS.md` como fuente de verdad para los agentes
+* **No es un chatbot monolítico:** Convierte el IDE en un equipo coordinado con roles especializados (Analyst, UI Designer, Architect, Developer, QA, Tech Lead, DevOps, Skill Manager).
+* **Documentos > Conversación:** El conocimiento vive en artefactos inmutables y trazables (`spec.md`, `architecture.md`, `qa.md`), no en chats efímeros.
+* **Memoria Persistente entre Sesiones:** Nunca repite explicaciones ni pierde contexto gracias al sistema `Capture → Compact → Recall`.
+* **Grafo de Decisiones Conectado:** Modela relaciones arquitectónicas (`depends_on`, `supersedes`, `conflicts_with`) para prevenir deuda técnica.
 
 ---
 
-## Qué tiene el framework
+## ⚡ Quick Start (3 Minutos)
+
+### 1️⃣ Agregar como Git Submodule en tu proyecto
+```bash
+git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+git commit -m "chore: add ai-agents OS submodule"
+```
+
+### 2️⃣ Inicializar entorno y reglas de IDE
+```bash
+bash .ai/agents/scripts/setup-ide.sh
+```
+*El script interactivo creará `.ai/`, generará los seeds de memoria/métricas/grafo y configurará tu IDE (Cursor, Claude Code, Windsurf, Roo-Code/Cline o Copilot).*
+
+### 3️⃣ Crear y desarrollar tu primera iniciativa
+```bash
+# Crear estructura
+bash .ai/agents/scripts/new-initiative.sh FEAT 001 login-mfa
+
+# Abrir el Dashboard interactivo
+bash .ai/agents/scripts/dashboard.sh
+```
+
+---
+
+## 🏛️ Arquitectura del Sistema
 
 ### 👥 8 Agentes Especializados
 
-Cada agente es un **rol profesional** con responsabilidad, constraints y output definidos:
+Cada agente opera bajo un rol estricto, consumiendo los artefactos de la fase previa y generando contratos verificables:
 
-| Agente | Qué hace | Output principal |
-|--------|----------|------------------|
-| **Skill Manager** | Orquesta skills, memoria y DAG antes de cada sesión | `context-snapshot.md` |
-| **Product Analyst** | Transforma ideas en especificaciones claras | `spec.md`, `discovery.md` |
-| **UI Designer** | Diseña interfaces con responsividad y a11y | `ui-design.md` |
-| **Software Architect** | Diseña soluciones técnicas con ADRs | `architecture.md` |
-| **Tech Lead** | Supervisa, revisa y toma decisiones (gate final) | Veredictos: APROBADO/RECHAZADO |
-| **Senior Developer** | Implementa siguiendo la arquitectura aprobada | Código + `decision.md` |
-| **QA Engineer** | Valida calidad con criterios objetivos | `qa.md` (PASS/FAIL) |
-| **DevOps Engineer** | CI/CD, deployments, infraestructura | Configs, pipelines |
-
-> Los agentes **solo consumen documentos**, no contexto conversacional. Esto hace el proceso reproducible: puede retomarse en cualquier sesión sin perder nada.
+| Rol | Archivo | Responsabilidad Principal | Artefacto de Salida |
+| :--- | :--- | :--- | :--- |
+| 🧙‍♂️ **Skill Manager** | [`roles/skill-manager.md`](roles/skill-manager.md) | Orquestador de contexto, catálogo de skills y memoria | `context-snapshot.md` |
+| 📋 **Product Analyst** | [`roles/analyst.md`](roles/analyst.md) | Requerimientos, reglas de negocio y discovery | `spec.md`, `discovery.md` |
+| 🎨 **UI Designer** | [`roles/ui-designer.md`](roles/ui-designer.md) | Tokens de diseño, maquetas UI, estados y a11y | `ui-design.md` |
+| 🏗️ **Software Architect** | [`roles/architect.md`](roles/architect.md) | Diseño técnico, esquemas de BD y ADRs | `architecture.md`, `decision.md` |
+| 💻 **Senior Developer** | [`roles/developer.md`](roles/developer.md) | Implementación de código y tests automatizados | Código + Test Suites |
+| 🧪 **QA Engineer** | [`roles/qa.md`](roles/qa.md) | Validación técnica, regresión y Self-Healing loop | `qa.md` (`APROBADO`/`RECHAZADO`) |
+| 🛡️ **Tech Lead** | [`roles/tech-lead.md`](roles/tech-lead.md) | Code review, supervisión, staging gate y hand-off | Veredicto Final & Merge |
+| 🚀 **DevOps Engineer** | [`roles/devops.md`](roles/devops.md) | CI/CD, infraestructura, release y deployment | Pipelines, Despliegue |
 
 ---
 
 ### 🧩 15 Framework Skills
 
-Skills metodológicas reutilizables que encapsulan conocimiento especializado — cualquier agente las activa según la tarea:
+Metodologías de ingeniería listas para ser activadas dinámicamente por cualquier rol:
 
-| Categoría | Skills |
-|-----------|--------|
-| **Analysis** | `requirements-discovery` · `ux-heuristics` |
-| **Architecture** | `api-design` · `backend-architecture` · `database-design` · `performance-tuning` · `ai-integration` |
-| **Development** | `code-review` · `frontend-patterns` · `mobile-development` |
-| **QA** | `test-strategy` · `testing-automation` · `security-audit` |
-| **Workflow** | `release-readiness` · `devops-pipeline` |
+```
+skills/
+├── analysis/       ➔ requirements-discovery · ux-heuristics
+├── architecture/   ➔ api-design · backend-architecture · database-design · performance-tuning · ai-integration
+├── development/    ➔ code-review · frontend-patterns · mobile-development
+├── qa/             ➔ test-strategy · testing-automation · security-audit
+└── workflow/       ➔ release-readiness · devops-pipeline
+```
 
-Además, el Skill Manager **descubre skills externas** desde tu proyecto (`type: tech`), tu entorno de usuario (MCP Servers, Claude Code) y el catálogo [skills.sh](https://www.skills.sh/).
-
-Ver [`skills/README.md`](skills/README.md) para el catálogo completo.
-
----
-
-### 🔄 5 Workflows con DAG
-
-Cada workflow declara su **grafo de dependencias explícito** (nodos, aristas, gates, back-edges) con 3 modos de ejecución:
-
-| Workflow | Propósito | Agentes involucrados |
-|----------|-----------|----------------------|
-| [`new-feature.md`](workflows/new-feature.md) | Feature completa (idea → producción) | Analyst → UI → Architect → TL → Dev → QA |
-| [`bug-fix.md`](workflows/bug-fix.md) | Corrección dinámica por severidad | Analyst → QA → Dev (según tipo de bug) |
-| [`refactor.md`](workflows/refactor.md) | Refactorización sin cambio de comportamiento | Architect → Dev → QA |
-| [`release.md`](workflows/release.md) | Deployment a producción con plan de rollback | TL → DevOps → QA |
-| [`architecture-change.md`](workflows/architecture-change.md) | Cambios estructurales con ADR obligatorio | Architect → TL |
-
-**Modos de ejecución:**
-- **Rápido:** Para cambios menores — aggressively truncates context, skip optional stages.
-- **Estándar:** El default — consumos normales, validaciones completas.
-- **Profundo:** Para features críticas — revisión adversarial, más iteraciones de QA, más validación.
-
-Ver [`docs/workflow-dag.md`](docs/workflow-dag.md) para la documentación completa del sistema DAG.
+> **Descubrimiento Externo:** El Skill Manager descubre dinámicamente skills instaladas por el usuario, servidores MCP y catálogos globales como [skills.sh](https://www.skills.sh/).
 
 ---
 
-### 🧠 Workflow Memory — Memoria Persistente del Pipeline
+### 🔄 5 Workflows con DAG (Directed Acyclic Graph)
 
-**Problema que resuelve:** Sin memoria, cada sesión arranca de cero. Las decisiones se re-explican, los patrones se re-descubren, los errores se repiten.
+Flujos estructurados con dependencias formales, gates de calidad y bucles de autocorrección:
 
-**Solución:** `Capture → Compact → Recall`. Cada agente, al terminar, escribe una entrada en la memoria. Al iniciar la siguiente sesión, el Skill Manager compacta todo en un snapshot de ~30 líneas.
+| Workflow | Propósito | Secuencia de Agentes |
+| :--- | :--- | :--- |
+| 🚀 [`new-feature.md`](workflows/new-feature.md) | Desarrollo end-to-end de nueva funcionalidad | `Analyst → UI → Architect → Tech Lead → Dev → QA → Tech Lead/DevOps` |
+| 🐛 [`bug-fix.md`](workflows/bug-fix.md) | Diagnóstico y corrección por severidad | `Triage → Analyst/Architect/UI → Dev → QA (Self-Healing Loop)` |
+| 🧹 [`refactor.md`](workflows/refactor.md) | Reestructuración de código sin alterar comportamiento | `Architect → Developer → QA (Regression Tests)` |
+| 📦 [`release.md`](workflows/release.md) | Despliegue controlado a producción con rollback | `Tech Lead → DevOps → QA Post-Deploy` |
+| 🏛️ [`architecture-change.md`](workflows/architecture-change.md) | Modificación estructural con ADR obligatorio | `Architect → Tech Lead → Knowledge Graph Sync` |
+
+**Modos de Ejecución:**
+* 🟢 **Rápido:** Trunca contexto para tareas menores y cambios cosméticos.
+* 🟡 **Estándar (Default):** Flujo completo con validación rigurosa de artefactos.
+* 🔴 **Profundo:** Revisión adversarial, auditoría de seguridad y múltiples pasadas de QA.
+
+---
+
+### 🧠 Memoria Persistente (4-Tier Memory)
+
+Evita que los agentes olviden decisiones o re-expliquen conceptos entre sesiones:
 
 ```
 .ai/memory/
-├── workflow-log.md         ← Memoria episódica (append-only)
-├── decisions-catalog.md    ← Memoria semántica (decisiones indexadas)
-├── patterns-learned.md     ← Memoria procedimental (lecciones aplicables)
-└── context-snapshot.md     ← Memoria compactada (resumen para sesión)
+├── workflow-log.md         ← Memoria Episódica: Log append-only cronológico de ejecuciones
+├── decisions-catalog.md    ← Memoria Semántica: Índice de decisiones y ADRs vigentes
+├── patterns-learned.md     ← Memoria Procedimental: Lecciones aprendidas y buenas prácticas
+└── context-snapshot.md     ← Memoria Compactada: Resumen ejecutivo (~30 líneas) para inicio de sesión
 ```
-
-| Tipo | Qué recuerda | Ejemplo |
-|:---|:---|:---|
-| **Episódica** | Qué pasó en cada sesión | "Architect eligió PostgreSQL vs SQLite por ACID" |
-| **Semántica** | Decisiones vigentes | "Decisión DEC-013: PostgreSQL como motor único" |
-| **Procedimental** | Lecciones reutilizables | "Tests E2E flaky por dependencia de orden → aislamiento por test" |
-
-Ver [`docs/workflow-memory.md`](docs/workflow-memory.md).
 
 ---
 
-### 🔗 Knowledge Graph — Grafo de Decisiones
+### 🕸️ Knowledge Graph de Decisiones (ADR)
 
-**Problema que resuelve:** `decisions.md` es lineal — para entender el impacto de cambiar `ARCH-012`, hay que leer todo el log.
-
-**Solución:** Un grafo ligero de nodos (ADRs) y aristas tipadas que permite calcular transitivamente qué decisiones dependen, superseden o están en conflicto.
+Indexa las decisiones arquitectónicas (`.ai/knowledge-graph.yaml`) como un grafo de relaciones tipadas:
 
 ```yaml
 # .ai/knowledge-graph.yaml
 nodes:
-  - id: ARCH-012
-    title: "PostgreSQL como motor único"
+  - id: ARCH-115
+    title: "Bloqueo de Acceso por Reserva Fuera de Horario"
     status: ACTIVE
-    depends_on: [ARCH-001]
-    conflicts_with: [ARCH-015]
+    depends_on: [ARCH-103, ARCH-112]
+    supersedes: []
+    conflicts_with: []
 ```
 
-| Relación | Qué modela |
-|----------|-----------|
-| `depends_on` | Esta decisión asume que otra está vigente |
-| `supersedes` | Esta decisión reemplaza a otra |
-| `related` | Compatibles, sin dependencia |
-| `conflicts_with` | Incompatibles bajo ciertas condiciones |
-
-> Inspirado en Ogcode: grafo determinista y ligero, sin embeddings. Se escribe a mano por el Architect/Tech Lead.
-
-Ver [`docs/knowledge-graph.md`](docs/knowledge-graph.md) + [`templates/knowledge-graph.yaml`](templates/knowledge-graph.yaml).
+* 🔵 **`depends_on`**: Relación de dependencia directa.
+* 🟡 **`supersedes`**: Decisión que reemplaza y vuelve obsoleta a una anterior.
+* 🔴 **`conflicts_with`**: Incompatibilidad condicionada.
+* 🌐 **`related`**: Decisiones complementarias en el mismo dominio.
 
 ---
 
-### 📊 Métricas de Agentes
+### 📦 Sistema de Archivado Automático e Interactivo (v3.4.0)
 
-**Problema que resuelve:** No se mide cuántos tokens consume cada fase, cuánto tiempo tarda, ni si los back-edges están quemando recursos.
+Garantiza la higiene del contexto y una mesa de trabajo limpia, moviendo iniciativas completadas desde `.ai/features/` a `.ai/archive/`:
 
-**Solución:** Registro append-only por ejecución + agregados regenerados por el Skill Manager.
+* 🛡️ **Gate de Calidad Inquebrantable:** Verifica que `qa.md` tenga veredicto `APROBADO`.
+* 🔗 **Reconciliación de Rutas en el Grafo:** Actualiza automáticamente `ref: features/...` $ightarrow$ `ref: archive/...` en `knowledge-graph.yaml`.
+* 📝 **Registro de Memoria:** Agrega el cierre a `workflow-log.md` y regenera `context-snapshot.md`.
+* 🧪 **Protocolo Staging Interactivo:** El Tech Lead / QA consulta al usuario para validar en el entorno de pruebas antes de autorizar el archivado definitivo.
 
-```yaml
-# .ai/metrics/executions.yaml
-executions:
-  - ts: 2026-09-11T15:30:00Z
-    initiative: FEAT-042
-    role: architect
-    phase: architecture
-    tokens_in: 18423
-    tokens_out: 5912
-    duration_s: 812
-    attempts: 1
-    verdict: APROBADO
+```bash
+# Archivar una iniciativa individualmente
+bash .ai/agents/scripts/archive-initiative.sh FEAT-113
+
+# Cerrar fase y archivar en un solo comando
+bash .ai/agents/scripts/finish-phase.sh FEAT-113 approval tech-lead --verdict APROBADO --archive
+
+# Auto-archivar en lote todas las iniciativas aprobadas
+bash .ai/agents/scripts/sync-initiatives.sh --archive-approved
 ```
-
-**Métricas derivadas (calculadas por Skill Manager):**
-- **Costo por fase:** tokens totales agrupados por fase del pipeline.
-- **Retry rate:** proxy de calidad del gate anterior.
-- **Eficiencia de tokens:** qué fracción de lo consumido es producción útil.
-
-Ver [`docs/agent-metrics.md`](docs/agent-metrics.md) + [`templates/metrics-executions.yaml`](templates/metrics-executions.yaml).
 
 ---
 
 ### 📊 Visualizador Interactivo (Dashboard Web Autónomo)
 
-Para explorar visualmente el estado completo de tu proyecto sin instalar servidores backend ni dependencias pesadas:
+Explora todo el ecosistema de tu proyecto en una aplicación web interactiva local de ancho completo:
 
 ```bash
 bash .ai/agents/scripts/dashboard.sh
 ```
 
-Genera y abre de forma instantánea `.ai/dashboard.html` en tu navegador, ofreciendo:
-- **🕸️ Grafo Interactivo (Knowledge Graph):** Canvas interactivo (Vis.js) de ADRs con nodos coloreados por estado (`ACTIVE`, `PENDING`, `SUPERSEDED`), aristas tipadas (`depends_on`, `conflicts_with`, `supersedes`), buscador y panel de detalle.
-- **📈 Telemetría & Tokens:** Tarjetas de KPIs (Tokens totales in/out, estimación de costos USD, sesiones, reintentos de gate) y gráficos interactivos (Chart.js) de consumo por rol y fase.
-- **🧠 Workflow Memory:** Vista compactada del snapshot, línea de tiempo episódica (`workflow-log.md`), catálogo de decisiones y patrones aprendidos.
-- **📁 Iniciativas (.ai/features):** Tablero de seguimiento con inversión de tokens acumulada por iniciativa.
+* 🏢 **Tab Proyecto:** Visor completo de identidad, objetivos de negocio, actores/roles, stack y ficha técnica.
+* 📁 **Tab Iniciativas:** Matriz de features/bugs con buscador, filtros, telemetría y visualizador de artefactos SDD.
+* 🕸️ **Tab Grafo ADR:** Visualización 2D interactiva (Vis.js) con física de nodos, herramientas de zoom, búsqueda y panel de detalle.
+* 📜 **Tab Reglas:** Reglas de negocio e invariantes del sistema (`business-rules.md`).
+* 🧠 **Tab Memoria:** Snapshot ejecutivo, log episódico, catálogo de decisiones y patrones aprendidos.
+* 📈 **Tab Telemetría:** Métricas de consumo de tokens (in/out), costos estimados y gráficos (Chart.js) por rol y fase.
+* ℹ️ **Modal About:** Documentación embebida del framework accesible desde el navbar.
 
 ---
 
-### 📂 Sistema Documental con 5 Reglas
+## 🛠️ Suite de Automatización CLI
 
-El framework estructura el conocimiento del proyecto en dos niveles:
+Todos los scripts residen en `.ai/agents/scripts/` y estandarizan el ciclo de vida del proyecto:
 
-**Conocimiento permanente** (`.ai/`):
-```
-.ai/context.md          ← Identidad del proyecto
-.ai/business-rules.md   ← Reglas de negocio del dominio
-.ai/architecture.md     ← Arquitectura actual en producción
-.ai/decisions.md        ← Log histórico de ADRs
-.ai/glossary.md         ← Términos del dominio
-.ai/memory/             ← Memoria del pipeline
-.ai/metrics/            ← Métricas del pipeline
-.ai/knowledge-graph.yaml← Grafo de decisiones
-```
-
-**Trabajo por feature** (`.ai/features/FEAT-NNN-slug/`):
-```
-spec.md, ui-design.md, architecture.md, qa.md, decision.md
-```
-
-**Las 5 Reglas Documentales:**
-
-| Regla | Resumen |
-|-------|---------|
-| **R1** | Antes de crear, verificar si existe uno equivalente |
-| **R2** | Priorizar actualización sobre creación |
-| **R3** | Nunca crear versiones paralelas — actualizar el existente |
-| **R4** | Los cambios en roles/workflows se reflejan en CHANGELOG |
-| **R5** | Los documentos representan el estado actual, no el histórico |
+| Comando | Propósito | Ejemplo de Uso |
+| :--- | :--- | :--- |
+| **`setup-ide.sh`** | Inicializa `.ai/`, memoria, métricas, KG y reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
+| **`update-ai-agents.sh`** | Actualiza el framework (submodule + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh` |
+| **`new-initiative.sh`** | Bootstrap de nueva iniciativa (`FEAT`, `BUG`, `AUDIT`, `REF`) | `bash .ai/agents/scripts/new-initiative.sh FEAT 042 pagos-stripe` |
+| **`finish-phase.sh`** | Cierre formal de fase (registra memory, metrics y snapshot) | `bash .ai/agents/scripts/finish-phase.sh FEAT-042 qa qa --verdict APROBADO` |
+| **`archive-initiative.sh`** | Archiva una iniciativa a `.ai/archive/` con validación QA | `bash .ai/agents/scripts/archive-initiative.sh FEAT-042` |
+| **`sync-initiatives.sh`** | Reconcilia, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .ai/agents/scripts/sync-initiatives.sh --fix --archive-approved` |
+| **`validate-project.sh`** | Auditoría documental y chequeo de conformidad del framework | `bash .ai/agents/scripts/validate-project.sh` |
+| **`dashboard.sh`** | Genera y abre el visualizador interactivo (`dashboard.html`) | `bash .ai/agents/scripts/dashboard.sh` |
 
 ---
 
-### ✅ Checklists por Área Técnica
-
-| Checklist | Cubre |
-|-----------|-------|
-| [`frontend-review.md`](checklists/frontend-review.md) | HTML semántico, responsividad, performance |
-| [`ui-review.md`](checklists/ui-review.md) | Consistencia visual, a11y, interacción |
-| [`backend-review.md`](checklists/backend-review.md) | API, manejo de errores, seguridad |
-| [`database-review.md`](checklists/database-review.md) | Esquemas, queries, migraciones |
-| [`security-review.md`](checklists/security-review.md) | AuthN/Z, secretos, dependencias |
-| [`performance-review.md`](checklists/performance-review.md) | Tiempos de respuesta, memory leaks |
-| [`release-review.md`](checklists/release-review.md) | Checklist operacional pre-despliegue |
-
----
-
-### ⚡ CI/CD Multi-Lenguaje
-
-El template de GitHub Actions valida **dos cosas automáticamente**:
-
-1. **Estructura documental** — que `.ai/` tenga los archivos obligatorios y que los bloques DAG estén balanceados.
-2. **Tests por lenguaje** — detecta automáticamente `package.json` (Node), `pyproject.toml`/`requirements.txt` (Python), `go.mod` (Go) y corre los tests correspondientes.
-
-Copia a tu proyecto:
-```bash
-cp .ai/agents/templates/github-action-ci.yml .github/workflows/ai-agents-validation.yml
-```
-
----
-
-### 🛠️ Scripts de Automatización
-
-| Script | Qué hace | Uso |
-|--------|----------|-----|
-| [`setup-ide.sh`](scripts/setup-ide.sh) | Inicializa `.ai/`, genera seeds de memoria/métricas/KG, configura IDEs | `bash .ai/agents/scripts/setup-ide.sh` |
-| [`update-ai-agents.sh`](scripts/update-ai-agents.sh) | Actualiza el framework en un comando (submodule + setup + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
-| [`new-initiative.sh`](scripts/new-initiative.sh) | Crea estructura de feature/bug/auditoría/refactor automáticamente | `bash .ai/agents/scripts/new-initiative.sh FEAT 003 login-seguro` |
-| [`finish-phase.sh`](scripts/finish-phase.sh) | Cierra una fase registrando memory, metrics y snapshot (append-only) | `bash .ai/agents/scripts/finish-phase.sh FEAT-114 qa` |
-| [`sync-initiatives.sh`](scripts/sync-initiatives.sh) | Sincroniza, auto-repara (`--fix`) y reconcilia iniciativas con memory, metrics y KG | `bash .ai/agents/scripts/sync-initiatives.sh [--fix]` |
-| [`validate-project.sh`](scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
-| [`dashboard.sh`](scripts/dashboard.sh) | Genera y abre el visualizador interactivo (.ai/dashboard.html: Proyecto, Grafo ADR, Telemetría, Memoria) | `bash .ai/agents/scripts/dashboard.sh` |
-
----
-
-## Flujo de Trabajo Completo
-
-```mermaid
-flowchart TD
-    A[💡 Idea] --> B[🔍 Analyst: Discovery]
-    B --> C{Ambigüedades?}
-    C -->|Sí| D[📝 discovery.md]
-    C -->|No| E[📝 spec.md]
-    D --> E
-    E --> F{TL: Revisa spec}
-    F -->|Rechazada| E
-    F -->|Aprobada| G[🎨 UI: ui-design.md]
-    G --> H[🏗️ Architect: architecture.md]
-    H --> I{TL: Revisa diseños}
-    I -->|Rechazado| G
-    I -->|Rechazado| H
-    I -->|Aprobado| J[💻 Developer: Implementación]
-    J --> K[🧪 QA: qa.md]
-    K -->|FAIL| J
-    K -->|PASS| L[🚀 Producción]
-    L --> M[📁 archive/]
-    M --> N[📝 Actualizar docs + Memory + Metrics]
-```
-
-**Cada paso produce un artefacto → el siguiente agente lo consume.** El pipeline es una cadena de documentos, no de prompts.
-
----
-
-## Ejemplos de Uso
-
-> **Nota:** Gracias a las reglas del IDE, la IA lee `.ai/context.md` automáticamente al ser invocada. No necesitas pegar contexto en cada prompt.
-
-### Crear una feature
-
-```markdown
-# 1. Crear la estructura
-bash .ai/agents/scripts/new-initiative.sh FEAT 003 login-seguro
-
-# 2. Activar Analyst
-Actúa como el agente Product Analyst definido en .ai/agents/roles/analyst.md.
-Nuestra feature actual es: FEAT-003-login-seguro
-Requerimiento: Login con autenticación MFA y rate limiting
-
-# 3. Cuando la spec esté aprobada, activar UI Designer
-Actúa como el agente UI Designer definido en .ai/agents/roles/ui-designer.md.
-Nuestra feature actual es: FEAT-003-login-seguro
-Genera ui-design.md basándote en spec.md aprobada.
-
-# 4. Cuando la UI esté aprobada, activar Architect
-Actúa como el agente Software Architect definido en .ai/agents/roles/architect.md.
-Nuestra feature actual es: FEAT-003-login-seguro
-Genera architecture.md basándote en spec.md + ui-design.md.
-```
-
-### Reportar un bug
-
-```markdown
-Actúa como el agente QA Engineer definido en .ai/agents/roles/qa.md.
-Nuestra feature actual es: BUG-001-double-booking
-Escribe el reporte en .ai/features/BUG-001-double-booking/bug-report.md
-```
-
-### Activar un agente con el Prompt Guide
-
-```markdown
-Lee .ai/agents/roles/prompt-guide.md y luego ejecuta el agente QA Engineer
-para validar la feature FEAT-003-login-seguro.
-```
-
-Ver [`roles/prompt-guide.md`](roles/prompt-guide.md) para prompts de activación específicos por agente.
-
----
-
-## Guía de Integración en tu Proyecto
-
-### Paso 1: Agregar como Git Submodule
-
-```bash
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
-git commit -m "chore: add ai-agents as submodule"
-```
-
-> ¿Ya clonaste un proyecto con esto? Ejecutá: `git submodule update --init --recursive`
-
-### Paso 2: Ejecutar el Instalador
-
-```bash
-bash .ai/agents/scripts/setup-ide.sh
-```
-
-El script te guía para:
-1. **Crear `.ai/`** con archivos permanentes del proyecto (`context.md`, `business-rules.md`, etc.)
-2. **Configurar tu IDE** — Cursor, Claude Code, Windsurf, Cline o Copilot
-3. **Actualizar `.gitignore`** para excluir sesiones locales
-
-### Paso 3: Completar el contexto del proyecto
-
-Edita `.ai/context.md` con la información de tu proyecto (stack, módulos, convenciones). O usa este prompt para autogenerarlo:
-
-```markdown
-Actúa como el agente Product Analyst definido en .ai/agents/roles/analyst.md
-y genera .ai/context.md basándote en la plantilla .ai/agents/templates/project-context.md
-tras escanear la estructura del proyecto.
-```
-
-### Paso 4: Empezar a trabajar
-
-Tu IDE ahora puede:
-- **Leer la memoria del proyecto** — `.ai/context.md`, `.ai/architecture.md`, `.ai/business-rules.md`
-- **Asumir roles especializados** — los archivos de `.ai/agents/roles/`
-- **Seguir workflows** — `new-feature`, `bug-fix`, `refactor`, `release`, `architecture-change`
-- **Usar skills** — el Skill Manager detecta automáticamente las relevantes
-- **Recordar entre sesiones** — Workflow Memory mantiene el contexto vivo
-
-### Estructura resultante
+## 📂 Estructura Documental y Convenciones
 
 ```
 mi-proyecto/
-├── src/
 ├── .ai/
-│   ├── agents/                  ← Submódulo (este repo)
-│   ├── context.md
-│   ├── business-rules.md
-│   ├── architecture.md
-│   ├── decisions.md
-│   ├── knowledge-graph.yaml     ← Grafo de decisiones
-│   ├── glossary.md
-│   ├── memory/                  ← Memoria del pipeline
-│   │   ├── workflow-log.md
-│   │   ├── decisions-catalog.md
-│   │   ├── patterns-learned.md
-│   │   └── context-snapshot.md
-│   ├── metrics/                 ← Métricas del pipeline
-│   │   └── executions.yaml
-│   ├── features/
-│   │   └── FEAT-001-nombre/
-│   │       ├── spec.md
-│   │       ├── ui-design.md
-│   │       ├── architecture.md
-│   │       ├── qa.md
-│   │       └── decision.md
-│   ├── archive/
-│   └── sessions/
-├── .github/workflows/
-│   └── ai-agents-validation.yml ← CI multi-lenguaje
-├── AGENTS.md                    ← Fuente de verdad para agentes
-├── .cursorrules / CLAUDE.md     ← Reglas de tu IDE
-└── .gitignore
+│   ├── agents/                  ← Submódulo Git (ai-agents framework)
+│   ├── context.md               ← Identidad, stack, convenciones y registro de IDs
+│   ├── business-rules.md        ← Reglas de negocio e invariantes permanentes
+│   ├── architecture.md          ← Arquitectura actual del sistema en producción
+│   ├── decisions.md             ← Registro cronológico de ADRs
+│   ├── knowledge-graph.yaml     ← Grafo ligero de decisiones arquitectónicas
+│   ├── glossary.md              ← Glosario y términos del dominio
+│   ├── memory/                  ← Memoria persistente del pipeline
+│   │   ├── workflow-log.md      ← Log episódico de sesiones
+│   │   ├── decisions-catalog.md ← Catálogo semántico de decisiones
+│   │   ├── patterns-learned.md  ← Lecciones y patrones aprendidos
+│   │   └── context-snapshot.md  ← Snapshot compactado de contexto
+│   ├── metrics/                 ← Métricas y telemetría de tokens
+│   │   └── executions.yaml      ← Registro de ejecuciones
+│   ├── features/                ← Iniciativas activas en desarrollo (FEAT-XXX, BUG-XXX)
+│   ├── archive/                 ← Iniciativas cerradas y en producción (Read-Only)
+│   └── dashboard.html           ← Dashboard visual interactivo generado
+├── AGENTS.md                    ← Fuente de verdad para agentes en el proyecto
+└── .cursorrules / CLAUDE.md     ← Reglas de configuración según tu IDE
 ```
 
----
+### 📋 Las 5 Reglas Documentales (R1-R5)
 
-## Actualizar el Framework en un Proyecto Existente
-
-### Actualización Estándar (1 solo comando)
-```bash
-# Actualiza el submodule al último commit, commitea el puntero e inicializa sistemas nuevos
-bash .ai/agents/scripts/update-ai-agents.sh
-```
-
-### Migración desde versiones previas a v3.2.0 (Ponerse al día)
-Si tu proyecto viene de una versión anterior (`< v3.2.0`) y deseas activar la **Memoria Persistente**, el **Knowledge Graph**, la **Telemetría** y sincronizar todas las features históricas que ya tenías:
-
-```bash
-# 1. Actualizar el submódulo a la última versión
-git submodule update --remote .ai/agents
-
-# 2. Inicializar las estructuras de memoria, métricas y grafo
-bash .ai/agents/scripts/setup-ide.sh --auto
-
-# 3. Reconciliar y sincronizar todas las features y bugs existentes en el proyecto
-bash .ai/agents/scripts/sync-initiatives.sh
-
-# 4. Validar el estado del proyecto
-bash .ai/agents/scripts/validate-project.sh
-```
-
-*(O todo en una sola línea):*
-```bash
-git submodule update --remote .ai/agents && bash .ai/agents/scripts/setup-ide.sh --auto && bash .ai/agents/scripts/sync-initiatives.sh && bash .ai/agents/scripts/validate-project.sh
-```
-
-> 📖 Ver la guía completa de migración en [`docs/project-integration.md`](docs/project-integration.md#45-migración-desde-versiones-anteriores-a-v320).
+1. **R1:** Antes de crear un documento, verificar si existe uno equivalente para actualizar.
+2. **R2:** Priorizar la **actualización** sobre la creación.
+3. **R3:** Nunca crear versiones paralelas (`spec-v2.md`). Modificar el documento canónico.
+4. **R4:** Los cambios estructurales deben reflejarse en `CHANGELOG.md` y documentos globales.
+5. **R5:** Los documentos representan el **estado actual**, no el histórico.
 
 ---
 
-## Filosofía de Trabajo
+## 💡 Filosofía y Principios SDD
 
-| Principio | Descripción |
-|-----------|-------------|
-| **Documentos > Conversación** | El conocimiento vive en artefactos verificables |
-| **Artefactos como fuente de verdad** | Cada agente consume el documento del anterior |
-| **Discovery antes de Spec** | Se explora antes de especificar |
-| **Actualización > Creación** | Si el documento existe, actualizarlo es la respuesta |
-| **Sin Duplicación** | Los proyectos referencian, no copian |
-| **Roles Claros** | Cada agente tiene responsabilidades definidas |
-
-Ver [`docs/sdd-philosophy.md`](docs/sdd-philosophy.md) para el modelo mental completo.
+* **Artefactos como Fuente de Verdad:** Las decisiones se escriben en documentos formales, no en el historial de chat.
+* **Discovery antes de Spec:** Se investiga el problema antes de redactar especificaciones.
+* **Localization Step:** El Developer delimita con exactitud los archivos a intervenir antes de escribir código.
+* **Economía de Contexto:** Cada agente recibe únicamente los documentos pertinentes a su rol.
 
 ---
 
-## Documentación Completa
+## 📚 Documentación del Repositorio
 
-### Sistemas del Framework
-| Documento | Qué cubre |
-|-----------|-----------|
-| [`docs/workflow-memory.md`](docs/workflow-memory.md) | Memoria persistente: Capture → Compact → Recall |
-| [`docs/workflow-dag.md`](docs/workflow-dag.md) | DAG de workflows: nodos, aristas, gates, modos de ejecución |
-| [`docs/knowledge-graph.md`](docs/knowledge-graph.md) | Grafo ligero de decisiones arquitectónicas |
-| [`docs/agent-metrics.md`](docs/agent-metrics.md) | Métricas por rol y fase: tokens, tiempo, retry rate |
-
-### Gestión de Skills
-| Documento | Qué cubre |
-|-----------|-----------|
-| [`docs/skill-discovery.md`](docs/skill-discovery.md) | Cómo se descubren las skills disponibles |
-| [`docs/skill-resolution.md`](docs/skill-resolution.md) | Resolución de alias, dependencias y conflictos |
-| [`docs/external-skill-providers.md`](docs/external-skill-providers.md) | Integración con skills.sh, MCP Servers |
-| [`docs/skill-context.md`](docs/skill-context.md) | Cómo el contexto enriquece el comportamiento |
-| [`skills/README.md`](skills/README.md) | Catálogo de las 15 framework skills |
-| [`skills/registry.md`](skills/registry.md) | Reglas dinámicas de priorización |
-
-### Convenciones y Estructura
-| Documento | Qué cubre |
-|-----------|-----------|
-| [`docs/sdd-philosophy.md`](docs/sdd-philosophy.md) | Filosofía Specification-Driven Development |
-| [`docs/artifact-lifecycle.md`](docs/artifact-lifecycle.md) | Ciclo de vida de los artefactos |
-| [`docs/documentation-strategy.md`](docs/documentation-strategy.md) | Sistema documental de dos niveles |
-| [`docs/project-ai-structure.md`](docs/project-ai-structure.md) | Guía completa de la estructura `.ai/` |
-| [`docs/naming-conventions.md`](docs/naming-conventions.md) | Convenciones FEAT-NNN, BUG-NNN, ARCH-NNN |
-| [`docs/project-integration.md`](docs/project-integration.md) | Integración detallada como submódulo |
-| [`docs/versioning-strategy.md`](docs/versioning-strategy.md) | Versionado del repo, agentes y skills |
-
-### Roles
-| Documento | Qué cubre |
-|-----------|-----------|
-| [`roles/prompt-guide.md`](roles/prompt-guide.md) | Cómo escribir prompts efectivos para cada agente |
-| [`roles/skill-manager.md`](roles/skill-manager.md) | Orquestador de skills, memoria y DAG |
-| [`docs/agent-definitions.md`](docs/agent-definitions.md) | Estándar de diseño de agentes |
+| Guía | Propósito |
+| :--- | :--- |
+| 📖 [`docs/sdd-philosophy.md`](docs/sdd-philosophy.md) | Modelo mental de Specification-Driven Development |
+| 🧠 [`docs/workflow-memory.md`](docs/workflow-memory.md) | Sistema de Memoria Persistente en 4 capas |
+| 🔄 [`docs/workflow-dag.md`](docs/workflow-dag.md) | Definición y modos de ejecución de workflows con DAG |
+| 🕸️ [`docs/knowledge-graph.md`](docs/knowledge-graph.md) | Modelado del Grafo de Decisiones Arquitectónicas |
+| 📊 [`docs/agent-metrics.md`](docs/agent-metrics.md) | Telemetría de tokens, duración y costos por fase |
+| 🧩 [`docs/skill-discovery.md`](docs/skill-discovery.md) | Descubrimiento, resolución y aislamiento de skills |
+| 🔌 [`docs/project-integration.md`](docs/project-integration.md) | Guía de instalación, migración y submódulos Git |
+| 📝 [`roles/prompt-guide.md`](roles/prompt-guide.md) | Guía de prompts efectivos por rol |
 
 ---
 
-## Versión
+<div align="center">
 
-| Campo | Valor |
-|-------|-------|
-| Versión | `v3.2.0` |
-| Estado | Estable |
-| Última actualización | Septiembre 2026 |
-| Licencia | Ver repositorio |
+**ai-agents OS** · *Desarrollado para pensar en grande, empezar en pequeño y escalar con orden y disciplina.*  
+Distribuido bajo licencia MIT.
 
----
-
-*Construido para pensar en grande, empezar en pequeño y escalar sin límites.*
+</div>

@@ -285,17 +285,27 @@ Ver [`templates/feature-folder-template.md`](../templates/feature-folder-templat
 
 ## Carpeta `archive/`
 
-**Propósito:** Almacena las features completadas y en producción como referencia histórica.
+**Propósito:** Almacena las iniciativas (features, bugs, auditorías, refactors) completadas y en producción como referencia histórica inmutable.
 
 **Reglas:**
 - Es **read-only** — ningún agente modifica archivos en `archive/`
 - Se usa como referencia cuando se necesita entender cómo se construyó algo
-- No debe ser consumida como contexto activo — solo como referencia puntual
+- No es consumida como contexto activo por los agentes para evitar consumo innecesario de tokens
 - Mantener el mismo nombre de carpeta que tenía en `features/`
 
+**Cómo mover una iniciativa a archive:**
+Se utiliza el script de automatización con Quality Gate:
+```bash
+# Archivar con validación de QA y actualización del Knowledge Graph
+bash .ai/agents/scripts/archive-initiative.sh FEAT-XXX
+
+# O en lote para todas las aprobadas
+bash .ai/agents/scripts/sync-initiatives.sh --archive-approved
+```
+
 **Cuándo mover una feature a archive:**
-- La feature pasó QA con resultado PASS
-- Fue aprobada por el Tech Lead
+- La feature pasó QA con veredicto `APROBADO` (o `PASS`)
+- Fue aprobada por el Tech Lead tras validación en entorno de pruebas / staging
 - El código está en producción (o en la rama principal)
 
 ---
