@@ -116,11 +116,11 @@ scan_initiatives_json() {
             [ -f "$dir/bug-report.md" ] && has_bug=true
 
             if [ -f "$dir/spec.md" ]; then
-                title=$(grep -E '^# ' "$dir/spec.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+                title=$(grep -E '^# ' "$dir/spec.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
             elif [ -f "$dir/bug-report.md" ]; then
-                title=$(grep -E '^# ' "$dir/bug-report.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+                title=$(grep -E '^# ' "$dir/bug-report.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
             elif [ -f "$dir/README.md" ]; then
-                title=$(grep -E '^# ' "$dir/README.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+                title=$(grep -E '^# ' "$dir/README.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
             fi
 
             if [ -f "$dir/qa.md" ]; then
@@ -174,15 +174,15 @@ PROJECT_UPDATED=""
 PROJECT_REPO=""
 
 if [ -f "$CONTEXT_FILE" ]; then
-    PROJECT_TITLE=$(grep -E '\|\s*\*\*Nombre del Proyecto\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    PROJECT_TITLE=$(grep -E '\|\s*\*\*Nombre del Proyecto\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
     if [ -z "$PROJECT_TITLE" ] || [[ "$PROJECT_TITLE" =~ ^\[.*\]$ ]]; then
-        PROJECT_TITLE=$(grep -E '^# ' "$CONTEXT_FILE" | head -1 | sed 's/^# //' | sed 's/ — Contexto del Proyecto//' | sed 's/ - Contexto del Proyecto//' | sed 's/ — Project Context//' | sed 's/ - Project Context//' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+        PROJECT_TITLE=$(grep -E '^# ' "$CONTEXT_FILE" | head -1 | sed 's/^# //' | sed 's/ — Contexto del Proyecto//' | sed 's/ - Contexto del Proyecto//' | sed 's/ — Project Context//' | sed 's/ - Project Context//' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
     fi
-    PROJECT_TYPE=$(grep -E '\|\s*\*\*Tipo\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
-    PROJECT_STATUS=$(grep -E '\|\s*\*\*Estado\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
-    PROJECT_START=$(grep -E '\|\s*\*\*Fecha de inicio\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
-    PROJECT_UPDATED=$(grep -E '\|\s*\*\*Última actualización\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
-    PROJECT_REPO=$(grep -E '\|\s*\*\*Repositorio principal\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+    PROJECT_TYPE=$(grep -E '\|\s*\*\*Tipo\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
+    PROJECT_STATUS=$(grep -E '\|\s*\*\*Estado\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
+    PROJECT_START=$(grep -E '\|\s*\*\*Fecha de inicio\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
+    PROJECT_UPDATED=$(grep -E '\|\s*\*\*Última actualización\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
+    PROJECT_REPO=$(grep -E '\|\s*\*\*Repositorio principal\*\*\s*\|' "$CONTEXT_FILE" | head -1 | awk -F'|' '{print $3}' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' || true)
 fi
 
 [ -z "$PROJECT_TITLE" ] && PROJECT_TITLE="$PROJECT_BASENAME"
