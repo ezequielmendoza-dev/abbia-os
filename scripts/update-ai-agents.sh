@@ -43,12 +43,12 @@ fi
 
 if [ -n "$VERSION" ]; then
     # 3a. Pin a una versión específica (tag)
-    echo -e "\n${BLUE}--- 1/3: Actualizando submodule a $VERSION ---${NC}"
-    (cd "$SUBMODULE_DIR" && git fetch --tags --quiet && git checkout "$VERSION")
+    echo -e "\n${BLUE}--- 1/4: Actualizando submodule a $VERSION ---${NC}"
+    (cd "$SUBMODULE_DIR" && git fetch --tags --quiet && git checkout -B "$VERSION" "$VERSION" && git reset --hard "$VERSION")
 else
     # 3b. Último commit de la rama principal
     echo -e "\n${BLUE}--- 1/4: Actualizando submodule al último commit ---${NC}"
-    (cd "$SUBMODULE_DIR" && git fetch --quiet && git checkout main && git pull --ff-only --quiet)
+    (cd "$SUBMODULE_DIR" && git fetch --quiet && git checkout -B main origin/main && git reset --hard origin/main)
 fi
 
 NEW_VERSION="$(cd "$SUBMODULE_DIR" && git describe --tags --always 2>/dev/null || git rev-parse --short HEAD)"
