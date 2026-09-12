@@ -7,7 +7,7 @@
 #   1. Knowledge Graph (Grafo de decisiones arquitectónicas y dependencias)
 #   2. Telemetría y Métricas (Tokens consumidos por rol, tiempos y costos)
 #   3. Workflow Memory (Línea de tiempo de sesiones, catálogo y lecciones)
-#   4. Estado del Proyecto e Iniciativas Activas (.ai/features/)
+#   4. Catálogo Completo de Iniciativas (.ai/features/ y .ai/archive/)
 # ==============================================================================
 
 set -euo pipefail
@@ -57,6 +57,7 @@ PATTERNS_FILE="$MEM_DIR/patterns-learned.md"
 SNAPSHOT_FILE="$MEM_DIR/context-snapshot.md"
 CONTEXT_FILE="$AI_DIR/context.md"
 FEATURES_DIR="$AI_DIR/features"
+ARCHIVE_DIR="$AI_DIR/archive"
 
 # Leer y sanitizar contenidos para inyección JSON
 read_file_or_default() {
@@ -69,7 +70,85 @@ read_file_or_default() {
     fi
 }
 
-# Extraer nodos del Knowledge Graph
+# Escanear iniciativas en .ai/features/ y .ai/archive/
+scan_initiatives_json() {
+    local features_dir="$1"
+    local archive_dir="$2"
+    local first=1
+
+    echo "["
+    for base in "$features_dir" "$archive_dir"; do
+        [ ! -d "$base" ] && continue
+        local status="ACTIVE"
+        if [ "$base" = "$archive_dir" ]; then
+            status="ARCHIVED"
+        fi
+
+        for dir in "$base"/*; do
+            [ ! -d "$dir" ] && continue
+            local folder="$(basename "$dir")"
+            [ "$folder" = "*" ] && continue
+            [ "$folder" = ".gitkeep" ] && continue
+
+            local itype="OTHER"
+            if [[ "$folder" =~ ^FEAT- ]]; then itype="FEAT"; fi
+            if [[ "$folder" =~ ^BUG- ]]; then itype="BUG"; fi
+            if [[ "$folder" =~ ^AUDIT- ]]; then itype="AUDIT"; fi
+            if [[ "$folder" =~ ^REF- ]]; then itype="REF"; fi
+
+            local has_spec=false
+            local has_ui=false
+            local has_arch=false
+            local has_qa=false
+            local has_dec=false
+            local has_bug=false
+            local qa_verdict="PENDING"
+            local title=""
+
+            [ -f "$dir/spec.md" ] && has_spec=true
+            [ -f "$dir/ui-design.md" ] && has_ui=true
+            [ -f "$dir/architecture.md" ] && has_arch=true
+            [ -f "$dir/decision.md" ] && has_dec=true
+            [ -f "$dir/bug-report.md" ] && has_bug=true
+
+            if [ -f "$dir/spec.md" ]; then
+                title=$(grep -E '^# ' "$dir/spec.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+            elif [ -f "$dir/bug-report.md" ]; then
+                title=$(grep -E '^# ' "$dir/bug-report.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+            elif [ -f "$dir/README.md" ]; then
+                title=$(grep -E '^# ' "$dir/README.md" | head -1 | sed 's/^# //' | tr -d '"\r\n\\' | sed 's/^[ \t]*//;s/[ \t]*$//' || true)
+            fi
+
+            if [ -f "$dir/qa.md" ]; then
+                has_qa=true
+                if grep -qi "APROBADO" "$dir/qa.md" 2>/dev/null; then
+                    qa_verdict="APROBADO"
+                elif grep -qi "RECHAZADO" "$dir/qa.md" 2>/dev/null; then
+                    qa_verdict="RECHAZADO"
+                fi
+            fi
+
+            if [ -z "$title" ]; then
+                title="$folder"
+            fi
+
+            # Clean json escape
+            title=$(echo "$title" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+            if [ "$first" -eq 0 ]; then
+                echo ","
+            fi
+            first=0
+
+            printf '  {"id":"%s","name":"%s","type":"%s","status":"%s","title":"%s","has_spec":%s,"has_ui":%s,"has_arch":%s,"has_qa":%s,"has_decision":%s,"has_bug":%s,"qa_verdict":"%s"}' \
+                "$folder" "$folder" "$itype" "$status" "$title" "$has_spec" "$has_ui" "$has_arch" "$has_qa" "$has_dec" "$has_bug" "$qa_verdict"
+        done
+    done
+    echo ""
+    echo "]"
+}
+
+# Extraer datos
 KG_RAW=$(read_file_or_default "$KG_FILE" "version: 1\nnodes: []\nedges: []")
 METRICS_RAW=$(read_file_or_default "$METRICS_FILE" "executions: []")
 LOG_RAW=$(read_file_or_default "$LOG_FILE" "(sin entradas en workflow-log.md)")
@@ -77,6 +156,7 @@ CATALOG_RAW=$(read_file_or_default "$CATALOG_FILE" "(sin catálogo)")
 PATTERNS_RAW=$(read_file_or_default "$PATTERNS_FILE" "(sin patrones aprendidos)")
 SNAPSHOT_RAW=$(read_file_or_default "$SNAPSHOT_FILE" "(sin snapshot)")
 CONTEXT_RAW=$(read_file_or_default "$CONTEXT_FILE" "(sin context.md)")
+INITIATIVES_RAW=$(scan_initiatives_json "$FEATURES_DIR" "$ARCHIVE_DIR")
 
 OUTPUT_HTML="$AI_DIR/dashboard.html"
 
@@ -112,6 +192,11 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    .filter-btn.active {
+      background-color: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
@@ -159,6 +244,9 @@ $PATTERNS_RAW
   <script type="text/plain" id="raw-snapshot">
 $SNAPSHOT_RAW
   </script>
+  <script type="application/json" id="raw-initiatives">
+$INITIATIVES_RAW
+  </script>
 HTML_DATA
 
 cat << 'HTML_BODY' >> "$OUTPUT_HTML"
@@ -192,23 +280,32 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           </div>
         </div>
 
-        <!-- Node Details Panel -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detalle de Decisión</h3>
-            <div id="node-detail-empty" class="text-xs text-slate-500 italic py-8 text-center">
-              Haz clic en cualquier nodo del grafo para ver su información y relaciones.
+        <!-- Node Detail Side Panel -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+          <div id="node-detail-empty" class="text-center py-20 text-slate-500">
+            <span class="text-3xl">👈</span>
+            <p class="mt-2 text-xs">Haz clic en cualquier nodo del grafo para ver el detalle de la decisión arquitectónica.</p>
+          </div>
+          <div id="node-detail-card" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+              <span id="detail-id" class="font-mono text-sm font-bold text-sky-400">ARCH-001</span>
+              <span id="detail-status" class="px-2 py-0.5 rounded text-[10px] font-semibold">ACTIVE</span>
             </div>
-            <div id="node-detail-card" class="hidden space-y-3 text-xs">
-              <div class="flex items-center justify-between">
-                <span id="detail-id" class="px-2 py-0.5 rounded font-mono font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">ARCH-000</span>
-                <span id="detail-status" class="px-2 py-0.5 rounded font-semibold text-[10px]">ACTIVE</span>
+            <div>
+              <h3 id="detail-title" class="text-sm font-bold text-slate-100">Título de la Decisión</h3>
+            </div>
+            <div class="border-t border-slate-800 pt-3 space-y-2 text-xs">
+              <div>
+                <span class="text-slate-400 block font-medium">Depende de:</span>
+                <span id="detail-depends" class="font-mono text-slate-300">-</span>
               </div>
-              <h4 id="detail-title" class="font-bold text-slate-100 text-sm">Título de la Decisión</h4>
-              <div class="space-y-1.5 text-slate-300">
-                <div><span class="text-slate-500">Depende de:</span> <span id="detail-depends" class="font-mono text-sky-400">[]</span></div>
-                <div><span class="text-slate-500">Reemplaza a:</span> <span id="detail-supersedes" class="font-mono text-amber-400">[]</span></div>
-                <div><span class="text-slate-500">Conflictos con:</span> <span id="detail-conflicts" class="font-mono text-rose-400">[]</span></div>
+              <div>
+                <span class="text-slate-400 block font-medium">Reemplaza a:</span>
+                <span id="detail-supersedes" class="font-mono text-slate-300">-</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block font-medium">Conflictos potenciales:</span>
+                <span id="detail-conflicts" class="font-mono text-rose-400">-</span>
               </div>
             </div>
           </div>
@@ -268,27 +365,28 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         </div>
       </div>
 
-      <!-- Executions Table -->
+      <!-- Executions History Table -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-        <div class="px-5 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
           <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Historial de Ejecuciones de Agentes</h3>
-          <span id="table-count" class="text-xs text-slate-500">0 registros</span>
+          <span id="table-count" class="text-xs text-slate-500">0 ejecuciones</span>
         </div>
-        <div class="overflow-x-auto max-h-80">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950 text-slate-400 text-[10px] uppercase font-semibold sticky top-0">
+        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider sticky top-0">
               <tr>
-                <th class="py-2.5 px-4">Fecha (UTC)</th>
-                <th class="py-2.5 px-4">Iniciativa</th>
-                <th class="py-2.5 px-4">Rol</th>
-                <th class="py-2.5 px-4">Fase</th>
-                <th class="py-2.5 px-4">Tokens In</th>
-                <th class="py-2.5 px-4">Tokens Out</th>
-                <th class="py-2.5 px-4">Duración</th>
-                <th class="py-2.5 px-4">Veredicto</th>
+                <th class="py-2.5 px-4 font-semibold">Timestamp</th>
+                <th class="py-2.5 px-4 font-semibold">Iniciativa</th>
+                <th class="py-2.5 px-4 font-semibold">Rol</th>
+                <th class="py-2.5 px-4 font-semibold">Fase</th>
+                <th class="py-2.5 px-4 font-semibold">Tokens In</th>
+                <th class="py-2.5 px-4 font-semibold">Tokens Out</th>
+                <th class="py-2.5 px-4 font-semibold">Duración</th>
+                <th class="py-2.5 px-4 font-semibold">Veredicto</th>
               </tr>
             </thead>
-            <tbody id="executions-tbody" class="divide-y divide-slate-800/60 font-mono"></tbody>
+            <tbody id="executions-tbody" class="divide-y divide-slate-800/60 font-mono text-[11px]">
+            </tbody>
           </table>
         </div>
       </div>
@@ -296,27 +394,26 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
 
     <!-- ==================== TAB 3: WORKFLOW MEMORY ==================== -->
     <section id="tab-memory" class="tab-content space-y-6">
-      <!-- Snapshot Card -->
-      <div class="bg-gradient-to-r from-sky-950/40 to-slate-900 border border-sky-800/40 rounded-xl p-5 shadow-lg">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">📸</span>
-            <h3 class="text-sm font-bold text-sky-400">Context Snapshot (Memoria Compactada)</h3>
-          </div>
-          <span class="text-[10px] bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded font-mono">context-snapshot.md</span>
-        </div>
-        <div id="snapshot-content" class="prose prose-invert prose-xs max-w-none text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800/80"></div>
-      </div>
-
-      <!-- Memory Views Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Workflow Log (Episodic) -->
-        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center justify-between">
-            <span>📖 Bitácora Cronológica (Workflow Log)</span>
-            <span class="text-[10px] text-slate-500 font-normal">Memoria Episódica</span>
-          </h3>
-          <div id="log-timeline" class="space-y-4 max-h-[500px] overflow-y-auto pr-2"></div>
+        <!-- Context Snapshot -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
+                <span>🧠</span> Context Snapshot (Compactado para Sesión)
+              </h3>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">context-snapshot.md</span>
+            </div>
+            <div id="snapshot-content" class="prose prose-invert prose-sm text-xs mt-4 max-h-96 overflow-y-auto pr-2"></div>
+          </div>
+
+          <!-- Workflow Log Timeline -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span>📜</span> Línea de Tiempo de Sesiones (Episódica)
+            </h3>
+            <div id="log-timeline" class="space-y-4 max-h-[500px] overflow-y-auto pr-2"></div>
+          </div>
         </div>
 
         <!-- Decisions Catalog & Patterns -->
@@ -340,22 +437,172 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       </div>
     </section>
 
-    <!-- ==================== TAB 4: INICIATIVAS ==================== -->
-    <section id="tab-features" class="tab-content space-y-4">
-      <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
-        <div>
-          <h2 class="text-base font-semibold text-slate-200">Iniciativas del Sistema (.ai/features/)</h2>
-          <p class="text-xs text-slate-400">Resumen y estado de las features, bugs, auditorías y refactors.</p>
+    <!-- ==================== TAB 4: INICIATIVAS COMPLETAS ==================== -->
+    <section id="tab-features" class="tab-content space-y-6">
+      <!-- Quick Summary Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Iniciativas Totales</div>
+          <div id="init-kpi-total" class="text-xl font-black text-sky-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Activas (.ai/features)</div>
+          <div id="init-kpi-active" class="text-xl font-black text-emerald-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Archivadas (.ai/archive)</div>
+          <div id="init-kpi-archived" class="text-xl font-black text-slate-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Features (FEAT)</div>
+          <div id="init-kpi-feats" class="text-xl font-black text-sky-300 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Bugs (BUG)</div>
+          <div id="init-kpi-bugs" class="text-xl font-black text-rose-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">QA Aprobado</div>
+          <div id="init-kpi-approved" class="text-xl font-black text-teal-400 mt-1">0</div>
         </div>
       </div>
-      <div id="initiatives-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <!-- Advanced Filter & Search Toolbar -->
+      <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+          <!-- Live Text Search -->
+          <div class="relative w-full md:w-96">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 text-xs">🔍</span>
+            <input type="text" id="init-search-input" oninput="applyInitiativeFilters()" placeholder="Buscar por ID, título o palabra clave..." class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 placeholder:text-slate-600">
+          </div>
+
+          <!-- Sort Selector -->
+          <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <span class="text-xs text-slate-400">Ordenar:</span>
+            <select id="init-sort-select" onchange="applyInitiativeFilters()" class="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500">
+              <option value="id-asc">ID (A - Z)</option>
+              <option value="id-desc">ID (Z - A)</option>
+              <option value="tokens-desc">Más tokens invertidos</option>
+              <option value="tokens-asc">Menos tokens invertidos</option>
+              <option value="title-asc">Título (A - Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Pill Buttons -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs">
+          <!-- Type Filter -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">Tipo:</span>
+            <button onclick="setTypeFilter('ALL')" id="filter-type-ALL" class="filter-type-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todos</button>
+            <button onclick="setTypeFilter('FEAT')" id="filter-type-FEAT" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">FEAT</button>
+            <button onclick="setTypeFilter('BUG')" id="filter-type-BUG" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">BUG</button>
+            <button onclick="setTypeFilter('AUDIT')" id="filter-type-AUDIT" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">AUDIT</button>
+            <button onclick="setTypeFilter('REF')" id="filter-type-REF" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">REF</button>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">Estado:</span>
+            <button onclick="setStatusFilter('ALL')" id="filter-status-ALL" class="filter-status-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todas</button>
+            <button onclick="setStatusFilter('ACTIVE')" id="filter-status-ACTIVE" class="filter-status-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Activas</button>
+            <button onclick="setStatusFilter('ARCHIVED')" id="filter-status-ARCHIVED" class="filter-status-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Archivadas</button>
+          </div>
+
+          <!-- QA Status Filter -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">QA:</span>
+            <button onclick="setQaFilter('ALL')" id="filter-qa-ALL" class="filter-qa-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todos</button>
+            <button onclick="setQaFilter('APROBADO')" id="filter-qa-APROBADO" class="filter-qa-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">🟢 Aprobado</button>
+            <button onclick="setQaFilter('PENDING')" id="filter-qa-PENDING" class="filter-qa-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">🟡 Pendiente / En Curso</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Counter feedback -->
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+        <span id="initiatives-count-label">Mostrando 0 iniciativas</span>
+      </div>
+
+      <!-- Initiatives Responsive Cards Grid -->
+      <div id="initiatives-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
   </main>
+
+  <!-- Initiative Detail Modal Dialog -->
+  <div id="initiative-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-800 flex items-start justify-between bg-slate-900/90">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="modal-type-badge" class="px-2 py-0.5 rounded text-[10px] font-bold">FEAT</span>
+            <span id="modal-status-badge" class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300">ACTIVA</span>
+            <span id="modal-qa-badge" class="px-2 py-0.5 rounded text-[10px] font-bold">QA: PENDING</span>
+          </div>
+          <h3 id="modal-title" class="text-base font-bold text-slate-100 mt-2 font-mono">FEAT-001</h3>
+          <p id="modal-desc" class="text-xs text-slate-400 mt-0.5"></p>
+        </div>
+        <button onclick="closeInitiativeModal()" class="text-slate-400 hover:text-slate-200 text-xl font-bold p-1 rounded-lg hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 overflow-y-auto space-y-5 text-xs">
+        <!-- Artifacts Checklist -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">📄 Artefactos de la Metodología (SDD)</h4>
+          <div id="modal-artifacts-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        </div>
+
+        <!-- Telemetry for this initiative -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">⚡ Telemetría e Inversión de Tokens</h4>
+          <div id="modal-telemetry-empty" class="text-slate-500 text-xs italic">No hay ejecuciones registradas en executions.yaml para esta iniciativa.</div>
+          <div id="modal-telemetry-content" class="hidden space-y-2">
+            <div class="grid grid-cols-3 gap-2 text-center bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div>
+                <div class="text-[10px] text-slate-500">Tokens Totales</div>
+                <div id="modal-tokens-total" class="font-bold text-sky-400 text-sm">0</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-500">Fases Registradas</div>
+                <div id="modal-phases-count" class="font-bold text-indigo-400 text-sm">0</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-500">Costo Est. USD</div>
+                <div id="modal-cost-est" class="font-bold text-emerald-400 text-sm">$0.00</div>
+              </div>
+            </div>
+            <div class="border border-slate-800 rounded-lg overflow-hidden mt-3">
+              <table class="w-full text-left text-[11px]">
+                <thead class="bg-slate-950 text-slate-400 uppercase text-[9px]">
+                  <tr>
+                    <th class="p-2">Rol / Fase</th>
+                    <th class="p-2">Tokens</th>
+                    <th class="p-2">Duración</th>
+                    <th class="p-2">Veredicto</th>
+                  </tr>
+                </thead>
+                <tbody id="modal-executions-tbody" class="divide-y divide-slate-800/60 font-mono"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500 font-mono" id="modal-folder-path">.ai/features/FEAT-001</span>
+        <button onclick="closeInitiativeModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-semibold rounded-lg border border-slate-700 transition">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // --- Data Parsing ---
     let kgData = { nodes: [], edges: [] };
     let metricsData = { executions: [] };
+    let allInitiatives = [];
 
     try {
       const kgRaw = document.getElementById('raw-kg').textContent.trim();
@@ -366,6 +613,10 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       const metricsRaw = document.getElementById('raw-metrics').textContent.trim();
       metricsData = jsyaml.load(metricsRaw) || { executions: [] };
     } catch (e) { console.error('Error parseando Metrics YAML:', e); }
+
+    try {
+      allInitiatives = JSON.parse(document.getElementById('raw-initiatives').textContent.trim() || '[]');
+    } catch (e) { console.error('Error parseando Iniciativas JSON:', e); }
 
     const logRaw = document.getElementById('raw-log').textContent;
     const catalogRaw = document.getElementById('raw-catalog').textContent;
@@ -598,31 +849,279 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       });
     }
 
-    // --- Tab 4: Initiatives Grid ---
-    function initInitiatives() {
-      const grid = document.getElementById('initiatives-grid');
-      const initiatives = {};
+    // ==================== TAB 4: INITIATIVES CONTROLLER ====================
+    let currentTypeFilter = 'ALL';
+    let currentStatusFilter = 'ALL';
+    let currentQaFilter = 'ALL';
 
+    function setTypeFilter(type) {
+      currentTypeFilter = type;
+      document.querySelectorAll('.filter-type-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('filter-type-' + type).classList.add('active');
+      applyInitiativeFilters();
+    }
+
+    function setStatusFilter(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.filter-status-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('filter-status-' + status).classList.add('active');
+      applyInitiativeFilters();
+    }
+
+    function setQaFilter(qa) {
+      currentQaFilter = qa;
+      document.querySelectorAll('.filter-qa-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('filter-qa-' + qa).classList.add('active');
+      applyInitiativeFilters();
+    }
+
+    function initInitiatives() {
+      // Cruzar métricas con iniciativas
+      const initMetrics = {};
       (metricsData.executions || []).forEach(ex => {
         if (!ex.initiative) return;
-        if (!initiatives[ex.initiative]) initiatives[ex.initiative] = { id: ex.initiative, count: 0, tokens: 0, lastTs: ex.ts };
-        initiatives[ex.initiative].count++;
-        initiatives[ex.initiative].tokens += (Number(ex.tokens_in) || 0) + (Number(ex.tokens_out) || 0);
+        const key = ex.initiative;
+        if (!initMetrics[key]) initMetrics[key] = { count: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0, executions: [], lastTs: ex.ts };
+        const sum = (Number(ex.tokens_in) || 0) + (Number(ex.tokens_out) || 0);
+        initMetrics[key].count++;
+        initMetrics[key].tokensIn += (Number(ex.tokens_in) || 0);
+        initMetrics[key].tokensOut += (Number(ex.tokens_out) || 0);
+        initMetrics[key].totalTokens += sum;
+        initMetrics[key].executions.push(ex);
+        initMetrics[key].lastTs = ex.ts;
       });
 
-      Object.values(initiatives).forEach(init => {
-        const card = document.createElement('div');
-        card.className = 'bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2';
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-sky-400 font-mono text-sm">${init.id}</span>
-            <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">${init.count} fases</span>
+      // Asignar métricas a la lista de iniciativas
+      allInitiatives.forEach(init => {
+        const met = initMetrics[init.id] || { count: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0, executions: [], lastTs: '-' };
+        init.metrics = met;
+      });
+
+      // Calcular KPI Cards
+      let activeCount = 0, archivedCount = 0, featsCount = 0, bugsCount = 0, approvedCount = 0;
+      allInitiatives.forEach(init => {
+        if (init.status === 'ACTIVE') activeCount++;
+        if (init.status === 'ARCHIVED') archivedCount++;
+        if (init.type === 'FEAT') featsCount++;
+        if (init.type === 'BUG') bugsCount++;
+        if (init.qa_verdict === 'APROBADO') approvedCount++;
+      });
+
+      document.getElementById('init-kpi-total').textContent = allInitiatives.length;
+      document.getElementById('init-kpi-active').textContent = activeCount;
+      document.getElementById('init-kpi-archived').textContent = archivedCount;
+      document.getElementById('init-kpi-feats').textContent = featsCount;
+      document.getElementById('init-kpi-bugs').textContent = bugsCount;
+      document.getElementById('init-kpi-approved').textContent = approvedCount;
+
+      applyInitiativeFilters();
+    }
+
+    function applyInitiativeFilters() {
+      const search = (document.getElementById('init-search-input').value || '').toLowerCase().trim();
+      const sort = document.getElementById('init-sort-select').value;
+      const grid = document.getElementById('initiatives-grid');
+      grid.innerHTML = '';
+
+      let filtered = allInitiatives.filter(item => {
+        // Search
+        if (search) {
+          const matchId = item.id.toLowerCase().includes(search);
+          const matchTitle = (item.title || '').toLowerCase().includes(search);
+          if (!matchId && !matchTitle) return false;
+        }
+
+        // Type
+        if (currentTypeFilter !== 'ALL' && item.type !== currentTypeFilter) return false;
+
+        // Status
+        if (currentStatusFilter !== 'ALL' && item.status !== currentStatusFilter) return false;
+
+        // QA
+        if (currentQaFilter === 'APROBADO' && item.qa_verdict !== 'APROBADO') return false;
+        if (currentQaFilter === 'PENDING' && item.qa_verdict === 'APROBADO') return false;
+
+        return true;
+      });
+
+      // Sorting
+      filtered.sort((a, b) => {
+        if (sort === 'id-asc') return a.id.localeCompare(b.id, undefined, { numeric: true });
+        if (sort === 'id-desc') return b.id.localeCompare(a.id, undefined, { numeric: true });
+        if (sort === 'tokens-desc') return (b.metrics.totalTokens || 0) - (a.metrics.totalTokens || 0);
+        if (sort === 'tokens-asc') return (a.metrics.totalTokens || 0) - (b.metrics.totalTokens || 0);
+        if (sort === 'title-asc') return (a.title || '').localeCompare(b.title || '');
+        return 0;
+      });
+
+      document.getElementById('initiatives-count-label').textContent = `Mostrando ${filtered.length} de ${allInitiatives.length} iniciativas`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-500 bg-slate-900/40 border border-slate-800 rounded-xl">
+            <span class="text-3xl block">🔍</span>
+            <p class="mt-2 text-xs">No se encontraron iniciativas que coincidan con los filtros seleccionados.</p>
           </div>
-          <div class="text-xs text-slate-400">Tokens invertidos: <span class="font-bold text-slate-200">${init.tokens.toLocaleString()}</span></div>
-          <div class="text-[10px] text-slate-500">Última actividad: ${(init.lastTs || '').replace('T', ' ').replace('Z', '')}</div>
+        `;
+        return;
+      }
+
+      filtered.forEach(init => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all rounded-xl p-4.5 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md';
+
+        // Type color badge
+        let typeBadgeClass = 'bg-sky-500/20 text-sky-400 border border-sky-500/30';
+        if (init.type === 'BUG') typeBadgeClass = 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        if (init.type === 'AUDIT') typeBadgeClass = 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
+        if (init.type === 'REF') typeBadgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+
+        // QA badge
+        let qaBadgeClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        let qaText = '🟡 QA: PENDIENTE';
+        if (init.qa_verdict === 'APROBADO') {
+          qaBadgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          qaText = '🟢 QA: APROBADO';
+        } else if (init.qa_verdict === 'RECHAZADO') {
+          qaBadgeClass = 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+          qaText = '🔴 QA: RECHAZADO';
+        }
+
+        // Artifact chips helper
+        const chip = (label, active, icon) => `
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono flex items-center gap-1 ${active ? 'bg-slate-800 text-sky-300 border border-sky-500/30' : 'bg-slate-950/60 text-slate-600 border border-slate-800'}">
+            <span>${icon}</span>
+            <span>${label}</span>
+          </span>
+        `;
+
+        card.innerHTML = `
+          <div class="space-y-2.5">
+            <!-- Header Badges -->
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${typeBadgeClass}">${init.type}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] ${init.status === 'ACTIVE' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : 'bg-slate-800 text-slate-400'}">${init.status === 'ACTIVE' ? 'Activa' : 'Archivada'}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${qaBadgeClass}">${qaText}</span>
+            </div>
+
+            <!-- ID and Title -->
+            <div>
+              <span class="font-mono text-xs font-bold text-sky-400 block">${init.id}</span>
+              <h3 class="text-xs font-semibold text-slate-200 mt-1 line-clamp-2 leading-relaxed" title="${init.title}">${init.title}</h3>
+            </div>
+
+            <!-- SDD Artifacts Checklist -->
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${chip(init.type === 'BUG' ? 'bug-report' : 'spec', init.has_spec || init.has_bug, '📄')}
+              ${chip('ui', init.has_ui, '🎨')}
+              ${chip('arch', init.has_arch, '🏗️')}
+              ${chip('qa', init.has_qa, '🧪')}
+              ${chip('dec', init.has_decision, '⚖️')}
+            </div>
+          </div>
+
+          <!-- Card Footer & Actions -->
+          <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs">
+            <div class="text-[11px] text-slate-400">
+              <span class="font-bold text-slate-200">${(init.metrics.totalTokens || 0).toLocaleString()}</span> tokens
+              <span class="text-slate-500">(${init.metrics.count || 0} fases)</span>
+            </div>
+            <button onclick="openInitiativeModal('${init.id}')" class="px-3 py-1 bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 font-medium rounded-lg text-xs transition border border-slate-700">Explorar</button>
+          </div>
         `;
         grid.appendChild(card);
       });
+    }
+
+    // Modal Manager
+    function openInitiativeModal(id) {
+      const init = allInitiatives.find(i => i.id === id);
+      if (!init) return;
+
+      document.getElementById('modal-title').textContent = init.id;
+      document.getElementById('modal-desc').textContent = init.title || '';
+      document.getElementById('modal-folder-path').textContent = (init.status === 'ACTIVE' ? '.ai/features/' : '.ai/archive/') + init.id;
+
+      // Type Badge
+      const typeBadge = document.getElementById('modal-type-badge');
+      typeBadge.textContent = init.type;
+      typeBadge.className = `px-2 py-0.5 rounded text-[10px] font-bold ${init.type === 'BUG' ? 'bg-rose-500/20 text-rose-400' : 'bg-sky-500/20 text-sky-400'}`;
+
+      // Status Badge
+      const statusBadge = document.getElementById('modal-status-badge');
+      statusBadge.textContent = init.status === 'ACTIVE' ? 'ACTIVA' : 'ARCHIVADA';
+      statusBadge.className = `px-2 py-0.5 rounded text-[10px] font-medium ${init.status === 'ACTIVE' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : 'bg-slate-800 text-slate-400'}`;
+
+      // QA Badge
+      const qaBadge = document.getElementById('modal-qa-badge');
+      qaBadge.textContent = 'QA: ' + init.qa_verdict;
+      qaBadge.className = `px-2 py-0.5 rounded text-[10px] font-bold ${init.qa_verdict === 'APROBADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`;
+
+      // Artifacts Grid
+      const artGrid = document.getElementById('modal-artifacts-grid');
+      artGrid.innerHTML = '';
+      const docItem = (name, exists, desc) => {
+        const div = document.createElement('div');
+        div.className = `p-2.5 rounded-lg border text-xs flex flex-col justify-between ${exists ? 'bg-slate-950 border-sky-500/40 text-slate-200' : 'bg-slate-950/40 border-slate-800/60 text-slate-600'}`;
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold text-[11px] ${exists ? 'text-sky-400' : 'text-slate-600'}">${name}</span>
+            <span>${exists ? '✅' : '❌'}</span>
+          </div>
+          <span class="text-[10px] mt-1 text-slate-500">${desc}</span>
+        `;
+        artGrid.appendChild(div);
+      };
+
+      if (init.type === 'BUG') {
+        docItem('bug-report.md', init.has_bug || init.has_spec, 'Reporte y causa raíz');
+        docItem('qa.md', init.has_qa, 'Plan de pruebas y validación');
+        docItem('architecture.md', init.has_arch, 'Ajuste estructural (opcional)');
+      } else {
+        docItem('spec.md', init.has_spec, 'Especificación funcional');
+        docItem('ui-design.md', init.has_ui, 'Diseño de interfaz y UX');
+        docItem('architecture.md', init.has_arch, 'Diseño técnico y ADRs');
+        docItem('qa.md', init.has_qa, 'Plan y reporte de pruebas');
+        docItem('decision.md', init.has_decision, 'Registro de decisión técnica');
+      }
+
+      // Telemetry
+      const execs = (init.metrics && init.metrics.executions) ? init.metrics.executions : [];
+      if (execs.length === 0) {
+        document.getElementById('modal-telemetry-empty').classList.remove('hidden');
+        document.getElementById('modal-telemetry-content').classList.add('hidden');
+      } else {
+        document.getElementById('modal-telemetry-empty').classList.add('hidden');
+        document.getElementById('modal-telemetry-content').classList.remove('hidden');
+        
+        document.getElementById('modal-tokens-total').textContent = (init.metrics.totalTokens || 0).toLocaleString();
+        document.getElementById('modal-phases-count').textContent = init.metrics.count || 0;
+        const costEst = ((init.metrics.tokensIn * 3 / 1000000) + (init.metrics.tokensOut * 15 / 1000000));
+        document.getElementById('modal-cost-est').textContent = '$' + costEst.toFixed(3);
+
+        const tbody = document.getElementById('modal-executions-tbody');
+        tbody.innerHTML = '';
+        execs.forEach(ex => {
+          const tr = document.createElement('tr');
+          const tok = (Number(ex.tokens_in) || 0) + (Number(ex.tokens_out) || 0);
+          tr.className = 'hover:bg-slate-900/60';
+          tr.innerHTML = `
+            <td class="p-2 text-slate-300 font-semibold">${ex.role || '-'}<span class="block text-[9px] text-slate-500 font-normal">${ex.phase || '-'}</span></td>
+            <td class="p-2 text-slate-400">${tok.toLocaleString()}</td>
+            <td class="p-2 text-slate-400">${ex.duration_s || 0}s</td>
+            <td class="p-2"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${ex.verdict === 'APROBADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}">${ex.verdict || '-'}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('initiative-modal').classList.remove('hidden');
+    }
+
+    function closeInitiativeModal() {
+      document.getElementById('initiative-modal').classList.add('hidden');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
