@@ -166,7 +166,7 @@ Los workflows documentan el flujo completo de trabajo para escenarios comunes. I
 
 ### `scripts/` — Automatización
 
-Scripts de setup y validación que los proyectos consumen desde `.ai/agents/scripts/`: `setup-ide.sh` (inicializa `.ai/` y reglas de IDE, con modo `--auto` para no-interactivo), `update-ai-agents.sh` (actualiza el framework en un comando: submodule + setup), `new-initiative.sh` (bootstrap de feature/bug/auditoría/refactor), `finish-phase.sh` (cierre de fase: registra entrada en `workflow-log.md`, ejecución en `executions.yaml` y regenera `context-snapshot.md` — garantiza que los sistemas v3.2.0 tengan datos), `validate-project.sh` (cumplimiento de reglas documentales) y `common.sh` (librería compartida).
+Scripts de setup y validación que los proyectos consumen desde `.ai/agents/scripts/`: `setup-ide.sh` (inicializa `.ai/` y reglas de IDE, con modo `--auto` para no-interactivo), `update-ai-agents.sh` (actualiza el framework en un comando: submodule + setup + sync + validación), `new-initiative.sh` (bootstrap de feature/bug/auditoría/refactor), `finish-phase.sh` (cierre de fase: registra entrada en `workflow-log.md`, ejecución en `executions.yaml` y regenera `context-snapshot.md`), `sync-initiatives.sh` (auto-reconciliación y auto-reparación `--fix` de iniciativas históricas y legacy), `validate-project.sh` (cumplimiento de reglas documentales), `dashboard.sh` (generador y visor HTML interactivo con datos del proyecto, grafo ADR, telemetría y memoria) y `common.sh` (librería compartida).
 
 **Regla:** Los scripts deben ser idempotentes y no destructivos: pueden ejecutarse varias veces sin romper el estado del proyecto.
 
