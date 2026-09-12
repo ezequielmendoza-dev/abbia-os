@@ -11,6 +11,7 @@
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
 3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
 4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
+5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega o fase de trabajo, **ejecutar en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]`.
 
 ---
 
@@ -20,6 +21,7 @@
 - Cuando se trabaje en modo Composer (agente), ejecutar las tareas de forma completa: no dejar `// TODO` ni implementaciones parciales salvo que el usuario lo indique.
 - Al crear archivos nuevos, verificar primero que no exista un archivo equivalente (Regla R1 de `AGENTS.md`).
 - Si una tarea requiere cambios en múltiples archivos, agrupar los cambios lógicamente y explicar el orden de ejecución.
+- **AL CONCLUIR:** Siempre ejecutar `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` para actualizar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y snapshot.
 
 ### Chat
 - En modo Chat, priorizar respuestas concisas y contextualmente relevantes.

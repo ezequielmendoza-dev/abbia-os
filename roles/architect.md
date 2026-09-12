@@ -316,13 +316,15 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 
 ---
 
-## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+## 🏁 Protocolo de Cierre Mandatorio (Hand-off & Telemetría)
 
-Una vez generado y verificado el diseño técnico (`architecture.md`), los ADRs correspondientes y actualizado el Knowledge Graph (`.ai/knowledge-graph.yaml`), **debes ejecutar el cierre de tu fase**:
-
-```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect
-```
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
+> Como Software Architect, una vez generado `architecture.md` y registrados los ADRs en `.ai/knowledge-graph.yaml`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> ```bash
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect
+> ```
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect`
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

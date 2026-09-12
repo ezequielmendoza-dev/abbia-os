@@ -12,8 +12,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
   - **Knowledge Graph Reconciliation:** Reescribe automáticamente rutas de referencias (`ref: features/...` $\rightarrow$ `ref: archive/...`) en `.ai/knowledge-graph.yaml`.
   - **Memoria Persistente:** Registra el evento de pase a histórico en `.ai/memory/workflow-log.md` y regenera `.ai/memory/context-snapshot.md`.
   - **Modo Interactivo:** Soporte de confirmación interactiva en consola (`--prompt`).
-- **Soporte `--archive` y `--ask-archive` en `scripts/finish-phase.sh`** — Permite que la fase de aprobación final (`approval` / `deploy` / `release`) archive la iniciativa directamente o consulte al usuario de forma interactiva en un solo comando.
-- **Modo Batch Auto-Archive en `scripts/sync-initiatives.sh --archive-approved`** — Escanea `.ai/features/` y archiva en lote todas las iniciativas completadas que cuenten con QA `APROBADO`.
+- **Regla Documental R6 (Cierre Mandatorio y Telemetría)** — Establecida como regla crítica en `AGENTS.md` y todas las configuraciones de IDE (`CLAUDE.md`, `cursorrules`, `windsurfrules`, `clinerules`, `roomodes`, `copilot-instructions.md`, `.cursor/rules/`):
+  - Todo agente debe ejecutar obligatoriamente `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` antes de finalizar su turno o entregar respuestas, garantizando la telemetría veraz en `executions.yaml`, el log en `workflow-log.md` y el snapshot de contexto.
+  - Actualizados todos los roles (`roles/*.md`) y workflows (`new-feature.md`, `bug-fix.md`) con comandos CLI explícitos de fin de fase.
 ### Corregido
 - **Eliminación de Estimaciones Sintéticas (6,500 tokens mock)** — Se eliminó la inyección arbitraria de ejecuciones de prueba (`tokens_in: 4500, tokens_out: 2000`) en `scripts/sync-initiatives.sh`.
 - **Integridad y Precisión de Telemetría en `scripts/dashboard.sh`** — El dashboard ahora distingue de forma estricta entre métricas reales medidas (`measured` con valores reales) y ejecuciones sin medición (`null` o sin telemetría), mostrando guiones (`—`) o indicadores claros de "sin telemetría" en lugar de inventar o inflar números artificiales.

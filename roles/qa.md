@@ -308,13 +308,15 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 
 ---
 
-## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+## 🏁 Protocolo de Cierre Mandatorio (Hand-off & Telemetría)
 
-Una vez completada la validación y generado `qa.md` con su veredicto explícito (`APROBADO` o `RECHAZADO`), **debes ejecutar el cierre de tu fase**:
-
-```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>
-```
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
+> Como QA Engineer, una vez emitido el reporte `qa.md`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> ```bash
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>
+> ```
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO`
 
 > **💡 Orientación al Usuario:**  
 > Si el veredicto es **`APROBADO`**, informa al usuario que la iniciativa ha superado las pruebas técnicas y está lista para que pueda realizar sus pruebas funcionales en el **entorno de pruebas/staging** antes de la revisión final del Tech Lead y el pase a producción.

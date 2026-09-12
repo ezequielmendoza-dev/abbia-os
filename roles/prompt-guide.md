@@ -252,6 +252,16 @@ Las preguntas que puede hacer un agente son siempre sobre:
 
 Las decisiones técnicas dentro de su área de expertise las toman sin consultar.
 
+### Tip 5: Cierre Mandatorio de Fase con finish-phase.sh (Regla R6)
+Cada vez que un agente concluye su fase de trabajo (Spec, UI, Architecture, Implementation, QA, Approval, Deploy), **debe ejecutarse en terminal**:
+```bash
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [opciones]
+```
+Esto garantiza automáticamente:
+1. **Memoria de Workflow:** Registro append-only en `.ai/memory/workflow-log.md`.
+2. **Telemetría Veraz:** Registro exacto de ejecución en `.ai/metrics/executions.yaml`.
+3. **Snapshot Actualizado:** Regeneración inmediata de `.ai/memory/context-snapshot.md`.
+
 ---
 
-*Guía versión 1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Guía versión 3.4.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*

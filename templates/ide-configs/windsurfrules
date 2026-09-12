@@ -11,6 +11,7 @@
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
 3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
 4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
+5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega de fase o código, **ejecutar en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` para persistir memoria y telemetría.
 
 ---
 
@@ -18,6 +19,7 @@
 
 ### Flujos de Cascade
 - Cuando Cascade proponga un flujo de edición multi-archivo, verificar que la secuencia de cambios respete las dependencias entre módulos (editar primero interfaces/tipos, luego implementaciones).
+- Al completar cualquier flujo o tarea, ejecutar siempre `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]`.
 - En flujos largos, confirmar el plan antes de ejecutar si involucra más de 5 archivos.
 - Ante una tarea ambigua, preguntar antes de asumir el alcance.
 

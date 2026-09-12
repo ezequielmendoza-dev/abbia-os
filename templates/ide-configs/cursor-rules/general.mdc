@@ -10,14 +10,13 @@ Este proyecto sigue la metodología **Specification-Driven Development (SDD)** g
 
 ## 📜 Principios Clave
 1. **Documentos como fuente de verdad:** Todo cambio comienza con una especificación (`spec.md` o `bug-report.md`) y un diseño arquitectónico aprobado (`architecture.md`).
-2. **Reglas Documentales R1–R5:**
+2. **Reglas Documentales R1–R6:**
    - **R1:** Antes de crear un documento, verificar si existe uno equivalente para actualizar.
    - **R2:** Priorizar la actualización sobre la creación.
    - **R3:** No crear versiones del tipo `archivo-v2.md`. Modificar el existente.
    - **R4:** Los cambios en roles/workflows deben reflejarse en el changelog correspondiente.
    - **R5:** Los documentos representan el **estado actual**, no el histórico.
-3. **Memoria y Métricas:**
-   - Al finalizar cualquier fase de trabajo, registrar el cierre utilizando el script `.ai/agents/scripts/finish-phase.sh` para actualizar `workflow-log.md`, `executions.yaml` y regenerar `context-snapshot.md`.
+   - **R6:** **Cierre Mandatorio y Telemetría:** Al finalizar cualquier fase de trabajo o entrega, **ejecutar obligatoriamente en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` para registrar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y regenerar `context-snapshot.md`. Nunca omitir este paso.
 
 ## 🧭 Estructura de Consulta Obligatoria
 Antes de proponer o implementar código, consulta:

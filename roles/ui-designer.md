@@ -184,3 +184,22 @@ Si existe → **actualizarlo** directamente en lugar de crear uno nuevo o duplic
 
 ### R2 — Mantener consistencia con el Design System
 Si el proyecto tiene un archivo de tokens de diseño o variables CSS globales (ej. `index.css`, `theme.js`), el UI Designer debe basar sus propuestas en estos tokens. No inventar valores de color, tamaño o espaciado arbitrarios a menos que sea justificable y se proponga como actualización al sistema de diseño en una sección de propuestas globales.
+
+---
+
+## 🏁 Protocolo de Cierre Mandatorio (Hand-off & Telemetría)
+
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
+> Como UI Designer, una vez generado el artefacto `ui-design.md`, **NUNCA finalices tu respuesta** sin haber ejecutado previamente en terminal:
+> ```bash
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer
+> ```
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 ui-design ui-designer`
+
+Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
+
+---
+
+*Agente versión 3.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+

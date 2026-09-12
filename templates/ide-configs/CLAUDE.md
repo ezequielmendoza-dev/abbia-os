@@ -33,6 +33,11 @@ npm run format       # Formatter
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
 3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
 4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
+5. **Cierre Mandatorio de Fase y Telemetría (Regla R6).** Al culminar cualquier tarea, entrega de código o documento (`spec`, `ui-design`, `architecture`, `implement`, `qa`, `approval`, `deploy`), **ES OBLIGATORIO ejecutar en la terminal**:
+   ```bash
+   bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]
+   ```
+   *Nunca des por finalizada tu respuesta ni pases el control sin haber ejecutado este comando.*
 
 ---
 

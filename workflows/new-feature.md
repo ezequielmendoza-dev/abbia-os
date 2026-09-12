@@ -196,6 +196,10 @@ Requerimiento:
 ```
 
 **Criterio de salida:** `spec.md` completa, sin preguntas abiertas bloqueantes, lista para revisión del Tech Lead.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug analysis analyst
+  ```
 
 ---
 
@@ -214,7 +218,16 @@ Actúa como el agente Tech Lead definido en roles/tech-lead.md.
 
 Contexto del proyecto: [contenido de .ai/context.md]
 
-Estoy presentando para revisión: feature-spec
+Estoy presentando para revisión: feature-spec en .ai/features/FEAT-NNN-slug/spec.md
+```
+
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-1 tech-lead --verdict <APROBADO|RECHAZADO>
+  ```
+
+---
+
 ### Paso 3 — Diseño de Interfaz (UI Designer)
 
 **Agente:** UI Designer  
@@ -233,6 +246,10 @@ Especificación funcional de referencia:
 ```
 
 **Criterio de salida:** `ui-design.md` completa, con la arquitectura de información, layouts y componentes diseñados para todos los viewports, lista para el desarrollo.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug ui-design ui-designer
+  ```
 
 ---
 
@@ -242,7 +259,7 @@ Especificación funcional de referencia:
 **Output:** `.ai/features/FEAT-NNN-slug/architecture.md`  
 **Template:** [`templates/architecture-spec.md`](../templates/architecture-spec.md)
 
-Si el diseño requiere cambios en la arquitectura global, actualizar `.ai/architecture.md` en este paso.
+Si el diseño requiere cambios en la arquitectura global, actualizar `.ai/architecture.md` y `.ai/knowledge-graph.yaml` en este paso.
 
 **Activación:**
 
@@ -259,6 +276,11 @@ Diseño visual de referencia:
 [contenido de .ai/features/FEAT-NNN-slug/ui-design.md]
 ```
 
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug architecture architect
+  ```
+
 ---
 
 ### Paso 5 — Revisión de Diseño (Tech Lead)
@@ -267,8 +289,13 @@ Diseño visual de referencia:
 **Veredictos posibles:** APROBADO / APROBADO CON OBSERVACIONES / RECHAZADO
 
 Si es **RECHAZADO** (por diseño técnico o visual) → volver al Paso 3 o 4 con el feedback del Tech Lead.  
-Si hay decisiones de arquitectura importantes → registrar en `.ai/decisions.md`.  
+Si hay decisiones de arquitectura importantes → registrar en `.ai/decisions.md` y `.ai/knowledge-graph.yaml`.  
 Si es **APROBADO** → continuar al Paso 6.
+
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-2 tech-lead --verdict <APROBADO|RECHAZADO>
+  ```
 
 ---
 
@@ -304,6 +331,10 @@ Diseño técnico de referencia:
 ```
 
 **Criterio de salida:** Implementación completa, funcional, con tests unitarios pasando y fiel a la UI y la arquitectura, lista para QA.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug implement developer
+  ```
 
 ---
 
@@ -342,6 +373,10 @@ Si el resultado es **RECHAZADO / FAIL**:
 2. **Developer Parchea:** El Developer consume `qa.md`, aplica el parche correctivo y re-ejecuta la suite de pruebas.
 3. **Re-evaluación:** Se repite el paso de QA (máximo 3 iteraciones). Si tras 3 intentos no pasa, se escala al Tech Lead para intervención arquitectónica.
 4. Si el resultado es **APROBADO / PASS** → continuar al Paso 8.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug qa qa --verdict <APROBADO|RECHAZADO>
+  ```
 
 ---
 
@@ -357,6 +392,10 @@ Si el resultado es **RECHAZADO / FAIL**:
 > 2. **Version Bump:** Una vez hecho el commit, ejecutar `npm run bump:minor -- "FEAT-NNN: descripción"` para actualizar la versión (minor), el CHANGELOG y el context. Esto mueve los cambios de `[Unreleased]` a la nueva versión.
 > 3. **Git Tag:** Crear tag `git tag -a vX.Y.Z -m "FEAT-NNN: descripción"` y push con `git push --tags`.
 > 4. **Release:** Indicar al usuario si debe proceder con release según [`workflows/release.md`](release.md).
+> 5. **Cierre Obligatorio (R6):**
+>    ```bash
+>    bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO [--archive]
+>    ```
 
 ---
 
@@ -364,6 +403,10 @@ Si el resultado es **RECHAZADO / FAIL**:
 
 **Agente:** DevOps Engineer (bajo demanda del Tech Lead)  
 **Workflow:** Ver [`workflows/release.md`](release.md) para el proceso de deployment.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug deploy devops --verdict PASS --archive
+  ```
 
 ---
 

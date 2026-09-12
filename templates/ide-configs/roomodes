@@ -7,9 +7,10 @@
       "groups": [
         "read",
         "edit",
+        "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/analyst.md. Escribe únicamente especificaciones funcionales y criterios de aceptación Gherkin. No toques código de producción."
+      "customInstructions": "Consulta roles/analyst.md. Escribe únicamente especificaciones funcionales y criterios de aceptación Gherkin. Al concluir, ejecuta obligatoriamente: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst."
     },
     {
       "slug": "ui-designer",
@@ -18,9 +19,10 @@
       "groups": [
         "read",
         "edit",
+        "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/ui-designer.md. Define componentes, tokens de diseño y layouts responsivos."
+      "customInstructions": "Consulta roles/ui-designer.md. Define componentes, tokens de diseño y layouts responsivos. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer."
     },
     {
       "slug": "architect",
@@ -29,9 +31,10 @@
       "groups": [
         "read",
         "edit",
+        "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/architect.md. Diseña contratos de API, esquemas de BD y registra ADRs con ID ARCH-NNN en .ai/knowledge-graph.yaml. No implementes código de producción."
+      "customInstructions": "Consulta roles/architect.md. Diseña contratos de API, esquemas de BD y registra ADRs con ID ARCH-NNN. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect."
     },
     {
       "slug": "tech-lead",
@@ -42,7 +45,7 @@
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/tech-lead.md. Revisa cumplimiento de estándares, checklists y emite aprobación o rechazo justificado."
+      "customInstructions": "Consulta roles/tech-lead.md. Revisa estándares y emite aprobación o rechazo. Al aprobar, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO [--archive]."
     },
     {
       "slug": "developer",
@@ -55,7 +58,7 @@
         "browser",
         "mcp"
       ],
-      "customInstructions": "Consulta roles/developer.md. Implementa código limpio, tipado estricto, pruebas unitarias y registra decisiones tácticas en decision.md."
+      "customInstructions": "Consulta roles/developer.md. Implementa código limpio, pruebas y registra decision.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer."
     },
     {
       "slug": "qa",
@@ -66,7 +69,7 @@
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/qa.md. Ejecuta pruebas reales y emite reporte qa.md con veredicto explícito APROBADO o RECHAZADO."
+      "customInstructions": "Consulta roles/qa.md. Ejecuta pruebas reales y emite reporte qa.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>."
     },
     {
       "slug": "devops",
@@ -77,7 +80,7 @@
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/devops.md. Automatiza pipelines, valida infraestructura como código y planes de release."
+      "customInstructions": "Consulta roles/devops.md. Automatiza pipelines y valida despliegues. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS [--archive]."
     },
     {
       "slug": "skill-manager",

@@ -309,7 +309,12 @@ Por favor, revisa el archivo de diseño (.ai/features/FEAT-NNN-slug/architecture
 
 ---
 
-## 🏁 Protocolo de Aprobación Final y Archivado (Hand-off Interactivo)
+## 🏁 Protocolo de Aprobación Final y Archivado (Hand-off Interactivo & Telemetría)
+
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL:**  
+> Como Tech Lead, al emitir cualquier veredicto de revisión o aprobación final, **NUNCA des por terminada tu respuesta** sin haber ejecutado en terminal:
+> `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict <APROBADO|RECHAZADO> [--archive]`
 
 Como Tech Lead, eres el responsable del veredicto final de la iniciativa antes de su pase a producción:
 

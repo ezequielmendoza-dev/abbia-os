@@ -274,13 +274,15 @@ Por favor, lee el diseño técnico en .ai/features/FEAT-NNN-slug/architecture.md
 
 ---
 
-## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+## 🏁 Protocolo de Cierre Mandatorio (Hand-off & Telemetría)
 
-Una vez completada la implementación de código, los tests unitarios y registrado `decision.md`, **debes ejecutar el cierre de tu fase**:
-
-```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer
-```
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
+> Como Senior Developer, **NUNCA des por finalizada tu respuesta ni pases el control** sin haber ejecutado previamente en la terminal:
+> ```bash
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer
+> ```
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 implement developer`
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

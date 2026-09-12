@@ -247,9 +247,19 @@ Tarea:
 - Hay un incidente en producción que diagnosticar
 
 ### Cuándo NO activar este agente
+- Es un cambio de lógica de negocio pura → activar Analyst o Developer
+- Es una tarea de diseño visual → activar UI Designer
+
 ---
 
-## 🏁 Protocolo de Cierre y Deploy a Producción (Hand-off)
+## 🏁 Protocolo de Cierre y Deploy a Producción (Hand-off & Telemetría)
+
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL:**  
+> Como DevOps Engineer, tras completar el despliegue a producción o validación de infraestructura, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> ```bash
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive
+> ```
 
 Una vez completado el deployment a producción y verificado el health check del sistema:
 

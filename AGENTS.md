@@ -69,6 +69,7 @@ Estas reglas aplican también al desarrollo de este repositorio:
 | **R3** | No crear versiones del tipo `architect-v2.md`. Modificar el existente |
 | **R4** | Los cambios en roles/workflows deben reflejarse en `CHANGELOG.md` |
 | **R5** | Los documentos representan el **estado actual**, no el histórico |
+| **R6** | **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase o tarea, el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` antes de responder o dar por finalizado su turno. |
 
 ### Convenciones
 - **Idioma:** Todo el contenido del repositorio debe estar en **español**.

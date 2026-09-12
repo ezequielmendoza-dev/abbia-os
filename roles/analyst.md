@@ -326,13 +326,15 @@ Pasos a seguir:
 
 ---
 
-## 🏁 Protocolo de Cierre Obligatorio (Hand-off)
+## 🏁 Protocolo de Cierre Mandatorio (Hand-off & Telemetría)
 
-Una vez generado y verificado el artefacto (`discovery.md` o `spec.md`), **debes ejecutar el cierre de tu fase** para sincronizar la memoria persistente y la telemetría del proyecto:
-
-```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst
-```
+> [!IMPORTANT]
+> **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
+> Como Product Analyst, una vez generado el artefacto (`spec.md` o `discovery.md`), **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> ```bash
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst
+> ```
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 analysis analyst`
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

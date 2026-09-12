@@ -186,17 +186,29 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 *Se activa si el bug es funcional o de negocio.*
 - **Entrada:** Reporte de bug.
 - **Acción:** Corregir `.ai/features/FEAT-XXX/spec.md` (o crearla en `.ai/features/BUG-NNN-slug/spec.md` si es general) y actualizar `.ai/business-rules.md` si aplica.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN analysis analyst
+  ```
 - **Aprobación:** El Tech Lead debe validar los cambios funcionales antes de que pasen al Developer.
 
 #### 1.B. Ajuste de Especificación Visual (UI Designer)
 *Se activa si el bug es de UI/UX, responsive, o a11y.*
 - **Entrada:** Reporte de bug + `ui-design.md` anterior.
-- **Acción:** Modificar el diseño en `ui-design.md` para corregir la alineación, adaptabilidad o definir el estado visual omitido. No requiere aprobación formal del Tech Lead a menos que modifique tokens de diseño globales.
+- **Acción:** Modificar el diseño en `ui-design.md` para corregir la alineación, adaptabilidad o definir el estado visual omitido.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN ui-design ui-designer
+  ```
 
 #### 1.C. Ajuste de Diseño Técnico (Software Architect)
 *Se activa si el bug es arquitectónico o de lógica técnica compleja.*
 - **Entrada:** Reporte de bug + diseño técnico actual.
-- **Acción:** Actualizar `architecture.md` de la feature o el archivo de arquitectura global `.ai/architecture.md`. Si se toma una decisión de diseño de impacto general, registrar una nueva decisión `ARCH-NNN` en `.ai/decisions.md`.
+- **Acción:** Actualizar `architecture.md` de la feature o el archivo de arquitectura global `.ai/architecture.md`. Si se toma una decisión de diseño de impacto general, registrar una nueva decisión `ARCH-NNN` en `.ai/decisions.md` y `.ai/knowledge-graph.yaml`.
+- **Cierre Obligatorio (R6):**
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN architecture architect
+  ```
 - **Aprobación:** El Tech Lead debe revisar y aprobar el diseño técnico modificado.
 
 ---
@@ -226,6 +238,10 @@ Especificación de corrección de referencia:
 - Escribir o actualizar una prueba automatizada (unit/integration) que reproduzca el bug y valide que no vuelva a ocurrir (Regression Test).
 - Queda estrictamente prohibido realizar refactorizaciones o agregar features no relacionadas (scope creep) dentro del fix.
 - Si el fix requiere modificar APIs o esquemas de BD no contemplados en el Paso 1.C, detener la implementación y notificar al Architect.
+- **Cierre Obligatorio (R6):** Al finalizar la implementación y tests, el Developer **debe ejecutar obligatoriamente**:
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN implement developer
+  ```
 
 ---
 
@@ -250,6 +266,10 @@ Cambios realizados: [Lista de commits o descripción de modificaciones de códig
   1. El QA genera en `qa.md` el diagnóstico estructurado con logs de error y pasos de reproducción.
   2. El Developer ajusta el parche de forma inmediata y re-ejecuta los tests.
   3. Se repite el ciclo hasta que el veredicto sea `APROBADO` (máximo 3 intentos antes de escalar al Tech Lead).
+- **Cierre Obligatorio (R6):** Al emitir el reporte `qa.md`, ejecutar:
+  ```bash
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN qa qa --verdict <APROBADO|RECHAZADO>
+  ```
 
 ---
 
@@ -268,16 +288,24 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 > 2. **Version Bump:** Una vez hecho el commit, ejecutar `npm run bump:patch -- "BUG-NNN: descripción"` para actualizar la versión (patch), el CHANGELOG y el context.
 > 3. **Git Tag:** Crear tag `git tag -a vX.Y.Z -m "BUG-NNN: descripción"` y push con `git push --tags`.
 > 4. **Release:** Indicar al usuario si procede release según [`workflows/release.md`](release.md).
+> 5. **Cierre Obligatorio (R6):**
+>    ```bash
+>    bash .ai/agents/scripts/finish-phase.sh BUG-NNN approval tech-lead --verdict APROBADO [--archive]
+>    ```
 
 ---
 
 ### Paso 5 — Deploy y Cierre
 
 1. Desplegar el fix a producción (ver [`workflows/release.md`](release.md)).
-2. Consolidar cambios en la memoria del proyecto:
+2. Ejecutar el cierre y archivado final:
+   ```bash
+   bash .ai/agents/scripts/finish-phase.sh BUG-NNN deploy devops --verdict PASS --archive
+   ```
+3. Consolidar cambios en la memoria del proyecto:
    - Si se modificó la arquitectura, actualizar `.ai/architecture.md`.
    - Si se modificó una regla funcional, actualizar `.ai/business-rules.md`.
-3. Actualizar `CHANGELOG.md` documentando el bug resuelto en la sección de "Fixed" (esto ya se hizo automáticamente en el Paso 4 con `npm run bump:patch`).
+4. Actualizar `CHANGELOG.md` documentando el bug resuelto en la sección de "Fixed" (esto ya se hizo automáticamente en el Paso 4 con `npm run bump:patch`).
 
 ---
 

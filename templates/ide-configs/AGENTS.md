@@ -44,6 +44,7 @@ Los documentos de especificación, diseño técnico y QA viven **únicamente** d
 | **R3** | No crear versiones del tipo `architecture-v2.md` o `spec-final.md` — modificar el existente |
 | **R4** | No crear documentos de features específicas en la raíz de `.ai/` |
 | **R5** | Los documentos raíz representan el **estado actual**, no el histórico |
+| **R6** | **Cierre Mandatorio y Telemetría:** Al completar cualquier fase (Spec, UI, Architecture, Implementation, QA, Approval, Deploy), el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` antes de finalizar su turno o entregar la respuesta, garantizando la telemetría y memoria persistente. |
 
 ---
 
