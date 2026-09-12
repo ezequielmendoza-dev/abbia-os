@@ -269,8 +269,8 @@ git commit -m "chore: update ai-agents submodule to v3.2.x"
 #### Paso 2 — Activar los sistemas nuevos (memoria, métricas, knowledge graph)
 
 ```bash
-# El setup-ide.sh v1.8.0 ahora existe dentro del submódulo actualizado.
-# Forma interactiva (recomendada si quieres regenerar reglas IDE):
+# El setup-ide.sh ahora existe dentro del submódulo actualizado.
+# Forma interactiva (recomendada si quieres regenerar reglas IDE o Cursor MDC):
 bash .ai/agents/scripts/setup-ide.sh
 # Forma sin preguntas (solo crea seeds, no toca reglas IDE):
 bash .ai/agents/scripts/setup-ide.sh --auto
@@ -278,11 +278,25 @@ bash .ai/agents/scripts/setup-ide.sh --auto
 
 Esto crea (idempotente, no toca lo existente): `.ai/memory/` con sus 4 seeds, `.ai/metrics/executions.yaml` y `.ai/knowledge-graph.yaml`.
 
-#### Paso 3 — Regenerar las reglas IDE con las nuevas referencias
+#### Paso 3 — Regenerar las reglas IDE con las nuevas referencias (Opcional)
 
-Si eliges la forma interactiva del Paso 2 (Opción 7 "Instalar TODOS"), los archivos `.cursorrules`, `CLAUDE.md`, etc. se regeneran apuntando a las rutas nuevas de v3 (`roles/`, `skills/`, `workflows/`).
+Si eliges la forma interactiva del Paso 2, puedes generar las reglas modulares de Cursor (`.cursor/rules/*.mdc`), modos de Roo-Code (`.roomodes`) o `.cursorrules`/`CLAUDE.md` actualizados.
 
-#### Paso 4 — Adaptar las features existentes de v1
+#### Paso 4 — Reconciliar y Sincronizar Features Históricas (`sync-initiatives.sh`)
+
+Para que todas las iniciativas que ya tenías creadas en `.ai/features/` antes del upgrade se indexen automáticamente en el **Knowledge Graph**, la **Memoria Episódica** y la **Telemetría**:
+
+```bash
+bash .ai/agents/scripts/sync-initiatives.sh
+```
+
+**Qué hace automáticamente:**
+- Escanea todas las carpetas en `.ai/features/`.
+- Indexa sus decisiones (`ARCH-NNN`) en `.ai/knowledge-graph.yaml` y `.ai/memory/decisions-catalog.md`.
+- Genera las entradas de sesión en `.ai/memory/workflow-log.md` y `.ai/metrics/executions.yaml`.
+- Compacta y genera el snapshot inicial en `.ai/memory/context-snapshot.md`.
+
+#### Paso 5 — Adaptar y Validar las features existentes
 
 | Aspecto | v1.x | v3.x | ¿Qué cambia? |
 |:---|:---|:---|:---|
@@ -290,15 +304,12 @@ Si eliges la forma interactiva del Paso 2 (Opción 7 "Instalar TODOS"), los arch
 | Nomenclatura | `FEAT-NNN-slug` | `FEAT-NNN-slug`, `BUG-NNN-slug`, `AUDIT-NNN-slug`, `REF-NNN-slug` | Sin cambios para FEAT/BUG; se agregan AUDIT y REF (estructura libre) |
 
 ```bash
-# Para cada feature existente (si no lo tiene ya):
+# Para cada feature existente en v1 (si no lo tiene ya):
 touch .ai/features/FEAT-NNN-slug/ui-design.md
-```
 
-Luego verifica con el validador:
-```bash
+# Validar conformidad completa:
 bash .ai/agents/scripts/validate-project.sh
 ```
-Los WARN de sistemas v3.2.0 desaparecen tras el Paso 2; los ERROR de `ui-design.md` desaparecen tras el Paso 4.
 
 #### Qué NO es retroactivo
 
@@ -312,7 +323,7 @@ Los WARN de sistemas v3.2.0 desaparecen tras el Paso 2; los ERROR de `ui-design.
 
 ```bash
 bash .ai/agents/scripts/update-ai-agents.sh                 # último commit
-bash .ai/agents/scripts/update-ai-agents.sh v3.2.2          # pin a un tag
+bash .ai/agents/scripts/update-ai-agents.sh v3.3.0          # pin a un tag
 ```
 
 ---

@@ -400,16 +400,37 @@ mi-proyecto/
 
 ---
 
-## Actualizar el Framework
+## Actualizar el Framework en un Proyecto Existente
+
+### Actualización Estándar (1 solo comando)
+```bash
+# Actualiza el submodule al último commit, commitea el puntero e inicializa sistemas nuevos
+bash .ai/agents/scripts/update-ai-agents.sh
+```
+
+### Migración desde versiones previas a v3.2.0 (Ponerse al día)
+Si tu proyecto viene de una versión anterior (`< v3.2.0`) y deseas activar la **Memoria Persistente**, el **Knowledge Graph**, la **Telemetría** y sincronizar todas las features históricas que ya tenías:
 
 ```bash
-# Actualizar al último commit
-git submodule update --remote .ai/agents && git add .ai/agents && git commit -m "chore: update ai-agents"
+# 1. Actualizar el submódulo a la última versión
+git submodule update --remote .ai/agents
 
-# Pinear a una versión específica
-cd .ai/agents && git checkout v3.2.0 && cd ../..
-git add .ai/agents && git commit -m "chore: pin ai-agents to v3.2.0"
+# 2. Inicializar las estructuras de memoria, métricas y grafo
+bash .ai/agents/scripts/setup-ide.sh --auto
+
+# 3. Reconciliar y sincronizar todas las features y bugs existentes en el proyecto
+bash .ai/agents/scripts/sync-initiatives.sh
+
+# 4. Validar el estado del proyecto
+bash .ai/agents/scripts/validate-project.sh
 ```
+
+*(O todo en una sola línea):*
+```bash
+git submodule update --remote .ai/agents && bash .ai/agents/scripts/setup-ide.sh --auto && bash .ai/agents/scripts/sync-initiatives.sh && bash .ai/agents/scripts/validate-project.sh
+```
+
+> 📖 Ver la guía completa de migración en [`docs/project-integration.md`](docs/project-integration.md#45-migración-desde-versiones-anteriores-a-v320).
 
 ---
 
