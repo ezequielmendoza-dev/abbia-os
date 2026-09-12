@@ -3,11 +3,13 @@
 # ==============================================================================
 # dashboard.sh — ai-agents Interactive Dashboard & Visualizer
 # ==============================================================================
-# Genera y abre un dashboard visual interactivo en el navegador para explorar:
-#   1. Knowledge Graph (Grafo de decisiones arquitectónicas y dependencias)
-#   2. Telemetría y Métricas (Tokens consumidos por rol, tiempos y costos)
-#   3. Workflow Memory (Línea de tiempo de sesiones, catálogo y lecciones)
-#   4. Catálogo Completo de Iniciativas (.ai/features/ y .ai/archive/)
+# Dashboard visual y autónomo para el equipo de desarrollo (ai-agents OS).
+# Proporciona visibilidad real y objetiva sobre:
+#   1. Iniciativas & Pipeline SDD (Features, Bugs, Refactors, Documentación y QA)
+#   2. Knowledge Graph (Grafo de Decisiones Arquitectónicas ADR y dependencias)
+#   3. Reglas de Negocio & Glosario (Definiciones del dominio)
+#   4. Memoria Técnica (Snapshot, lecciones aprendidas y bitácora de sesiones)
+#   5. Telemetría de Agentes (Tokens reales in/out, fases y tiempos de ejecución)
 # ==============================================================================
 
 set -euo pipefail
@@ -56,6 +58,8 @@ CATALOG_FILE="$MEM_DIR/decisions-catalog.md"
 PATTERNS_FILE="$MEM_DIR/patterns-learned.md"
 SNAPSHOT_FILE="$MEM_DIR/context-snapshot.md"
 CONTEXT_FILE="$AI_DIR/context.md"
+RULES_FILE="$AI_DIR/business-rules.md"
+GLOSSARY_FILE="$AI_DIR/glossary.md"
 FEATURES_DIR="$AI_DIR/features"
 ARCHIVE_DIR="$AI_DIR/archive"
 
@@ -70,7 +74,7 @@ read_file_or_default() {
     fi
 }
 
-# Escanear iniciativas en .ai/features/ y .ai/archive/
+# Escanear iniciativas reales en .ai/features/ y .ai/archive/
 scan_initiatives_json() {
     local features_dir="$1"
     local archive_dir="$2"
@@ -148,7 +152,7 @@ scan_initiatives_json() {
     echo "]"
 }
 
-# Extraer datos
+# Extraer datos reales del proyecto
 KG_RAW=$(read_file_or_default "$KG_FILE" "version: 1\nnodes: []\nedges: []")
 METRICS_RAW=$(read_file_or_default "$METRICS_FILE" "executions: []")
 LOG_RAW=$(read_file_or_default "$LOG_FILE" "(sin entradas en workflow-log.md)")
@@ -156,6 +160,8 @@ CATALOG_RAW=$(read_file_or_default "$CATALOG_FILE" "(sin catálogo)")
 PATTERNS_RAW=$(read_file_or_default "$PATTERNS_FILE" "(sin patrones aprendidos)")
 SNAPSHOT_RAW=$(read_file_or_default "$SNAPSHOT_FILE" "(sin snapshot)")
 CONTEXT_RAW=$(read_file_or_default "$CONTEXT_FILE" "(sin context.md)")
+RULES_RAW=$(read_file_or_default "$RULES_FILE" "(sin business-rules.md)")
+GLOSSARY_RAW=$(read_file_or_default "$GLOSSARY_FILE" "(sin glossary.md)")
 INITIATIVES_RAW=$(scan_initiatives_json "$FEATURES_DIR" "$ARCHIVE_DIR")
 
 OUTPUT_HTML="$AI_DIR/dashboard.html"
@@ -167,7 +173,7 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ai-agents OS — Visualizador Interactivo</title>
+  <title>ai-agents OS — Dashboard de Desarrollo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -207,14 +213,15 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
         <span class="text-2xl">🤖</span>
         <div>
           <h1 class="text-lg font-bold bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">ai-agents OS</h1>
-          <p class="text-xs text-slate-400">Specification-Driven Development Visualizer</p>
+          <p class="text-xs text-slate-400">Panel de Control & Estado del Repositorio</p>
         </div>
       </div>
       <nav class="flex space-x-1 bg-slate-800/60 p-1 rounded-xl border border-slate-700/50">
-        <button onclick="switchTab('graph')" id="tab-btn-graph" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-sky-500 text-white shadow-lg shadow-sky-500/20">🕸️ Knowledge Graph</button>
-        <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">📊 Telemetría & Tokens</button>
-        <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🧠 Workflow Memory</button>
-        <button onclick="switchTab('features')" id="tab-btn-features" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🚀 Iniciativas</button>
+        <button onclick="switchTab('features')" id="tab-btn-features" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all bg-sky-500 text-white shadow-lg shadow-sky-500/20">🚀 Iniciativas</button>
+        <button onclick="switchTab('graph')" id="tab-btn-graph" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🕸️ Arquitectura ADR</button>
+        <button onclick="switchTab('rules')" id="tab-btn-rules" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">⚖️ Reglas de Negocio</button>
+        <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🧠 Memoria Técnica</button>
+        <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">📊 Telemetría</button>
       </nav>
     </div>
   </header>
@@ -244,14 +251,111 @@ $PATTERNS_RAW
   <script type="text/plain" id="raw-snapshot">
 $SNAPSHOT_RAW
   </script>
+  <script type="text/plain" id="raw-rules">
+$RULES_RAW
+  </script>
+  <script type="text/plain" id="raw-glossary">
+$GLOSSARY_RAW
+  </script>
   <script type="application/json" id="raw-initiatives">
 $INITIATIVES_RAW
   </script>
 HTML_DATA
 
 cat << 'HTML_BODY' >> "$OUTPUT_HTML"
-    <!-- ==================== TAB 1: KNOWLEDGE GRAPH ==================== -->
-    <section id="tab-graph" class="tab-content active space-y-4">
+    <!-- ==================== TAB 1: INICIATIVAS & PIPELINE SDD ==================== -->
+    <section id="tab-features" class="tab-content active space-y-6">
+      <!-- Quick Summary Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Iniciativas Totales</div>
+          <div id="init-kpi-total" class="text-xl font-black text-sky-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Activas (.ai/features)</div>
+          <div id="init-kpi-active" class="text-xl font-black text-emerald-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Archivadas (.ai/archive)</div>
+          <div id="init-kpi-archived" class="text-xl font-black text-slate-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Features (FEAT)</div>
+          <div id="init-kpi-feats" class="text-xl font-black text-sky-300 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">Bugs (BUG)</div>
+          <div id="init-kpi-bugs" class="text-xl font-black text-rose-400 mt-1">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 font-medium">QA Aprobado</div>
+          <div id="init-kpi-approved" class="text-xl font-black text-teal-400 mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Advanced Filter & Search Toolbar -->
+      <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+          <!-- Live Text Search -->
+          <div class="relative w-full md:w-96">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 text-xs">🔍</span>
+            <input type="text" id="init-search-input" oninput="applyInitiativeFilters()" placeholder="Buscar por ID, título o palabra clave..." class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 placeholder:text-slate-600">
+          </div>
+
+          <!-- Sort Selector -->
+          <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <span class="text-xs text-slate-400">Ordenar:</span>
+            <select id="init-sort-select" onchange="applyInitiativeFilters()" class="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500">
+              <option value="id-asc">ID (A - Z)</option>
+              <option value="id-desc">ID (Z - A)</option>
+              <option value="tokens-desc">Más tokens registrados</option>
+              <option value="tokens-asc">Menos tokens registrados</option>
+              <option value="title-asc">Título (A - Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Pill Buttons -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs">
+          <!-- Type Filter -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">Tipo:</span>
+            <button onclick="setTypeFilter('ALL')" id="filter-type-ALL" class="filter-type-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todos</button>
+            <button onclick="setTypeFilter('FEAT')" id="filter-type-FEAT" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">FEAT</button>
+            <button onclick="setTypeFilter('BUG')" id="filter-type-BUG" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">BUG</button>
+            <button onclick="setTypeFilter('AUDIT')" id="filter-type-AUDIT" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">AUDIT</button>
+            <button onclick="setTypeFilter('REF')" id="filter-type-REF" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">REF</button>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">Estado:</span>
+            <button onclick="setStatusFilter('ALL')" id="filter-status-ALL" class="filter-status-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todas</button>
+            <button onclick="setStatusFilter('ACTIVE')" id="filter-status-ACTIVE" class="filter-status-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Activas</button>
+            <button onclick="setStatusFilter('ARCHIVED')" id="filter-status-ARCHIVED" class="filter-status-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Archivadas</button>
+          </div>
+
+          <!-- QA Status Filter -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">QA:</span>
+            <button onclick="setQaFilter('ALL')" id="filter-qa-ALL" class="filter-qa-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todos</button>
+            <button onclick="setQaFilter('APROBADO')" id="filter-qa-APROBADO" class="filter-qa-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">🟢 Aprobado</button>
+            <button onclick="setQaFilter('PENDING')" id="filter-qa-PENDING" class="filter-qa-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">🟡 Pendiente / En Curso</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Counter feedback -->
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+        <span id="initiatives-count-label">Mostrando 0 iniciativas</span>
+      </div>
+
+      <!-- Initiatives Responsive Cards Grid -->
+      <div id="initiatives-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ==================== TAB 2: KNOWLEDGE GRAPH (ADR) ==================== -->
+    <section id="tab-graph" class="tab-content space-y-4">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
         <div>
           <h2 class="text-base font-semibold text-slate-200 flex items-center gap-2">
@@ -316,7 +420,85 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       </div>
     </section>
 
-    <!-- ==================== TAB 2: TELEMETRÍA & TOKENS ==================== -->
+    <!-- ==================== TAB 3: REGLAS DE NEGOCIO & GLOSARIO ==================== -->
+    <section id="tab-rules" class="tab-content space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Business Rules Viewer -->
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
+                <span>⚖️</span> Reglas de Negocio del Dominio
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">Reglas formales activas que rigen la lógica de la aplicación.</p>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/business-rules.md</span>
+          </div>
+          <div id="rules-content" class="prose prose-invert prose-sm text-xs mt-4 max-h-[600px] overflow-y-auto pr-2"></div>
+        </div>
+
+        <!-- Glossary Viewer -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+                <span>📖</span> Glosario de Términos
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">Vocabulario y conceptos clave.</p>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/glossary.md</span>
+          </div>
+          <div id="glossary-content" class="prose prose-invert prose-xs text-xs mt-4 max-h-[600px] overflow-y-auto pr-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: WORKFLOW MEMORY & PATRONES ==================== -->
+    <section id="tab-memory" class="tab-content space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Context Snapshot -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
+                <span>🧠</span> Context Snapshot (Compactado para Sesión)
+              </h3>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">context-snapshot.md</span>
+            </div>
+            <div id="snapshot-content" class="prose prose-invert prose-sm text-xs mt-4 max-h-96 overflow-y-auto pr-2"></div>
+          </div>
+
+          <!-- Workflow Log Timeline -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span>📜</span> Línea de Tiempo de Sesiones (Bitácora Episódica)
+            </h3>
+            <div id="log-timeline" class="space-y-4 max-h-[500px] overflow-y-auto pr-2"></div>
+          </div>
+        </div>
+
+        <!-- Decisions Catalog & Patterns -->
+        <div class="space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+              <span>⚖️ Catálogo de Decisiones</span>
+              <span class="text-[10px] text-slate-500 font-normal">Semántica</span>
+            </h3>
+            <div id="catalog-content" class="prose prose-invert prose-xs text-xs max-h-60 overflow-y-auto"></div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+              <span>💡 Patrones & Lecciones Aprendidas</span>
+              <span class="text-[10px] text-slate-500 font-normal">Procedimental</span>
+            </h3>
+            <div id="patterns-content" class="prose prose-invert prose-xs text-xs max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: TELEMETRÍA DE AGENTES ==================== -->
     <section id="tab-metrics" class="tab-content space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -391,142 +573,6 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         </div>
       </div>
     </section>
-
-    <!-- ==================== TAB 3: WORKFLOW MEMORY ==================== -->
-    <section id="tab-memory" class="tab-content space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Context Snapshot -->
-        <div class="lg:col-span-2 space-y-6">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
-                <span>🧠</span> Context Snapshot (Compactado para Sesión)
-              </h3>
-              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">context-snapshot.md</span>
-            </div>
-            <div id="snapshot-content" class="prose prose-invert prose-sm text-xs mt-4 max-h-96 overflow-y-auto pr-2"></div>
-          </div>
-
-          <!-- Workflow Log Timeline -->
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <span>📜</span> Línea de Tiempo de Sesiones (Episódica)
-            </h3>
-            <div id="log-timeline" class="space-y-4 max-h-[500px] overflow-y-auto pr-2"></div>
-          </div>
-        </div>
-
-        <!-- Decisions Catalog & Patterns -->
-        <div class="space-y-6">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
-              <span>⚖️ Catálogo de Decisiones</span>
-              <span class="text-[10px] text-slate-500 font-normal">Semántica</span>
-            </h3>
-            <div id="catalog-content" class="prose prose-invert prose-xs text-xs max-h-60 overflow-y-auto"></div>
-          </div>
-
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
-              <span>💡 Patrones Aprendidos</span>
-              <span class="text-[10px] text-slate-500 font-normal">Procedimental</span>
-            </h3>
-            <div id="patterns-content" class="prose prose-invert prose-xs text-xs max-h-60 overflow-y-auto"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 4: INICIATIVAS COMPLETAS ==================== -->
-    <section id="tab-features" class="tab-content space-y-6">
-      <!-- Quick Summary Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 font-medium">Iniciativas Totales</div>
-          <div id="init-kpi-total" class="text-xl font-black text-sky-400 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 font-medium">Activas (.ai/features)</div>
-          <div id="init-kpi-active" class="text-xl font-black text-emerald-400 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 font-medium">Archivadas (.ai/archive)</div>
-          <div id="init-kpi-archived" class="text-xl font-black text-slate-400 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 font-medium">Features (FEAT)</div>
-          <div id="init-kpi-feats" class="text-xl font-black text-sky-300 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 font-medium">Bugs (BUG)</div>
-          <div id="init-kpi-bugs" class="text-xl font-black text-rose-400 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 font-medium">QA Aprobado</div>
-          <div id="init-kpi-approved" class="text-xl font-black text-teal-400 mt-1">0</div>
-        </div>
-      </div>
-
-      <!-- Advanced Filter & Search Toolbar -->
-      <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-3">
-          <!-- Live Text Search -->
-          <div class="relative w-full md:w-96">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 text-xs">🔍</span>
-            <input type="text" id="init-search-input" oninput="applyInitiativeFilters()" placeholder="Buscar por ID, título o palabra clave..." class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 placeholder:text-slate-600">
-          </div>
-
-          <!-- Sort Selector -->
-          <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-            <span class="text-xs text-slate-400">Ordenar:</span>
-            <select id="init-sort-select" onchange="applyInitiativeFilters()" class="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500">
-              <option value="id-asc">ID (A - Z)</option>
-              <option value="id-desc">ID (Z - A)</option>
-              <option value="tokens-desc">Más tokens invertidos</option>
-              <option value="tokens-asc">Menos tokens invertidos</option>
-              <option value="title-asc">Título (A - Z)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Filter Pill Buttons -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs">
-          <!-- Type Filter -->
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-[11px] font-semibold text-slate-400 mr-1">Tipo:</span>
-            <button onclick="setTypeFilter('ALL')" id="filter-type-ALL" class="filter-type-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todos</button>
-            <button onclick="setTypeFilter('FEAT')" id="filter-type-FEAT" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">FEAT</button>
-            <button onclick="setTypeFilter('BUG')" id="filter-type-BUG" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">BUG</button>
-            <button onclick="setTypeFilter('AUDIT')" id="filter-type-AUDIT" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">AUDIT</button>
-            <button onclick="setTypeFilter('REF')" id="filter-type-REF" class="filter-type-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">REF</button>
-          </div>
-
-          <!-- Status Filter -->
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-[11px] font-semibold text-slate-400 mr-1">Estado:</span>
-            <button onclick="setStatusFilter('ALL')" id="filter-status-ALL" class="filter-status-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todas</button>
-            <button onclick="setStatusFilter('ACTIVE')" id="filter-status-ACTIVE" class="filter-status-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Activas</button>
-            <button onclick="setStatusFilter('ARCHIVED')" id="filter-status-ARCHIVED" class="filter-status-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Archivadas</button>
-          </div>
-
-          <!-- QA Status Filter -->
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-[11px] font-semibold text-slate-400 mr-1">QA:</span>
-            <button onclick="setQaFilter('ALL')" id="filter-qa-ALL" class="filter-qa-btn filter-btn active px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">Todos</button>
-            <button onclick="setQaFilter('APROBADO')" id="filter-qa-APROBADO" class="filter-qa-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">🟢 Aprobado</button>
-            <button onclick="setQaFilter('PENDING')" id="filter-qa-PENDING" class="filter-qa-btn filter-btn px-2.5 py-1 rounded-md text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700">🟡 Pendiente / En Curso</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Counter feedback -->
-      <div class="flex items-center justify-between text-xs text-slate-400 px-1">
-        <span id="initiatives-count-label">Mostrando 0 iniciativas</span>
-      </div>
-
-      <!-- Initiatives Responsive Cards Grid -->
-      <div id="initiatives-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </section>
   </main>
 
   <!-- Initiative Detail Modal Dialog -->
@@ -556,7 +602,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
 
         <!-- Telemetry for this initiative -->
         <div>
-          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">⚡ Telemetría e Inversión de Tokens</h4>
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">⚡ Telemetría de la Iniciativa</h4>
           <div id="modal-telemetry-empty" class="text-slate-500 text-xs italic">No hay ejecuciones registradas en executions.yaml para esta iniciativa.</div>
           <div id="modal-telemetry-content" class="hidden space-y-2">
             <div class="grid grid-cols-3 gap-2 text-center bg-slate-950 p-3 rounded-lg border border-slate-800">
@@ -622,6 +668,8 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
     const catalogRaw = document.getElementById('raw-catalog').textContent;
     const patternsRaw = document.getElementById('raw-patterns').textContent;
     const snapshotRaw = document.getElementById('raw-snapshot').textContent;
+    const rulesRaw = document.getElementById('raw-rules').textContent;
+    const glossaryRaw = document.getElementById('raw-glossary').textContent;
 
     // --- Tab Navigation ---
     function switchTab(tabId) {
@@ -825,8 +873,10 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       });
     }
 
-    // --- Memory & Markdown Rendering ---
-    function initMemory() {
+    // --- Business Rules & Memory Rendering ---
+    function initDocsAndMemory() {
+      document.getElementById('rules-content').innerHTML = marked.parse(rulesRaw);
+      document.getElementById('glossary-content').innerHTML = marked.parse(glossaryRaw);
       document.getElementById('snapshot-content').innerHTML = marked.parse(snapshotRaw);
       document.getElementById('catalog-content').innerHTML = marked.parse(catalogRaw);
       document.getElementById('patterns-content').innerHTML = marked.parse(patternsRaw);
@@ -851,7 +901,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       });
     }
 
-    // ==================== TAB 4: INITIATIVES CONTROLLER ====================
+    // ==================== INITIATIVES CONTROLLER ====================
     let currentTypeFilter = 'ALL';
     let currentStatusFilter = 'ALL';
     let currentQaFilter = 'ALL';
@@ -878,7 +928,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
     }
 
     function initInitiatives() {
-      // Cruzar métricas con iniciativas
+      // Cruzar métricas reales con iniciativas
       const initMetrics = {};
       (metricsData.executions || []).forEach(ex => {
         if (!ex.initiative) return;
@@ -1130,10 +1180,10 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      initGraph();
-      initMetrics();
-      initMemory();
       initInitiatives();
+      initGraph();
+      initDocsAndMemory();
+      initMetrics();
     });
   </script>
 </body>
