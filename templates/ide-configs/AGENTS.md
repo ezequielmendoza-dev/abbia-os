@@ -139,7 +139,7 @@ El proyecto cuenta con herramientas en `.ai/agents/scripts/` para simplificar fl
 | `update-ai-agents.sh` | Actualizar el framework en un comando (submodule + setup): `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | `new-initiative.sh` | Crear nueva iniciativa (FEAT/BUG/AUDIT/REF) automáticamente: `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
 | `finish-phase.sh` | Cierre de fase: registra memory, metrics y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` |
-| `sync-initiatives.sh` | Sincroniza y reconcilia iniciativas pendientes con memory, metrics y KG: `bash .ai/agents/scripts/sync-initiatives.sh` |
+| `sync-initiatives.sh` | Sincroniza, auto-repara (`--fix`) y reconcilia iniciativas con memory, metrics y KG: `bash .ai/agents/scripts/sync-initiatives.sh [--fix]` |
 | `validate-project.sh` | Validar conformidad del proyecto local con las reglas documentales: `bash .ai/agents/scripts/validate-project.sh` |
 | `dashboard.sh` | Visualizador interactivo en el navegador (Grafo ADR, Telemetría de tokens, Memoria): `bash .ai/agents/scripts/dashboard.sh` |
 | `common.sh` | Librería compartida de soporte (interno, DRY) |

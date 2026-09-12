@@ -47,7 +47,7 @@ if [ -n "$VERSION" ]; then
     (cd "$SUBMODULE_DIR" && git fetch --tags --quiet && git checkout "$VERSION")
 else
     # 3b. Último commit de la rama principal
-    echo -e "\n${BLUE}--- 1/3: Actualizando submodule al último commit ---${NC}"
+    echo -e "\n${BLUE}--- 1/4: Actualizando submodule al último commit ---${NC}"
     (cd "$SUBMODULE_DIR" && git fetch --quiet && git checkout main && git pull --ff-only --quiet)
 fi
 
@@ -55,7 +55,7 @@ NEW_VERSION="$(cd "$SUBMODULE_DIR" && git describe --tags --always 2>/dev/null |
 echo -e "${GREEN}✓ Submodule actualizado a: ${NEW_VERSION}${NC}"
 
 # 4. Commit del puntero del submódulo en el proyecto
-echo -e "\n${BLUE}--- 2/3: Commiteando puntero del submódulo en el proyecto ---${NC}"
+echo -e "\n${BLUE}--- 2/4: Commiteando puntero del submódulo en el proyecto ---${NC}"
 cd "$PROJECT_ROOT"
 git add .ai/agents
 if git diff --cached --quiet; then
@@ -66,8 +66,16 @@ else
 fi
 
 # 5. Ejecutar setup-ide.sh para activar los nuevos sistemas (idempotente, no-interactivo)
-echo -e "\n${BLUE}--- 3/3: Ejecutando setup-ide.sh (sistemas v3.x) ---${NC}"
+echo -e "\n${BLUE}--- 3/4: Ejecutando setup-ide.sh (sistemas v3.x) ---${NC}"
 bash "$SUBMODULE_DIR/scripts/setup-ide.sh" --auto
+
+# 6. Sincronizar y auto-reparar iniciativas (compatible con proyectos legacy)
+echo -e "\n${BLUE}--- 4/4: Reconciliando y auto-reparando iniciativas (sync-initiatives --fix) ---${NC}"
+bash "$SUBMODULE_DIR/scripts/sync-initiatives.sh" --fix
+
+# 7. Validar conformidad final
+echo -e "\n${BLUE}--- Verificación final de conformidad documental ---${NC}"
+bash "$SUBMODULE_DIR/scripts/validate-project.sh"
 
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}   🎉 ai-agents OS actualizado a ${NEW_VERSION}!       ${NC}"

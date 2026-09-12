@@ -282,32 +282,26 @@ Esto crea (idempotente, no toca lo existente): `.ai/memory/` con sus 4 seeds, `.
 
 Si eliges la forma interactiva del Paso 2, puedes generar las reglas modulares de Cursor (`.cursor/rules/*.mdc`), modos de Roo-Code (`.roomodes`) o `.cursorrules`/`CLAUDE.md` actualizados.
 
-#### Paso 4 — Reconciliar y Sincronizar Features Históricas (`sync-initiatives.sh`)
+#### Paso 4 — Reconciliar, Auto-reparar y Sincronizar Features Históricas (`sync-initiatives.sh --fix`)
 
-Para que todas las iniciativas que ya tenías creadas en `.ai/features/` antes del upgrade se indexen automáticamente en el **Knowledge Graph**, la **Memoria Episódica** y la **Telemetría**:
+Para que todas las iniciativas que ya tenías creadas en `.ai/features/` antes del upgrade se adapten automáticamente a los estándares de v3.x y se indexen en el **Knowledge Graph**, la **Memoria Episódica** y la **Telemetría**:
 
 ```bash
-bash .ai/agents/scripts/sync-initiatives.sh
+bash .ai/agents/scripts/sync-initiatives.sh --fix
 ```
 
 **Qué hace automáticamente:**
 - Escanea todas las carpetas en `.ai/features/`.
-- Indexa sus decisiones (`ARCH-NNN`) en `.ai/knowledge-graph.yaml` y `.ai/memory/decisions-catalog.md`.
-- Genera las entradas de sesión en `.ai/memory/workflow-log.md` y `.ai/metrics/executions.yaml`.
-- Compacta y genera el snapshot inicial en `.ai/memory/context-snapshot.md`.
+- **Auto-reparación documental (`--fix`):** detecta artefactos faltantes propios de versiones anteriores (`decision.md`, `ui-design.md`, `qa.md`), genera stubs mínimos conformes y normaliza los veredictos de QA (`APROBADO`).
+- **Limpieza de template:** depura los placeholders de ejemplo en `.ai/knowledge-graph.yaml` e indexa las decisiones reales (`ARCH-NNN`).
+- **Memoria y Telemetría:** genera las entradas de sesión en `.ai/memory/workflow-log.md` y `.ai/metrics/executions.yaml`.
+- **Snapshot:** compacta y genera el snapshot inicial en `.ai/memory/context-snapshot.md`.
 
-#### Paso 5 — Adaptar y Validar las features existentes
+#### Paso 5 — Validar Conformidad del Proyecto
 
-| Aspecto | v1.x | v3.x | ¿Qué cambia? |
-|:---|:---|:---|:---|
-| Archivos requeridos por feature | `spec.md`, `architecture.md`, `qa.md`, `decision.md` | + `ui-design.md` | Las features de v1 **fallan** la validación hasta tener `ui-design.md` |
-| Nomenclatura | `FEAT-NNN-slug` | `FEAT-NNN-slug`, `BUG-NNN-slug`, `AUDIT-NNN-slug`, `REF-NNN-slug` | Sin cambios para FEAT/BUG; se agregan AUDIT y REF (estructura libre) |
+Tras correr la sincronización con `--fix`, verifica que el proyecto cumpla 100% con los estándares:
 
 ```bash
-# Para cada feature existente en v1 (si no lo tiene ya):
-touch .ai/features/FEAT-NNN-slug/ui-design.md
-
-# Validar conformidad completa:
 bash .ai/agents/scripts/validate-project.sh
 ```
 

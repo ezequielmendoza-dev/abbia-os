@@ -259,7 +259,7 @@ cp .ai/agents/templates/github-action-ci.yml .github/workflows/ai-agents-validat
 | [`update-ai-agents.sh`](scripts/update-ai-agents.sh) | Actualiza el framework (submodule + setup en un comando) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | [`new-initiative.sh`](scripts/new-initiative.sh) | Crea estructura de feature/bug/auditoría/refactor automáticamente | `bash .ai/agents/scripts/new-initiative.sh FEAT 003 login-seguro` |
 | [`finish-phase.sh`](scripts/finish-phase.sh) | Cierra una fase registrando memory, metrics y snapshot (append-only) | `bash .ai/agents/scripts/finish-phase.sh FEAT-114 qa` |
-| [`sync-initiatives.sh`](scripts/sync-initiatives.sh) | Sincroniza y reconcilia iniciativas pendientes con memory, metrics y KG | `bash .ai/agents/scripts/sync-initiatives.sh` |
+| [`sync-initiatives.sh`](scripts/sync-initiatives.sh) | Sincroniza, auto-repara (`--fix`) y reconcilia iniciativas con memory, metrics y KG | `bash .ai/agents/scripts/sync-initiatives.sh [--fix]` |
 | [`validate-project.sh`](scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
 | [`dashboard.sh`](scripts/dashboard.sh) | Genera y abre el dashboard visual interactivo (.ai/dashboard.html) | `bash .ai/agents/scripts/dashboard.sh` |
 

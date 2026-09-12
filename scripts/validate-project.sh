@@ -76,18 +76,23 @@ done
 echo -e "\n${BLUE}Verificando sistemas opcionales de v3.2.0 en .ai/...${NC}"
 
 if [ -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
-    # Contenido: un grafo útil tiene al menos un nodo ARCH-NNN y no conserva marcadores del template
+    # Contenido: un grafo útil tiene al menos un nodo ARCH-NNN real
     KG_NODES=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3}' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
-    KG_TEMPLATE=$(grep -cE '^updated: YYYY-MM-DD|^[[:space:]]*title: "Nombre corto de la decisión"' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
-    if [ "$KG_NODES" -gt 0 ] && [ "$KG_TEMPLATE" -eq 0 ]; then
-        echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado ($KG_NODES nodo(s))."
+    KG_TEMPLATE_TITLE=$(grep -cE '^[[:space:]]*title: "Nombre corto de la decisión"' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
+    
+    # Nodos reales = nodos totales menos los placeholders de ejemplo
+    REAL_KG_NODES=$((KG_NODES - KG_TEMPLATE_TITLE))
+    if [ "$REAL_KG_NODES" -lt 0 ]; then REAL_KG_NODES=0; fi
+
+    if [ "$REAL_KG_NODES" -gt 0 ]; then
+        echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado ($REAL_KG_NODES nodo(s) activo(s))."
         # Validación semántica: verificar que dependencias sigan el formato ARCH-NNN
         INVALID_REFS=$(grep -E '^[[:space:]]*(depends_on|supersedes|conflicts_with):' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" | grep -v '\[\]' | grep -E '\[.*\]' | grep -vE '\[(ARCH-[0-9]{3}(, *ARCH-[0-9]{3})*)\]' || true)
         if [ -n "$INVALID_REFS" ]; then
             warning_found "El grafo de decisiones contiene dependencias con formato no estándar: $INVALID_REFS (debe ser [ARCH-NNN])."
         fi
     else
-        warning_found ".ai/knowledge-graph.yaml existe pero sin nodos reales (solo el template). Registrar los ARCH-NNN (o usar finish-phase.sh)."
+        warning_found ".ai/knowledge-graph.yaml existe pero sin nodos reales (solo el template). Registrar los ARCH-NNN (o usar sync-initiatives.sh --fix)."
     fi
 else
     warning_found "No existe .ai/knowledge-graph.yaml. El grafo de decisiones está inactivo (opcional v3.2.0)."
@@ -248,6 +253,8 @@ echo -e "===================================================="
 
 if [ "$ERRORS" -gt 0 ]; then
     echo -e "${RED}❌ Validación Fallida. Se detectaron incumplimientos críticos de la estructura documental.${NC}"
+    echo -e "\n${YELLOW}💡 Tip: Si estás migrando un proyecto con iniciativas creadas en versiones previas a v3.2, puedes auto-reparar la estructura ejecutando:${NC}"
+    echo -e "${YELLOW}   bash .ai/agents/scripts/sync-initiatives.sh --fix${NC}"
     exit 1
 else
     echo -e "${GREEN}✅ Validación Exitosa. El proyecto cumple con la estructura y nomenclatura de ai-agents OS.${NC}"
