@@ -62,6 +62,9 @@ else
 fi
 
 MODE="estandar"
+MODEL="null"
+PROVIDER="null"
+TARGET_ENV="null"
 TOKENS_IN="null"
 TOKENS_OUT="null"
 DURATION_S="null"
@@ -79,6 +82,9 @@ i=0
 while [ $i -lt ${#ARGS[@]} ]; do
     case "${ARGS[$i]}" in
         --mode)       MODE="${ARGS[$((i+1))]:-estandar}"; i=$((i+2)) ;;
+        --model)      MODEL="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
+        --provider)   PROVIDER="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
+        --env|--target-env) TARGET_ENV="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
         --tokens-in)  TOKENS_IN="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
         --tokens-out) TOKENS_OUT="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
         --duration)   DURATION_S="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
@@ -95,7 +101,7 @@ while [ $i -lt ${#ARGS[@]} ]; do
     esac
 done
 
-# ---------- 2. Validaciones ----------
+# ---------- 2. Validaciones & Auto-detección ----------
 if [ -z "$INITIATIVE" ] || [ -z "$PHASE" ]; then
     echo -e "${RED}Error: Se requieren al menos <INICIATIVA> y <FASE>.${NC}"
     echo -e "Uso: bash finish-phase.sh <INICIATIVA> <FASE> [ROL] [OPCIONES]"
@@ -103,15 +109,64 @@ if [ -z "$INITIATIVE" ] || [ -z "$PHASE" ]; then
     exit 1
 fi
 
-INI_PATTERN="$(initiative_id_pattern)"
-if [[ ! "$INITIATIVE" =~ $INI_PATTERN ]]; then
-    echo -e "${RED}Error: INICIATIVA debe ser '<$(initiative_types_readable)>-<NNN>' (ej: FEAT-114, BUG-022, AUDIT-003, REF-010).${NC}"
+# Aceptar tanto FEAT-NNN como FEAT-NNN-slug (full name)
+INI_PATTERN_FULL="$(initiative_name_pattern)"
+INI_PATTERN_ID="$(initiative_id_pattern)"
+if [[ "$INITIATIVE" =~ $INI_PATTERN_FULL ]]; then
+    # Extraer solo TIPO-NNN para registrar en metrics (normalizar)
+    INITIATIVE_ID=$(echo "$INITIATIVE" | grep -oE "^($(echo "$INITIATIVE_TYPES" | tr ' ' '|'))-[0-9]{3}")
+    echo -e "${GREEN}✓ Iniciativa con slug detectada: $INITIATIVE → ID canónico: $INITIATIVE_ID${NC}"
+elif [[ "$INITIATIVE" =~ $INI_PATTERN_ID ]]; then
+    INITIATIVE_ID="$INITIATIVE"
+else
+    echo -e "${RED}Error: INICIATIVA debe ser '<$(initiative_types_readable)>-<NNN>' o '<$(initiative_types_readable)>-<NNN>-<slug>' (ej: FEAT-114, BUG-022-mi-bug).${NC}"
     exit 1
 fi
 
+# Advertir si la fase no coincide con los nombres canónicos del DAG
+CANONICAL_PHASES="analysis discovery ui-design architecture tech-review-1 tech-review-2 implement tasks qa approval deploy"
+PHASE_LOWER=$(echo "$PHASE" | tr '[:upper:]' '[:lower:]')
+if [[ ! " $CANONICAL_PHASES " =~ " $PHASE_LOWER " ]]; then
+    echo -e "${YELLOW}⚠ Fase '$PHASE' no es un nombre canónico del DAG. Nombres válidos: $CANONICAL_PHASES${NC}"
+    echo -e "${YELLOW}  Usando '$PHASE' tal cual — considera usar el nombre canónico para consistencia.${NC}"
+fi
+
+# Auto-inferir target_env si no se especificó
+if [ "$TARGET_ENV" = "null" ] || [ -z "$TARGET_ENV" ]; then
+    case "$PHASE_LOWER" in
+        analysis|discovery|ui-design|architecture|tech-review-1|implement|tasks)
+            TARGET_ENV="local" ;;
+        qa|tech-review-2)
+            TARGET_ENV="staging" ;;
+        approval|deploy)
+            TARGET_ENV="production" ;;
+        *)
+            TARGET_ENV="local" ;;
+    esac
+fi
+
+# Auto-detectar provider si no se especificó
+if [ "$PROVIDER" = "null" ] || [ -z "$PROVIDER" ]; then
+    if [ -n "${OPENCODE_SERVER:-}" ] || [ -n "${OPENCODE:-}" ]; then
+        PROVIDER="opencode"
+    elif [ -n "${ANTIGRAVITY_AGENT:-}" ] || [ -n "${GEMINI_CLI:-}" ]; then
+        PROVIDER="antigravity"
+    elif [ -n "${CURSOR_TRACE_ID:-}" ] || [ -n "${CURSOR_EXECPATH:-}" ]; then
+        PROVIDER="cursor"
+    elif [ -n "${CLAUDE_CODE:-}" ]; then
+        PROVIDER="claude-code"
+    elif [ -n "${WINDSURF_PORT:-}" ]; then
+        PROVIDER="windsurf"
+    fi
+fi
+
+# Auto-detectar rama de Git
+GIT_BRANCH=$(git -C "$PROJECT_ROOT" branch --show-current 2>/dev/null || git -C "$PROJECT_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "null")
+[ -z "$GIT_BRANCH" ] && GIT_BRANCH="null"
+
 # Sugerir ROL según fase si no se pasó
 if [ -z "$ROLE" ]; then
-    case "$PHASE" in
+    case "$PHASE_LOWER" in
         analysis|discovery)  ROLE="analyst" ;;
         ui-design)           ROLE="ui-designer" ;;
         architecture|tech-review-1) ROLE="architect" ;;
@@ -135,6 +190,13 @@ if [ "$VERDICT" != "null" ] && [[ ! "$VERDICT" =~ ^(PASS|FAIL|APROBADO|RECHAZADO
     echo -e "${RED}Error: --verdict debe ser PASS|FAIL|APROBADO|RECHAZADO.${NC}"; exit 1
 fi
 
+# Advertir si tokens no se pasaron (promover telemetría real)
+if [ "$TOKENS_IN" = "null" ] && [ "$TOKENS_OUT" = "null" ]; then
+    echo -e "${YELLOW}⚠ Sin telemetría de tokens (quedarán como null). Para registrar tokens reales, usá:${NC}"
+    echo -e "${YELLOW}  --tokens-in <N> --tokens-out <N> --duration <segundos> --source measured${NC}"
+    echo -e "${YELLOW}  (El valor lo encontrás en el contador de tokens de tu IDE/CLI de IA)${NC}"
+fi
+
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # ---------- 3. Registrar entrada en workflow-log.md (append-only) ----------
@@ -148,7 +210,7 @@ fi
 
 cat >> "$LOG_FILE" << EOF
 
-## [$INITIATIVE] — $ROLE ($TS)
+## [$INITIATIVE_ID] — $ROLE ($TS)
 
 - **Fase cerrada:** $PHASE
 - **Decisión:** $NOTE
@@ -196,10 +258,14 @@ fi
 
 cat >> "$METRICS_FILE" << EOF
   - ts: $TS
-    initiative: $INITIATIVE
+    initiative: $INITIATIVE_ID
     role: $ROLE
     phase: $PHASE
     mode: $MODE
+    model: $MODEL
+    provider: $PROVIDER
+    target_env: $TARGET_ENV
+    git_branch: $GIT_BRANCH
     tokens_in: $TOKENS_IN
     tokens_out: $TOKENS_OUT
     duration_s: $DURATION_S
@@ -208,6 +274,168 @@ cat >> "$METRICS_FILE" << EOF
     source: $SOURCE
 EOF
 echo -e "${GREEN}✓ Ejecución registrada en executions.yaml.${NC}"
+
+# ---------- 4b. Regenerar aggregates.yaml ----------
+AGGREGATES_FILE="$METRICS_DIR/aggregates.yaml"
+generate_aggregates() {
+    local execfile="$1"
+    local outfile="$2"
+    [ ! -f "$execfile" ] && return
+
+    # Usar python3 si está disponible para parsear YAML limpiamente
+    if command -v python3 &>/dev/null; then
+        python3 - "$execfile" "$outfile" << 'PYEOF'
+import sys, re
+from collections import defaultdict
+from datetime import datetime, timezone
+
+execfile = sys.argv[1]
+outfile  = sys.argv[2]
+
+# Mini-parser YAML de executions (no requiere pyyaml)
+entries = []
+current = {}
+with open(execfile) as f:
+    for line in f:
+        line = line.rstrip()
+        m = re.match(r'^\s+- ts:\s*(.+)$', line)
+        if m:
+            if current:
+                entries.append(current)
+            current = {'ts': m.group(1).strip()}
+            continue
+        for key in ['initiative','role','phase','mode','model','provider','target_env','git_branch','tokens_in','tokens_out','duration_s','attempts','verdict','source']:
+            m = re.match(rf'^\s+{key}:\s*(.+)$', line)
+            if m:
+                val = m.group(1).strip()
+                current[key] = None if val == 'null' else val
+    if current:
+        entries.append(current)
+
+def safe_int(v, default=0):
+    try: return int(v) if v is not None else default
+    except: return default
+
+per_phase    = defaultdict(lambda: {'tokens_total': 0, 'duration_s': 0, 'sample': 0, 'null_tokens': 0})
+per_role     = defaultdict(lambda: {'tokens_total': 0, 'duration_s': 0, 'attempts_total': 0, 'sample': 0, 'null_tokens': 0})
+per_feature  = defaultdict(lambda: {'tokens_total': 0, 'duration_s': 0, 'count': 0, 'retries': 0, 'null_tokens': 0})
+per_model    = defaultdict(lambda: {'tokens_total': 0, 'tokens_in': 0, 'tokens_out': 0, 'sample': 0, 'null_tokens': 0})
+per_provider = defaultdict(lambda: {'tokens_total': 0, 'sample': 0})
+per_env      = defaultdict(lambda: {'tokens_total': 0, 'sample': 0})
+
+for ex in entries:
+    ti = safe_int(ex.get('tokens_in'))
+    to = safe_int(ex.get('tokens_out'))
+    tt = ti + to
+    ds = safe_int(ex.get('duration_s'))
+    at = safe_int(ex.get('attempts'), 1)
+    phase    = ex.get('phase') or 'desconocida'
+    role     = ex.get('role')  or 'desconocido'
+    ini      = ex.get('initiative') or 'desconocida'
+    model    = ex.get('model') or 'no-especificado'
+    provider = ex.get('provider') or 'no-especificado'
+    env      = ex.get('target_env') or 'local'
+    null_tok = 1 if (ex.get('tokens_in') is None and ex.get('tokens_out') is None) else 0
+
+    per_phase[phase]['tokens_total'] += tt
+    per_phase[phase]['duration_s']   += ds
+    per_phase[phase]['sample']       += 1
+    per_phase[phase]['null_tokens']  += null_tok
+
+    per_role[role]['tokens_total']    += tt
+    per_role[role]['duration_s']      += ds
+    per_role[role]['attempts_total']  += at
+    per_role[role]['sample']          += 1
+    per_role[role]['null_tokens']     += null_tok
+
+    per_feature[ini]['tokens_total'] += tt
+    per_feature[ini]['duration_s']   += ds
+    per_feature[ini]['count']        += 1
+    per_feature[ini]['retries']      += max(0, at - 1)
+    per_feature[ini]['null_tokens']  += null_tok
+
+    per_model[model]['tokens_total'] += tt
+    per_model[model]['tokens_in']    += ti
+    per_model[model]['tokens_out']   += to
+    per_model[model]['sample']       += 1
+    per_model[model]['null_tokens']  += null_tok
+
+    per_provider[provider]['tokens_total'] += tt
+    per_provider[provider]['sample']       += 1
+
+    per_env[env]['tokens_total'] += tt
+    per_env[env]['sample']       += 1
+
+lines = [
+    '# ==============================================================================',
+    '# aggregates.yaml — Métricas Agregadas por Fase / Rol / Modelo / Entorno / Iniciativa',
+    '# ==============================================================================',
+    '# Generado automáticamente por finish-phase.sh — NO editar a mano.',
+    '# Fuente: .ai/metrics/executions.yaml  |  Docs: docs/agent-metrics.md',
+    '# ==============================================================================',
+    '',
+    f'generated_at: {datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}',
+    f'total_executions: {len(entries)}',
+    '',
+    'per_phase:',
+]
+for k, v in sorted(per_phase.items()):
+    lines.append(f'  {k}:')
+    lines.append(f'    tokens_total: {v["tokens_total"]}')
+    lines.append(f'    duration_s: {v["duration_s"]}')
+    lines.append(f'    sample: {v["sample"]}')
+    lines.append(f'    null_tokens: {v["null_tokens"]}  # ejecuciones sin telemetría real')
+
+lines += ['', 'per_role:']
+for k, v in sorted(per_role.items()):
+    lines.append(f'  {k}:')
+    lines.append(f'    tokens_total: {v["tokens_total"]}')
+    lines.append(f'    duration_s: {v["duration_s"]}')
+    lines.append(f'    attempts_total: {v["attempts_total"]}')
+    lines.append(f'    sample: {v["sample"]}')
+    lines.append(f'    null_tokens: {v["null_tokens"]}')
+
+lines += ['', 'per_model:']
+for k, v in sorted(per_model.items()):
+    lines.append(f'  {k}:')
+    lines.append(f'    tokens_total: {v["tokens_total"]}')
+    lines.append(f'    tokens_in: {v["tokens_in"]}')
+    lines.append(f'    tokens_out: {v["tokens_out"]}')
+    lines.append(f'    sample: {v["sample"]}')
+    lines.append(f'    null_tokens: {v["null_tokens"]}')
+
+lines += ['', 'per_provider:']
+for k, v in sorted(per_provider.items()):
+    lines.append(f'  {k}:')
+    lines.append(f'    tokens_total: {v["tokens_total"]}')
+    lines.append(f'    sample: {v["sample"]}')
+
+lines += ['', 'per_env:']
+for k, v in sorted(per_env.items()):
+    lines.append(f'  {k}:')
+    lines.append(f'    tokens_total: {v["tokens_total"]}')
+    lines.append(f'    sample: {v["sample"]}')
+
+lines += ['', 'per_feature:']
+for k, v in sorted(per_feature.items()):
+    rt = round(v["retries"] / v["count"], 2) if v["count"] > 0 else 0
+    lines.append(f'  {k}:')
+    lines.append(f'    tokens_total: {v["tokens_total"]}')
+    lines.append(f'    duration_s: {v["duration_s"]}')
+    lines.append(f'    count: {v["count"]}')
+    lines.append(f'    retry_rate: {rt}')
+    lines.append(f'    null_tokens: {v["null_tokens"]}')
+
+with open(outfile, 'w', encoding='utf-8') as f:
+    f.write('\n'.join(lines) + '\n')
+print(f"aggregates.yaml generado: {len(entries)} ejecuciones, {len(per_phase)} fases, {len(per_role)} roles, {len(per_model)} modelos, {len(per_env)} entornos, {len(per_feature)} iniciativas.")
+PYEOF
+        echo -e "${GREEN}✓ aggregates.yaml regenerado.${NC}"
+    else
+        echo -e "${YELLOW}! python3 no disponible — aggregates.yaml no se regeneró (opcional).${NC}"
+    fi
+}
+generate_aggregates "$METRICS_FILE" "$AGGREGATES_FILE"
 
 # ---------- 5. Regenerar context-snapshot ----------
 if [ "${NO_SNAPSHOT:-false}" != "true" ]; then
@@ -228,6 +456,10 @@ echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}   🎉 Fase '$PHASE' cerrada para $INITIATIVE ($ROLE)${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo -e "Timestamp: ${YELLOW}$TS${NC}"
+if [ "$TOKENS_IN" = "null" ] || [ "$TOKENS_OUT" = "null" ]; then
+    echo -e "${YELLOW}⚠  Tokens sin registrar. Para la próxima fase, agregá al comando:${NC}"
+    echo -e "${YELLOW}   --tokens-in <N> --tokens-out <N> --source measured${NC}"
+fi
 echo -e "Siguiente: registra las decisiones arquitectónicas en .ai/decisions.md"
 echo -e "y actualiza .ai/knowledge-graph.yaml (nodo ARCH-NNN) si aplica."
-echo -e "===================================================="
+echo -e "====================================================="

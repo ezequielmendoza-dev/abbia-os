@@ -332,9 +332,12 @@ Pasos a seguir:
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como Product Analyst, una vez generado el artefacto (`spec.md` o `discovery.md`), **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst \
+>   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 analysis analyst`
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 analysis analyst --tokens-in 18500 --tokens-out 4200 --duration 480 --source measured`  
+> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA (ej: Antigravity muestra tokens de la sesión). Si no los tenés, omití los flags y quedarán como `null`.*
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

@@ -314,9 +314,12 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como QA Engineer, una vez emitido el reporte `qa.md`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> \
+>   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO`
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO --tokens-in 9000 --tokens-out 2500 --duration 360 --source measured`  
+> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags y quedarán como `null`.*
 
 > **💡 Orientación al Usuario:**  
 > Si el veredicto es **`APROBADO`**, informa al usuario que la iniciativa ha superado las pruebas técnicas y está lista para que pueda realizar sus pruebas funcionales en el **entorno de pruebas/staging** antes de la revisión final del Tech Lead y el pase a producción.

@@ -258,14 +258,18 @@ Tarea:
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL:**  
 > Como DevOps Engineer, tras completar el despliegue a producción o validación de infraestructura, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
+>   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --duration <SEGUNDOS> --source measured
 > ```
 
 Una vez completado el deployment a producción y verificado el health check del sistema:
 
 ```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
+  --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> --duration <SEGUNDOS> --source measured
 ```
+*Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags.*
 
 El flag `--archive` ejecuta [`scripts/archive-initiative.sh`](../scripts/archive-initiative.sh), moviendo la iniciativa a `.ai/archive/`, actualizando los paths en `.ai/knowledge-graph.yaml`, registrando en `.ai/memory/workflow-log.md` y regenerando `.ai/memory/context-snapshot.md`.
 

@@ -193,9 +193,12 @@ Si el proyecto tiene un archivo de tokens de diseño o variables CSS globales (e
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como UI Designer, una vez generado el artefacto `ui-design.md`, **NUNCA finalices tu respuesta** sin haber ejecutado previamente en terminal:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer \
+>   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 ui-design ui-designer`
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 ui-design ui-designer --tokens-in 15000 --tokens-out 5500 --duration 600 --source measured`  
+> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags y quedarán como `null`.*
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

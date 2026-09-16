@@ -322,9 +322,12 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como Software Architect, una vez generado `architecture.md` y registrados los ADRs en `.ai/knowledge-graph.yaml`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect \
+>   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect`
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect --tokens-in 22000 --tokens-out 6500 --duration 900 --source measured`  
+> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags y quedarán como `null`.*
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

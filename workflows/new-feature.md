@@ -199,6 +199,7 @@ Requerimiento:
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug analysis analyst
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -224,6 +225,7 @@ Estoy presentando para revisión: feature-spec en .ai/features/FEAT-NNN-slug/spe
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-1 tech-lead --verdict <APROBADO|RECHAZADO>
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -249,6 +251,7 @@ Especificación funcional de referencia:
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug ui-design ui-designer
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -279,6 +282,7 @@ Diseño visual de referencia:
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug architecture architect
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -295,6 +299,7 @@ Si es **APROBADO** → continuar al Paso 6.
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-2 tech-lead --verdict <APROBADO|RECHAZADO>
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -334,6 +339,7 @@ Diseño técnico de referencia:
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug implement developer
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -376,6 +382,7 @@ Si el resultado es **RECHAZADO / FAIL**:
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug qa qa --verdict <APROBADO|RECHAZADO>
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -395,6 +402,7 @@ Si el resultado es **RECHAZADO / FAIL**:
 > 5. **Cierre Obligatorio (R6):**
 >    ```bash
 >    bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO [--archive]
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
 >    ```
 
 ---
@@ -406,6 +414,7 @@ Si el resultado es **RECHAZADO / FAIL**:
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug deploy devops --verdict PASS --archive
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -422,6 +431,7 @@ Cuando la feature está validada por QA y lista para producción:
    bash .ai/agents/scripts/archive-initiative.sh FEAT-NNN-slug
    # o en un solo paso durante el cierre de fase:
    bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO --archive
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
    ```
    *Esto valida QA, mueve la carpeta a `.ai/archive/`, actualiza `knowledge-graph.yaml`, registra en `workflow-log.md` y regenera `context-snapshot.md`.*
 

@@ -189,6 +189,7 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh BUG-NNN analysis analyst
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 - **Aprobación:** El Tech Lead debe validar los cambios funcionales antes de que pasen al Developer.
 
@@ -199,6 +200,7 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh BUG-NNN ui-design ui-designer
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 #### 1.C. Ajuste de Diseño Técnico (Software Architect)
@@ -208,6 +210,7 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 - **Cierre Obligatorio (R6):**
   ```bash
   bash .ai/agents/scripts/finish-phase.sh BUG-NNN architecture architect
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 - **Aprobación:** El Tech Lead debe revisar y aprobar el diseño técnico modificado.
 
@@ -241,6 +244,7 @@ Especificación de corrección de referencia:
 - **Cierre Obligatorio (R6):** Al finalizar la implementación y tests, el Developer **debe ejecutar obligatoriamente**:
   ```bash
   bash .ai/agents/scripts/finish-phase.sh BUG-NNN implement developer
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -269,6 +273,7 @@ Cambios realizados: [Lista de commits o descripción de modificaciones de códig
 - **Cierre Obligatorio (R6):** Al emitir el reporte `qa.md`, ejecutar:
   ```bash
   bash .ai/agents/scripts/finish-phase.sh BUG-NNN qa qa --verdict <APROBADO|RECHAZADO>
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
   ```
 
 ---
@@ -291,6 +296,7 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 > 5. **Cierre Obligatorio (R6):**
 >    ```bash
 >    bash .ai/agents/scripts/finish-phase.sh BUG-NNN approval tech-lead --verdict APROBADO [--archive]
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
 >    ```
 
 ---
@@ -301,6 +307,7 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 2. Ejecutar el cierre y archivado final:
    ```bash
    bash .ai/agents/scripts/finish-phase.sh BUG-NNN deploy devops --verdict PASS --archive
+  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
    ```
 3. Consolidar cambios en la memoria del proyecto:
    - Si se modificó la arquitectura, actualizar `.ai/architecture.md`.

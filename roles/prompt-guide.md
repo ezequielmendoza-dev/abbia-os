@@ -253,15 +253,48 @@ Las preguntas que puede hacer un agente son siempre sobre:
 Las decisiones técnicas dentro de su área de expertise las toman sin consultar.
 
 ### Tip 5: Cierre Mandatorio de Fase con finish-phase.sh (Regla R6)
-Cada vez que un agente concluye su fase de trabajo (Spec, UI, Architecture, Implementation, QA, Approval, Deploy), **debe ejecutarse en terminal**:
+Cada vez que un agente concluye su fase de trabajo, **debe ejecutarse en terminal**:
 ```bash
 bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [opciones]
 ```
+
+**Flags disponibles y recomendados:**
+
+| Flag | Descripción | Valor por defecto |
+|:---|:---|:---|
+| `--model <NOMBRE>` | Modelo de IA utilizado (ej: `deepseek/deepseek-r1`, `gemini-3.7-flash`, `claude-3.7-sonnet`) | `null` |
+| `--provider <NOMBRE>` | Entorno/IDE (ej: `opencode`, `antigravity`, `cursor`, `claude-code`) | Auto-detectado |
+| `--env <local\|staging\|production>` | Entorno de despliegue/validación (local, staging, prod) | Auto-inferido s/ fase |
+| `--tokens-in <N>` | Tokens de entrada consumidos en la sesión | `null` |
+| `--tokens-out <N>` | Tokens de salida generados en la sesión | `null` |
+| `--duration <N>` | Duración de la fase en segundos | `null` |
+| `--source measured\|estimate` | `measured` si los tokens son reales, `estimate` si son estimados | `estimate` |
+| `--verdict PASS\|FAIL\|APROBADO\|RECHAZADO` | Solo para fases gate (qa, approval, deploy) | `null` |
+| `--mode rapido\|estandar\|profundo` | Modo de ejecución del DAG | `estandar` |
+| `--attempts <N>` | Número de intentos (incluye back-edges) | `1` |
+
+**Fases canónicas del DAG** (usar exactamente estos nombres):
+`analysis` · `discovery` · `ui-design` · `architecture` · `tech-review-1` · `tech-review-2` · `implement` · `tasks` · `qa` · `approval` · `deploy`
+
+**Inferencia y Auto-detección:**
+- **`target_env`:** Se auto-asigna `local` para análisis/desarrollo, `staging` para QA, y `production` para release.
+- **`git_branch`:** Se auto-detecta la rama activa de Git en el momento de cierre.
+- **`provider`:** Se auto-detecta si estás en OpenCode, Antigravity, Cursor, etc.
+
+**Ejemplo completo:**
+```bash
+bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect \
+  --model "deepseek/deepseek-r1" --provider "opencode" --env "local" \
+  --tokens-in 22000 --tokens-out 6500 \
+  --duration 900 --source measured
+```
+
 Esto garantiza automáticamente:
 1. **Memoria de Workflow:** Registro append-only en `.ai/memory/workflow-log.md`.
-2. **Telemetría Veraz:** Registro exacto de ejecución en `.ai/metrics/executions.yaml`.
-3. **Snapshot Actualizado:** Regeneración inmediata de `.ai/memory/context-snapshot.md`.
+2. **Telemetría Veraz:** Registro exacto de ejecución en `.ai/metrics/executions.yaml` (con modelo, entorno, rama y tokens).
+3. **Aggregates:** Regeneración de `.ai/metrics/aggregates.yaml` con estadísticas por fase, rol, modelo, entorno e iniciativa.
+4. **Snapshot Actualizado:** Regeneración inmediata de `.ai/memory/context-snapshot.md` con resumen de métricas.
 
 ---
 
-*Guía versión 3.4.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Guía versión 3.5.1 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*

@@ -120,8 +120,42 @@ $decisions
 
 $pats
 
-Referencia: docs/workflow-memory.md (framework ai-agents).
 EOF
+
+    # --- Resumen de métricas (últimas sesiones de executions.yaml) ---
+    local metrics_file="$project_root/.ai/metrics/executions.yaml"
+    if [ -f "$metrics_file" ]; then
+        local total_sessions=0
+        local null_tokens=0
+        local measured_sessions=0
+        # Garantizar que son números enteros simples de una sola línea
+        total_sessions=$( (grep -c '^\s*- ts:' "$metrics_file" 2>/dev/null || true) | tr -cd '0-9' )
+        null_tokens=$( (grep -c '^\s*tokens_in: null' "$metrics_file" 2>/dev/null || true) | tr -cd '0-9' )
+        total_sessions=${total_sessions:-0}
+        null_tokens=${null_tokens:-0}
+        measured_sessions=$(( total_sessions - null_tokens ))
+        local warn_line=""
+        if [ "$null_tokens" -gt 0 ] 2>/dev/null; then
+            warn_line="> ⚠ Hay ${null_tokens} sesión(es) sin telemetría real. Pasá \`--tokens-in <N> --tokens-out <N> --source measured\` al llamar \`finish-phase.sh\`."
+        fi
+        cat >> "$out" << EOF
+## Métricas de telemetría
+
+- Total sesiones registradas: **$total_sessions**
+- Con tokens medidos: **$measured_sessions** | Sin tokens (null): **$null_tokens**
+$warn_line
+
+Referencia: docs/agent-metrics.md (framework ai-agents).
+EOF
+    else
+        cat >> "$out" << EOF
+## Métricas de telemetría
+
+> Sin datos en .ai/metrics/executions.yaml aún.
+
+Referencia: docs/agent-metrics.md (framework ai-agents).
+EOF
+    fi
 }
 
 # Función para detectar la raíz del proyecto

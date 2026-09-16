@@ -716,6 +716,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
             <button onclick="setStatusFilter('ALL')" id="filter-status-ALL" class="filter-status-btn filter-btn active px-2.5 py-1 rounded-lg text-[11px] border border-slate-700/70 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Todas</button>
             <button onclick="setStatusFilter('ACTIVE')" id="filter-status-ACTIVE" class="filter-status-btn filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-slate-700/70 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Activas</button>
             <button onclick="setStatusFilter('ARCHIVED')" id="filter-status-ARCHIVED" class="filter-status-btn filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-slate-700/70 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Archivadas</button>
+            <button onclick="setStatusFilter('READY_TO_ARCHIVE')" id="filter-status-READY_TO_ARCHIVE" class="filter-status-btn filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition">📦 Listas para Archivar</button>
           </div>
 
           <!-- QA Status Filter -->
@@ -981,16 +982,55 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
 
     <!-- ==================== TAB 5: TELEMETRÍA DE AGENTES ==================== -->
     <section id="tab-metrics" class="tab-content space-y-6">
-      <!-- KPI Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <!-- Banner de estado vacío — visible solo si no hay tokens medidos -->
+      <div id="metrics-empty-banner" class="hidden items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300">
+        <div class="text-xl mt-0.5">⚠️</div>
+        <div>
+          <div class="font-bold text-amber-200 mb-1">Sin telemetría real de tokens registrada</div>
+          <div class="text-amber-300/80 leading-relaxed">
+            Todas las entradas en <code class="bg-slate-800 px-1 py-0.5 rounded text-amber-400">.ai/metrics/executions.yaml</code> tienen <code class="bg-slate-800 px-1 py-0.5 rounded">tokens_in: null</code>.
+            Para capturar tokens reales, pasá los flags al llamar <code class="bg-slate-800 px-1 py-0.5 rounded text-sky-400">finish-phase.sh</code>:
+          </div>
+          <pre class="mt-2 bg-slate-950/60 border border-slate-700/60 rounded-lg p-3 text-[10px] text-sky-300 overflow-x-auto">bash .ai/agents/scripts/finish-phase.sh &lt;INICIATIVA&gt; &lt;FASE&gt; &lt;ROL&gt; \
+  --tokens-in &lt;N&gt; --tokens-out &lt;N&gt; --duration &lt;SEGUNDOS&gt; --source measured</pre>
+          <div class="mt-1.5 text-amber-300/60 text-[10px]">Los valores los encontrás en el contador de tokens de tu IDE/CLI de IA (Antigravity, Gemini, etc.)</div>
+        </div>
+      </div>
+      <!-- Live Pricing Status Bar -->
+      <div class="flex items-center justify-between p-3.5 bg-slate-900 border border-slate-800 rounded-2xl text-xs flex-wrap gap-3 shadow-sm">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="pricing-status-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="pricing-status-text" class="font-semibold text-slate-200">Tarifas en vivo sincronizadas con OpenRouter API</span>
+          <span id="pricing-models-count" class="px-2 py-0.5 rounded-md bg-slate-800 text-sky-400 font-mono text-[10px] border border-slate-700">Consultando...</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openCostMethodologyModal()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-medium transition border border-slate-700 flex items-center gap-1.5">
+            <span>ℹ️ Metodología y Precios</span>
+          </button>
+          <button onclick="refreshLivePricing(true)" id="refresh-pricing-btn" title="Refrescar tarifas en vivo" class="px-2.5 py-1 bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 rounded-lg text-[11px] transition border border-slate-700">
+            🔄
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Cards (5 Cards) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
           <div class="text-xs text-slate-400 font-medium">Tokens Totales</div>
           <div id="kpi-tokens-total" class="text-2xl font-black text-sky-400 mt-1">0</div>
           <div class="text-[10px] text-slate-500 mt-1"><span id="kpi-tokens-in">0</span> in · <span id="kpi-tokens-out">0</span> out</div>
         </div>
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm relative group">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Costo Est. API (USD)</span>
+            <button onclick="openCostMethodologyModal()" title="Ver cómo se calcula" class="text-slate-500 hover:text-sky-400">ℹ️</button>
+          </div>
+          <div id="kpi-cost-total" class="text-2xl font-black text-emerald-400 mt-1">$0.00</div>
+          <div class="text-[10px] text-slate-500 mt-1" id="kpi-cost-badge">s/ tarifas OpenRouter</div>
+        </div>
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
           <div class="text-xs text-slate-400 font-medium">Promedio por Fase</div>
-          <div id="kpi-tokens-avg" class="text-2xl font-black text-emerald-400 mt-1">0</div>
+          <div id="kpi-tokens-avg" class="text-2xl font-black text-sky-300 mt-1">0</div>
           <div class="text-[10px] text-slate-500 mt-1" id="kpi-tokens-ratio">0% in · 0% out</div>
         </div>
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
@@ -998,41 +1038,72 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <div id="kpi-sessions" class="text-2xl font-black text-indigo-400 mt-1">0</div>
           <div class="text-[10px] text-slate-500 mt-1"><span id="kpi-retries">0</span> reintentos de gate</div>
         </div>
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm col-span-2 sm:col-span-1">
           <div class="text-xs text-slate-400 font-medium">Tiempo de Pipeline</div>
           <div id="kpi-time" class="text-2xl font-black text-amber-400 mt-1">0m</div>
           <div class="text-[10px] text-slate-500 mt-1">Duración acumulada de fases</div>
         </div>
       </div>
 
-      <!-- Charts Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
-          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center justify-between">
-            <span>Consumo de Tokens por Rol</span>
+      <!-- Charts Grid (2x2 Layout) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span>Tokens por Rol</span>
             <span class="text-[10px] font-normal text-slate-500">In + Out</span>
           </h3>
-          <div class="h-64 flex items-center justify-center">
+          <div class="h-56 flex items-center justify-center">
             <canvas id="chart-roles"></canvas>
           </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
-          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center justify-between">
-            <span>Tokens por Fase del Pipeline</span>
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span>Tokens por Fase</span>
             <span class="text-[10px] font-normal text-slate-500">Distribución</span>
           </h3>
-          <div class="h-64 flex items-center justify-center">
+          <div class="h-56 flex items-center justify-center">
             <canvas id="chart-phases"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span>Modelos de IA</span>
+            <span class="text-[10px] font-normal text-slate-500">Tokens & Costo</span>
+          </h3>
+          <div class="h-56 flex items-center justify-center">
+            <canvas id="chart-models"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span>Entornos de Ejecución</span>
+            <span class="text-[10px] font-normal text-slate-500">Local / Staging / Prod</span>
+          </h3>
+          <div class="h-56 flex items-center justify-center">
+            <canvas id="chart-environments"></canvas>
           </div>
         </div>
       </div>
 
       <!-- Executions History Table -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Historial de Ejecuciones de Agentes</h3>
-          <span id="table-count" class="text-xs text-slate-400 font-medium">0 ejecuciones</span>
+        <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Historial de Ejecuciones de Agentes</h3>
+            <span id="table-count" class="text-xs text-slate-400 font-medium">0 ejecuciones</span>
+          </div>
+
+          <!-- Environment Filter Buttons -->
+          <div class="flex items-center gap-1.5 flex-wrap text-xs">
+            <span class="text-[11px] font-semibold text-slate-400 mr-1">Entorno:</span>
+            <button onclick="setEnvFilter('ALL')" id="filter-env-ALL" class="filter-env-btn filter-btn active px-2.5 py-1 rounded-lg text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Todos</button>
+            <button onclick="setEnvFilter('local')" id="filter-env-local" class="filter-env-btn filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">💻 Local</button>
+            <button onclick="setEnvFilter('staging')" id="filter-env-staging" class="filter-env-btn filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">🌐 Staging</button>
+            <button onclick="setEnvFilter('production')" id="filter-env-production" class="filter-env-btn filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">🚀 Producción</button>
+          </div>
         </div>
         <div class="overflow-x-auto max-h-96 overflow-y-auto">
           <table class="w-full text-left text-xs">
@@ -1042,8 +1113,11 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
                 <th class="py-3 px-4 font-semibold">Iniciativa</th>
                 <th class="py-3 px-4 font-semibold">Rol</th>
                 <th class="py-3 px-4 font-semibold">Fase</th>
+                <th class="py-3 px-4 font-semibold">Modelo / IDE</th>
+                <th class="py-3 px-4 font-semibold">Entorno / Rama</th>
                 <th class="py-3 px-4 font-semibold">Tokens In</th>
                 <th class="py-3 px-4 font-semibold">Tokens Out</th>
+                <th class="py-3 px-4 font-semibold">Costo Est. ($)</th>
                 <th class="py-3 px-4 font-semibold">Duración</th>
                 <th class="py-3 px-4 font-semibold">Veredicto</th>
               </tr>
@@ -1282,6 +1356,95 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       <div class="p-4 sm:p-5 border-t border-slate-800/80 bg-slate-950/80 flex items-center justify-between">
         <span class="text-[11px] text-slate-500">Diseñado para Pair Programming Humano + IA</span>
         <button onclick="closeAboutModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-semibold rounded-xl border border-slate-700 transition">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Methodology & Pricing Transparency Modal -->
+  <div id="cost-methodology-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/70 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-modal">
+      <!-- Modal Header -->
+      <div class="p-5 sm:p-6 border-b border-slate-800/80 bg-slate-900/95 flex items-start justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">TRANSPARENCIA DE COSTOS</span>
+            <span id="modal-pricing-live-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-sky-300">OpenRouter API</span>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
+            <span>💵</span> Metodología de Estimación de Costos de IA
+          </h3>
+          <p class="text-xs text-slate-400">Cómo se calculan los importes en USD y de dónde se obtienen las tarifas oficiales.</p>
+        </div>
+        <button onclick="closeCostMethodologyModal()" class="text-slate-400 hover:text-slate-200 text-lg font-bold p-1 rounded-lg hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs text-slate-300 leading-relaxed">
+        <!-- Live API Source Notice -->
+        <div class="p-4 bg-emerald-950/40 border border-emerald-800/60 rounded-xl space-y-2">
+          <div class="font-bold text-emerald-300 flex items-center gap-1.5">
+            <span>🌐</span> Fuente en Tiempo Real (Sin Hardcoding)
+          </div>
+          <p class="text-emerald-200/90 text-xs leading-relaxed">
+            Las tarifas por millón de tokens se consultan <strong>directamente en vivo desde la API pública de OpenRouter</strong> (<code class="bg-slate-900 px-1 py-0.5 rounded text-emerald-400">openrouter.ai/api/v1/models</code>), que mantiene al día los precios de más de 400 modelos de Google (Gemini), Anthropic (Claude), OpenAI (GPT), DeepSeek, Meta (Llama), Mistral y Qwen.
+          </p>
+          <div class="text-[11px] text-emerald-300/70 pt-1 flex items-center justify-between">
+            <span id="modal-pricing-sync-time">Última sincronización: consultando...</span>
+            <a href="https://openrouter.ai/models" target="_blank" class="text-sky-400 hover:underline">Ver catálogo OpenRouter ↗</a>
+          </div>
+        </div>
+
+        <!-- Formula -->
+        <div class="p-4 bg-slate-950/70 border border-slate-800/80 rounded-xl space-y-2">
+          <div class="font-bold text-sky-400 flex items-center gap-1.5">
+            <span>📐</span> Fórmula Matemática de Cálculo
+          </div>
+          <div class="bg-slate-900 p-3 rounded-lg font-mono text-[11px] text-slate-200 border border-slate-800 text-center overflow-x-auto">
+            Costo USD = (Tokens In × Tarifa Prompt / 1.000.000) + (Tokens Out × Tarifa Completion / 1.000.000)
+          </div>
+          <p class="text-slate-400 text-[11px]">
+            La fórmula separa estrictamente los tokens de entrada (prompts de contexto y código) de los tokens de salida (respuestas y diffs generados), multiplicando por la tarifa oficial correspondiente de cada modelo.
+          </p>
+        </div>
+
+        <!-- Subscription vs API Clarification -->
+        <div class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2">
+          <div class="font-bold text-amber-300 flex items-center gap-1.5">
+            <span>⚠️</span> Suscripciones Planas vs. Facturación Pay-as-you-go
+          </div>
+          <p class="text-amber-200/90 text-xs leading-relaxed">
+            Si utilizas herramientas con <strong>tarifa plana mensual</strong> (como Antigravity, Cursor Pro, Claude Pro o ChatGPT Plus), este costo <strong>no representa un cobro bancario adicional</strong>, sino el <em>valor económico de mercado equivalente</em> del cómputo realizado por la IA para esa iniciativa.
+          </p>
+        </div>
+
+        <!-- Model Pricing Lookup -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Tarifas Activas Detectadas</h4>
+            <input type="text" id="pricing-search-input" oninput="filterPricingTable()" placeholder="Buscar modelo (ej: gemini, claude, deepseek)..." class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 w-64">
+          </div>
+          <div class="border border-slate-800 rounded-xl overflow-hidden max-h-56 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/90 text-slate-400 uppercase text-[10px] sticky top-0 border-b border-slate-800">
+                <tr>
+                  <th class="py-2.5 px-3">Modelo</th>
+                  <th class="py-2.5 px-3">Prompt (1M tokens)</th>
+                  <th class="py-2.5 px-3">Completion (1M tokens)</th>
+                  <th class="py-2.5 px-3">Proveedor</th>
+                </tr>
+              </thead>
+              <tbody id="pricing-tbody" class="divide-y divide-slate-800/60 font-mono text-[11px]">
+                <tr><td colspan="4" class="py-4 text-center text-slate-500">Cargando tarifas en vivo...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 sm:p-5 border-t border-slate-800/80 bg-slate-950/80 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500">Precios actualizados automáticamente vía OpenRouter API</span>
+        <button onclick="closeCostMethodologyModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-semibold rounded-xl border border-slate-700 transition">Cerrar</button>
       </div>
     </div>
   </div>
@@ -1963,13 +2126,148 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       }
     }
 
-    // --- Telemetría & Charts (Chart.js) ---
+    // --- Telemetría & Live OpenRouter Pricing Engine ---
+    let liveModelsPricing = [];
+    let livePricingSyncTime = null;
+    let chartRolesInst = null, chartPhasesInst = null, chartModelsInst = null;
+
+    const fallbackPricingMap = {
+      'gemini-3.7-flash': { prompt: 0.075 / 1e6, completion: 0.30 / 1e6, name: 'Gemini 3.7 Flash', provider: 'Google' },
+      'gemini-2.5-pro': { prompt: 1.25 / 1e6, completion: 5.00 / 1e6, name: 'Gemini 2.5 Pro', provider: 'Google' },
+      'claude-3-7-sonnet': { prompt: 3.00 / 1e6, completion: 15.00 / 1e6, name: 'Claude 3.7 Sonnet', provider: 'Anthropic' },
+      'claude-3-5-sonnet': { prompt: 3.00 / 1e6, completion: 15.00 / 1e6, name: 'Claude 3.5 Sonnet', provider: 'Anthropic' },
+      'claude-3-5-haiku': { prompt: 0.80 / 1e6, completion: 4.00 / 1e6, name: 'Claude 3.5 Haiku', provider: 'Anthropic' },
+      'deepseek-r1': { prompt: 0.55 / 1e6, completion: 2.19 / 1e6, name: 'DeepSeek R1', provider: 'DeepSeek' },
+      'deepseek-v3': { prompt: 0.14 / 1e6, completion: 0.28 / 1e6, name: 'DeepSeek V3', provider: 'DeepSeek' },
+      'gpt-4o': { prompt: 2.50 / 1e6, completion: 10.00 / 1e6, name: 'GPT-4o', provider: 'OpenAI' },
+      'gpt-4o-mini': { prompt: 0.15 / 1e6, completion: 0.60 / 1e6, name: 'GPT-4o Mini', provider: 'OpenAI' },
+      'qwen-2.5-coder': { prompt: 0.66 / 1e6, completion: 1.00 / 1e6, name: 'Qwen 2.5 Coder', provider: 'Qwen' }
+    };
+
+    function matchModelPricing(modelName) {
+      if (!modelName || modelName === 'null' || modelName === 'no-especificado') {
+        // Fallback default: Gemini Flash / Baseline Económico ($0.10 in / $0.40 out por 1M)
+        return { prompt: 0.10 / 1e6, completion: 0.40 / 1e6, name: 'Estándar (Estimado)', provider: 'General', isEstimated: true };
+      }
+
+      const q = modelName.toLowerCase().replace(/[-_./:]/g, '');
+      
+      // 1. Buscar en liveModelsPricing de OpenRouter
+      if (liveModelsPricing && liveModelsPricing.length > 0) {
+        // Coincidencia exacta o por subcadena normalizada
+        const found = liveModelsPricing.find(m => {
+          const normId = m.id.toLowerCase().replace(/[-_./:]/g, '');
+          const normName = (m.name || '').toLowerCase().replace(/[-_./:]/g, '');
+          return normId.includes(q) || normName.includes(q) || q.includes(normId);
+        });
+        if (found) {
+          return {
+            prompt: found.promptPrice,
+            completion: found.completionPrice,
+            name: found.name || found.id,
+            provider: (found.id.split('/')[0] || 'OpenRouter').toUpperCase(),
+            isEstimated: false
+          };
+        }
+      }
+
+      // 2. Buscar en fallback dictionary
+      for (const [k, v] of Object.entries(fallbackPricingMap)) {
+        const normK = k.toLowerCase().replace(/[-_./:]/g, '');
+        if (normK.includes(q) || q.includes(normK)) {
+          return { ...v, isEstimated: false };
+        }
+      }
+
+      return { prompt: 0.20 / 1e6, completion: 0.80 / 1e6, name: modelName, provider: 'Desconocido', isEstimated: true };
+    }
+
+    async function refreshLivePricing(forceRefresh = false) {
+      const dot = document.getElementById('pricing-status-dot');
+      const text = document.getElementById('pricing-status-text');
+      const countLabel = document.getElementById('pricing-models-count');
+      const modalSyncTime = document.getElementById('modal-pricing-sync-time');
+
+      if (dot) dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-spin';
+      if (text) text.textContent = 'Consultando tarifas en vivo a OpenRouter API...';
+
+      try {
+        const cacheKey = 'ai_agents_openrouter_pricing_v1';
+        const cacheTimeKey = 'ai_agents_openrouter_pricing_time';
+        const cachedData = localStorage.getItem(cacheKey);
+        const cachedTime = localStorage.getItem(cacheTimeKey);
+
+        const isFresh = cachedTime && (Date.now() - Number(cachedTime) < 12 * 3600 * 1000); // 12h cache
+
+        let rawModels = [];
+        if (!forceRefresh && isFresh && cachedData) {
+          rawModels = JSON.parse(cachedData);
+          livePricingSyncTime = new Date(Number(cachedTime)).toLocaleTimeString();
+        } else {
+          const res = await fetch('https://openrouter.ai/api/v1/models', { headers: { 'User-Agent': 'ai-agents-os/3.5.0' } });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const json = await res.json();
+          rawModels = json.data || [];
+          localStorage.setItem(cacheKey, JSON.stringify(rawModels));
+          localStorage.setItem(cacheTimeKey, String(Date.now()));
+          livePricingSyncTime = new Date().toLocaleTimeString();
+        }
+
+        liveModelsPricing = rawModels.map(m => {
+          const p = m.pricing || {};
+          const pIn = parseFloat(p.prompt || 0);
+          const pOut = parseFloat(p.completion || 0);
+          return {
+            id: m.id,
+            name: m.name || m.id,
+            promptPrice: isNaN(pIn) ? 0 : pIn,
+            completionPrice: isNaN(pOut) ? 0 : pOut,
+            provider: m.id.split('/')[0] || 'OpenRouter'
+          };
+        });
+
+        if (dot) dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-400';
+        if (text) text.textContent = 'Tarifas en vivo sincronizadas con OpenRouter API';
+        if (countLabel) countLabel.textContent = `${liveModelsPricing.length} modelos activos`;
+        if (modalSyncTime) modalSyncTime.textContent = `Última sincronización: ${livePricingSyncTime || 'Hoy'}`;
+
+      } catch (err) {
+        console.warn('OpenRouter API live fetch failed, using fallback pricing:', err);
+        if (dot) dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-sky-400';
+        if (text) text.textContent = 'Tarifas cargadas desde base local (offline)';
+        if (countLabel) countLabel.textContent = `${Object.keys(fallbackPricingMap).length} modelos`;
+        if (modalSyncTime) modalSyncTime.textContent = 'Modo offline / Base de referencia local';
+      }
+
+      renderTelemetryWithPricing();
+      renderPricingTable();
+    }
+
     function initMetrics() {
+      refreshLivePricing(false);
+    }
+
+    let currentEnvFilter = 'ALL';
+    let chartEnvironmentsInst = null;
+
+    function setEnvFilter(env) {
+      currentEnvFilter = env;
+      document.querySelectorAll('.filter-env-btn').forEach(btn => btn.classList.remove('active', 'bg-sky-600', 'text-white'));
+      const activeBtn = document.getElementById('filter-env-' + env);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderTelemetryWithPricing();
+    }
+
+    function renderTelemetryWithPricing() {
       const executions = metricsData.executions || [];
       let totalIn = 0, totalOut = 0, totalSec = 0, retries = 0;
+      let totalCostUsd = 0;
       let measuredExecsCount = 0;
       const roleTokens = {};
       const phaseTokens = {};
+      const modelTokens = {};
+      const modelCosts = {};
+      const envTokens = { 'local': 0, 'staging': 0, 'production': 0 };
 
       executions.forEach(ex => {
         const hasTokIn = ex.tokens_in !== null && ex.tokens_in !== undefined && ex.tokens_in !== '' && !isNaN(Number(ex.tokens_in));
@@ -1978,16 +2276,29 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         const outTok = hasTokOut ? Number(ex.tokens_out) : 0;
         const sum = inTok + outTok;
 
+        const pricing = matchModelPricing(ex.model);
+        const sessionCost = (inTok * pricing.prompt) + (outTok * pricing.completion);
+        ex._computedCost = sessionCost;
+        ex._matchedModel = pricing.name;
+        ex._matchedProvider = pricing.provider;
+
+        const env = ex.target_env || 'local';
+        envTokens[env] = (envTokens[env] || 0) + (sum > 0 ? sum : 1);
+
         if (sum > 0 || (hasTokIn && inTok > 0) || (hasTokOut && outTok > 0)) {
           totalIn += inTok;
           totalOut += outTok;
+          totalCostUsd += sessionCost;
           measuredExecsCount++;
 
           const role = ex.role || 'desconocido';
           const phase = ex.phase || 'otras';
+          const modelKey = ex.model && ex.model !== 'null' ? ex.model : 'No especificado';
 
           roleTokens[role] = (roleTokens[role] || 0) + sum;
           phaseTokens[phase] = (phaseTokens[phase] || 0) + sum;
+          modelTokens[modelKey] = (modelTokens[modelKey] || 0) + sum;
+          modelCosts[modelKey] = (modelCosts[modelKey] || 0) + sessionCost;
         }
 
         if (ex.duration_s !== null && ex.duration_s !== undefined && ex.duration_s !== '' && !isNaN(Number(ex.duration_s)) && Number(ex.duration_s) > 0) {
@@ -2001,46 +2312,107 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       const ratioIn = totalTokens > 0 ? Math.round((totalIn / totalTokens) * 100) : 0;
       const ratioOut = totalTokens > 0 ? (100 - ratioIn) : 0;
 
+      // Banner de estado vacío
+      const emptyBanner = document.getElementById('metrics-empty-banner');
+      if (emptyBanner) {
+        if (totalTokens === 0 && executions.length > 0) {
+          emptyBanner.classList.remove('hidden');
+          emptyBanner.classList.add('flex');
+        } else {
+          emptyBanner.classList.add('hidden');
+          emptyBanner.classList.remove('flex');
+        }
+      }
+
+      // KPIs
       document.getElementById('kpi-tokens-total').textContent = totalTokens > 0 ? totalTokens.toLocaleString() : '—';
       document.getElementById('kpi-tokens-in').textContent = totalIn > 0 ? totalIn.toLocaleString() : '—';
       document.getElementById('kpi-tokens-out').textContent = totalOut > 0 ? totalOut.toLocaleString() : '—';
+      
+      const costEl = document.getElementById('kpi-cost-total');
+      if (costEl) {
+        costEl.textContent = totalCostUsd > 0 ? `$${totalCostUsd.toFixed(4)}` : (totalTokens > 0 ? '< $0.01' : '—');
+      }
+
       document.getElementById('kpi-tokens-avg').textContent = avgTokens > 0 ? avgTokens.toLocaleString() : '—';
       document.getElementById('kpi-tokens-ratio').textContent = totalTokens > 0 ? `${ratioIn}% in · ${ratioOut}% out` : '—';
       document.getElementById('kpi-sessions').textContent = executions.length;
       document.getElementById('kpi-retries').textContent = retries;
       document.getElementById('kpi-time').textContent = totalSec > 0 ? (Math.round(totalSec / 60) + ' min') : '—';
 
-      // Render Charts
+      // Destroy previous chart instances
+      if (chartRolesInst) chartRolesInst.destroy();
+      if (chartPhasesInst) chartPhasesInst.destroy();
+      if (chartModelsInst) chartModelsInst.destroy();
+      if (chartEnvironmentsInst) chartEnvironmentsInst.destroy();
+
+      // Chart 1: Roles
       const roleLabels = Object.keys(roleTokens).length > 0 ? Object.keys(roleTokens) : ['Sin telemetría'];
       const roleValues = Object.keys(roleTokens).length > 0 ? Object.values(roleTokens) : [1];
       const roleColors = Object.keys(roleTokens).length > 0 ? ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'] : ['#334155'];
 
-      new Chart(document.getElementById('chart-roles'), {
+      chartRolesInst = new Chart(document.getElementById('chart-roles'), {
         type: 'doughnut',
         data: {
           labels: roleLabels,
           datasets: [{ data: roleValues, backgroundColor: roleColors }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
       });
 
+      // Chart 2: Phases
       const phaseLabels = Object.keys(phaseTokens).length > 0 ? Object.keys(phaseTokens) : ['Sin telemetría'];
       const phaseValues = Object.keys(phaseTokens).length > 0 ? Object.values(phaseTokens) : [0];
 
-      new Chart(document.getElementById('chart-phases'), {
+      chartPhasesInst = new Chart(document.getElementById('chart-phases'), {
         type: 'bar',
         data: {
           labels: phaseLabels,
-          datasets: [{ label: 'Tokens Totales', data: phaseValues, backgroundColor: '#38bdf8', borderRadius: 6 }]
+          datasets: [{ label: 'Tokens', data: phaseValues, backgroundColor: '#38bdf8', borderRadius: 6 }]
         },
         options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }, plugins: { legend: { display: false } } }
       });
 
+      // Chart 3: Models
+      const modelLabels = Object.keys(modelTokens).length > 0 ? Object.keys(modelTokens) : ['Sin telemetría'];
+      const modelValues = Object.keys(modelTokens).length > 0 ? Object.values(modelTokens) : [1];
+      const modelColors = ['#10b981', '#38bdf8', '#818cf8', '#f59e0b', '#ec4899'];
+
+      chartModelsInst = new Chart(document.getElementById('chart-models'), {
+        type: 'doughnut',
+        data: {
+          labels: modelLabels,
+          datasets: [{ data: modelValues, backgroundColor: modelColors.slice(0, modelLabels.length) }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+      });
+
+      // Chart 4: Environments
+      const envLabels = ['Local', 'Staging', 'Producción'];
+      const envValues = [envTokens['local'] || 0, envTokens['staging'] || 0, envTokens['production'] || 0];
+      const envColors = ['#38bdf8', '#f59e0b', '#10b981'];
+
+      chartEnvironmentsInst = new Chart(document.getElementById('chart-environments'), {
+        type: 'doughnut',
+        data: {
+          labels: envLabels,
+          datasets: [{ data: envValues, backgroundColor: envColors }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+      });
+
+      // Filter Executions for Table
+      let tableExecutions = executions.slice();
+      if (currentEnvFilter !== 'ALL') {
+        tableExecutions = tableExecutions.filter(ex => (ex.target_env || 'local') === currentEnvFilter);
+      }
+
       // Populate Table
       const tbody = document.getElementById('executions-tbody');
       tbody.innerHTML = '';
-      document.getElementById('table-count').textContent = executions.length + ' ejecuciones';
-      executions.slice().reverse().forEach(ex => {
+      document.getElementById('table-count').textContent = tableExecutions.length + ' de ' + executions.length + ' ejecuciones';
+      
+      tableExecutions.reverse().forEach(ex => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-800/40 transition';
         const tsFormatted = formatTimestamp(ex.ts);
@@ -2051,6 +2423,22 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         const tokInFormatted = hasTokIn ? Number(ex.tokens_in).toLocaleString() : '—';
         const tokOutFormatted = hasTokOut ? Number(ex.tokens_out).toLocaleString() : '—';
         const durFormatted = hasDur ? `${Number(ex.duration_s)}s` : '—';
+        const costFormatted = (hasTokIn || hasTokOut) && ex._computedCost !== undefined
+          ? `$${ex._computedCost.toFixed(4)}`
+          : '—';
+        
+        const modelLabel = ex.model && ex.model !== 'null' ? ex.model : (ex.provider && ex.provider !== 'null' ? ex.provider : '—');
+        
+        const env = ex.target_env || 'local';
+        let envBadgeClass = 'bg-sky-500/20 text-sky-400 border border-sky-500/30';
+        let envIcon = '💻';
+        if (env === 'staging') { envBadgeClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/30'; envIcon = '🌐'; }
+        if (env === 'production') { envBadgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'; envIcon = '🚀'; }
+
+        const gitBranchHtml = ex.git_branch && ex.git_branch !== 'null'
+          ? `<div class="text-[9px] text-slate-500 font-mono mt-0.5 truncate max-w-[130px]" title="${ex.git_branch}">🌿 ${ex.git_branch}</div>`
+          : '';
+
         const verdict = ex.verdict || '-';
         let verdictClass = 'bg-slate-800 text-slate-400';
         if (verdict === 'APROBADO' || verdict === 'PASS') verdictClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
@@ -2061,13 +2449,77 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <td class="py-3 px-4 font-bold text-sky-400 whitespace-nowrap">${ex.initiative || '-'}</td>
           <td class="py-3 px-4 text-slate-300 capitalize">${ex.role || '-'}</td>
           <td class="py-3 px-4 text-slate-400">${ex.phase || '-'}</td>
+          <td class="py-3 px-4 text-slate-300 font-mono text-[10px]">${modelLabel}</td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${envBadgeClass}">${envIcon} ${env}</span>
+            ${gitBranchHtml}
+          </td>
           <td class="py-3 px-4 text-slate-400">${tokInFormatted}</td>
           <td class="py-3 px-4 text-slate-400">${tokOutFormatted}</td>
+          <td class="py-3 px-4 font-bold text-emerald-400">${costFormatted}</td>
           <td class="py-3 px-4 text-slate-400">${durFormatted}</td>
           <td class="py-3 px-4"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${verdictClass}">${verdict}</span></td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function openCostMethodologyModal() {
+      const modal = document.getElementById('cost-methodology-modal');
+      if (modal) modal.classList.remove('hidden');
+      renderPricingTable();
+    }
+
+    function closeCostMethodologyModal() {
+      const modal = document.getElementById('cost-methodology-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderPricingTable(searchFilter = '') {
+      const tbody = document.getElementById('pricing-tbody');
+      if (!tbody) return;
+
+      const filter = searchFilter.toLowerCase().trim();
+      let list = (liveModelsPricing && liveModelsPricing.length > 0)
+        ? liveModelsPricing
+        : Object.entries(fallbackPricingMap).map(([k, v]) => ({ id: k, name: v.name, promptPrice: v.prompt, completionPrice: v.completion, provider: v.provider }));
+
+      if (filter) {
+        list = list.filter(m => m.id.toLowerCase().includes(filter) || (m.name || '').toLowerCase().includes(filter) || (m.provider || '').toLowerCase().includes(filter));
+      }
+
+      // Priorizar los modelos más populares
+      const topPriority = ['gemini-3.7-flash', 'gemini-2.5-flash', 'claude-3.7-sonnet', 'claude-3.5-sonnet', 'deepseek-r1', 'gpt-4o', 'qwen-2.5-coder'];
+      list.sort((a, b) => {
+        const aTop = topPriority.some(p => a.id.toLowerCase().includes(p));
+        const bTop = topPriority.some(p => b.id.toLowerCase().includes(p));
+        if (aTop && !bTop) return -1;
+        if (!aTop && bTop) return 1;
+        return a.id.localeCompare(b.id);
+      });
+
+      const displayList = list.slice(0, 50);
+
+      tbody.innerHTML = displayList.map(m => {
+        const prompt1M = (m.promptPrice * 1_000_000).toFixed(3);
+        const compl1M = (m.completionPrice * 1_000_000).toFixed(3);
+        return `
+          <tr class="hover:bg-slate-800/50 transition">
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-200">${m.name || m.id}</div>
+              <div class="text-[9px] text-slate-500 font-mono">${m.id}</div>
+            </td>
+            <td class="py-2.5 px-3 font-mono text-sky-300">$${prompt1M}</td>
+            <td class="py-2.5 px-3 font-mono text-emerald-300">$${compl1M}</td>
+            <td class="py-2.5 px-3 text-slate-400 uppercase text-[10px]">${m.provider}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterPricingTable() {
+      const q = (document.getElementById('pricing-search-input')?.value || '');
+      renderPricingTable(q);
     }
 
     // --- Business Rules & Memory Rendering ---
@@ -2241,7 +2693,11 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         if (currentTypeFilter !== 'ALL' && item.type !== currentTypeFilter) return false;
 
         // Status
-        if (currentStatusFilter !== 'ALL' && item.status !== currentStatusFilter) return false;
+        if (currentStatusFilter === 'READY_TO_ARCHIVE') {
+          if (!(item.status === 'ACTIVE' && item.qa_verdict === 'APROBADO')) return false;
+        } else if (currentStatusFilter !== 'ALL' && item.status !== currentStatusFilter) {
+          return false;
+        }
 
         // QA
         if (currentQaFilter === 'APROBADO' && item.qa_verdict !== 'APROBADO') return false;
@@ -2309,6 +2765,8 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           qaText = '🔴 QA: RECHAZADO';
         }
 
+        const isReadyToArchive = (init.status === 'ACTIVE' && init.qa_verdict === 'APROBADO');
+
         // Artifact chips helper
         const chip = (label, active, icon) => `
           <span class="px-2 py-0.5 rounded-md text-[10px] font-mono flex items-center gap-1 ${active ? 'bg-slate-800 text-sky-300 border border-sky-500/30' : 'bg-slate-950/60 text-slate-600 border border-slate-800/80'}">
@@ -2317,13 +2775,23 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           </span>
         `;
 
+        // Execution phase pills
+        const executedPhases = [...new Set((init.metrics.executions || []).map(e => e.phase))];
+        const phasePillsHtml = executedPhases.length > 0 ? `
+          <div class="flex items-center gap-1 flex-wrap pt-1 text-[9px] font-mono text-slate-400">
+            <span class="text-slate-500">Fases:</span>
+            ${executedPhases.map(p => `<span class="px-1.5 py-0.2 rounded bg-slate-950/80 border border-slate-700/60 text-sky-300">${p}</span>`).join('<span class="text-slate-600">›</span>')}
+          </div>
+        ` : '';
+
         card.innerHTML = `
           <div class="space-y-3">
             <!-- Header Badges -->
             <div class="flex items-center justify-between gap-2 flex-wrap">
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${typeBadgeClass}">${init.type}</span>
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] ${init.status === 'ACTIVE' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : 'bg-slate-800 text-slate-400'}">${init.status === 'ACTIVE' ? 'Activa' : 'Archivada'}</span>
+                ${isReadyToArchive ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">📦 Listo para Archivar</span>' : ''}
               </div>
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${qaBadgeClass}">${qaText}</span>
             </div>
@@ -2342,6 +2810,8 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
               ${chip('qa', init.has_qa, '🧪')}
               ${chip('dec', init.has_decision, '⚖️')}
             </div>
+
+            ${phasePillsHtml}
           </div>
 
           <!-- Card Footer & Actions -->

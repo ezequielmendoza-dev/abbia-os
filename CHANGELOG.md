@@ -4,6 +4,29 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.5.0] — 2026-09-16
+
+### Agregado
+- **Integración con OpenRouter Live Pricing API (Cero Hardcoding)** — `scripts/dashboard.sh` consulta en tiempo real la API pública de OpenRouter (`https://openrouter.ai/api/v1/models`) para obtener las tarifas actualizadas de más de 400 modelos de IA (Gemini, Claude, GPT, DeepSeek, Qwen, Mistral, etc.), calculando el costo estimado en USD de cada sesión y del proyecto completo con caché en `localStorage` y soporte offline.
+- **Modal de Transparencia de Costos y Metodología** — Nuevo diálogo interactivo en el dashboard accesible desde el KPI de Costo en USD que detalla la fórmula matemática, la fuente en vivo de OpenRouter y un buscador de tarifas por modelo.
+- **Soporte de Modelo y Proveedor en Telemetría** — `scripts/finish-phase.sh` acepta `--model <NOMBRE>` (ej: `gemini-3.7-flash`, `claude-3.7-sonnet`, `deepseek-r1`) y `--provider <NOMBRE>` (ej: `opencode`, `antigravity`, `cursor`), registrándolos en `executions.yaml` y generando agregados `per_model` y `per_provider` en `aggregates.yaml`.
+- **`aggregates.yaml` generado automáticamente** — `scripts/finish-phase.sh` ahora invoca un mini-parser Python al cerrar cada fase y regenera `.ai/metrics/aggregates.yaml` con estadísticas agrupadas por fase, rol, modelo e iniciativa (`tokens_total`, `duration_s`, `sample`, `null_tokens`, `retry_rate`). Ya no requiere intervención manual del Skill Manager.
+- **Métricas en `context-snapshot.md`** — `scripts/common.sh` incluye ahora un bloque de telemetría en el snapshot automático: total de sesiones, sesiones con tokens medidos y alerta si hay sesiones sin telemetría real.
+- **Banner de estado vacío en Telemetría del Dashboard** — `scripts/dashboard.sh` muestra un banner de advertencia accionable (con snippet de comando) cuando todas las entradas de `executions.yaml` tienen `tokens_in: null`.
+
+### Corregido
+- **Validación de `INITIATIVE` en `finish-phase.sh`** — Ahora acepta tanto la forma corta `FEAT-NNN` como la forma larga `FEAT-NNN-slug` (nombre completo de la carpeta de iniciativa). El ID se normaliza a `FEAT-NNN` para `executions.yaml` y `workflow-log.md`, mientras que la ruta completa se conserva en el mensaje de outputs.
+- **Inferencia de ROL insensible a mayúsculas** — La inferencia de rol por fase ahora usa `PHASE_LOWER` para evitar fallos con fases como `"Spec"` o `"QA"` pasadas con mayúsculas.
+
+### Modificado
+- **Instrucción de tokens en todos los roles** — `roles/analyst.md`, `architect.md`, `developer.md`, `qa.md`, `tech-lead.md`, `ui-designer.md`, `devops.md`: Los comandos R6 de cierre de fase ahora incluyen `--tokens-in`, `--tokens-out`, `--duration` y `--source measured` como flags opcionales con ejemplos de valores reales y nota explicativa de cómo obtenerlos del IDE.
+- **Instrucción de tokens en workflows** — `workflows/new-feature.md` (10 comandos) y `workflows/bug-fix.md` (7 comandos) incluyen comentario `# Flags opcionales: --tokens-in <N>...` en cada bloque de cierre de fase.
+- **`roles/prompt-guide.md` Tip 5 expandido** — Tabla completa de flags disponibles, lista de fases canónicas del DAG, instrucción de cómo obtener tokens en el IDE, ejemplo completo y descripción de los 4 efectos del `finish-phase.sh`.
+- **Advertencia de fase no canónica** — `finish-phase.sh` advierte (sin error) cuando la fase no coincide con los nombres del DAG (`analysis`, `ui-design`, `architecture`, etc.), ayudando a normalizar registros históricos como `"Spec"`, `"UI"`, `"Implementation"`.
+- **Recordatorio de tokens en output final** — `finish-phase.sh` muestra un recordatorio al final de la ejecución si los tokens quedaron como `null`, con el comando exacto a agregar en la próxima llamada.
+
+---
+
 ## [3.4.0] — 2026-09-12
 
 ### Agregado

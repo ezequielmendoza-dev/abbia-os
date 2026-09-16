@@ -280,9 +280,12 @@ Por favor, lee el diseño técnico en .ai/features/FEAT-NNN-slug/architecture.md
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como Senior Developer, **NUNCA des por finalizada tu respuesta ni pases el control** sin haber ejecutado previamente en la terminal:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer
+> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer \
+>   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 implement developer`
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 implement developer --tokens-in 35000 --tokens-out 12000 --duration 1800 --source measured`  
+> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags y quedarán como `null`.*
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 
