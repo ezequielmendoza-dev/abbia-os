@@ -8,10 +8,14 @@
 
 executions:
   - ts: YYYY-MM-DDTHH:MM:SSZ        # ISO-8601
-    initiative: FEAT-001            # FEAT-NNN | BUG-NNN
+    initiative: FEAT-001            # FEAT-NNN | BUG-NNN | AUDIT-NNN | REF-NNN
     role: architect                 # analyst | ui-designer | architect | developer | qa | tech-lead | devops
-    phase: architecture              # fase del DAG (ver docs/workflow-dag.md)
+    phase: architecture             # fase del DAG (ver docs/workflow-dag.md)
     mode: estandar                  # rapido | estandar | profundo
+    model: claude-3-7-sonnet        # modelo de IA (gemini-2.5-pro, deepseek-r1, gpt-4o, etc.)
+    provider: opencode              # IDE / entorno (opencode, antigravity, cursor, claude-code, windsurf)
+    target_env: local               # local | staging | production
+    git_branch: main                # rama de Git activa durante la ejecución
     tokens_in: 0                    # tokens de entrada de la invocación (null si no medible)
     tokens_out: 0                   # tokens de salida producidos
     duration_s: 0                   # duración en segundos

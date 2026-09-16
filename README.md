@@ -3,7 +3,7 @@
 # 🤖 ai-agents OS
 ### *Framework de Specification-Driven Development (SDD) para Ingeniería Asistida por IA*
 
-[![Version](https://img.shields.io/badge/version-v3.4.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.5.1-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-stable-success.svg?style=for-the-badge)](README.md)
 [![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-purple.svg?style=for-the-badge)](docs/sdd-philosophy.md)
 [![Memory](https://img.shields.io/badge/memory-4--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
@@ -192,7 +192,7 @@ bash .ai/agents/scripts/sync-initiatives.sh --archive-approved
 
 ---
 
-### 📊 Visualizador Interactivo (Dashboard Web Autónomo)
+### 📊 Visualizador Interactivo (Dashboard Web Autónomo v3.5.1)
 
 Explora todo el ecosistema de tu proyecto en una aplicación web interactiva local de ancho completo:
 
@@ -201,11 +201,14 @@ bash .ai/agents/scripts/dashboard.sh
 ```
 
 * 🏢 **Tab Proyecto:** Visor completo de identidad, objetivos de negocio, actores/roles, stack y ficha técnica.
-* 📁 **Tab Iniciativas:** Matriz de features/bugs con buscador, filtros, telemetría y visualizador de artefactos SDD.
+* 📁 **Tab Iniciativas:** Matriz de features/bugs con buscador, filtros por estado (`Listas para Archivar`, `Activas`, `Archivadas`), filtros de entorno (`💻 Local`, `🌐 Staging`, `🚀 Producción`), visualizador de artefactos SDD, modelo utilizado y rama de Git.
 * 🕸️ **Tab Grafo ADR:** Visualización 2D interactiva (Vis.js) con física de nodos, herramientas de zoom, búsqueda y panel de detalle.
 * 📜 **Tab Reglas:** Reglas de negocio e invariantes del sistema (`business-rules.md`).
 * 🧠 **Tab Memoria:** Snapshot ejecutivo, log episódico, catálogo de decisiones y patrones aprendidos.
-* 📈 **Tab Telemetría:** Métricas de consumo de tokens (in/out), costos estimados y gráficos (Chart.js) por rol y fase.
+* 📈 **Tab Telemetría & Observabilidad (AgentOps / LLMOps):** 
+  - **4 Gráficos Interactivos (2x2):** Tokens por Rol, Tokens por Fase, Consumo por Modelo de IA y Distribución por Entorno.
+  - **🌐 OpenRouter Live Pricing API (Cero Hardcoding):** Consulta en tiempo real más de 440 modelos para tarificar tokens en USD al día.
+  - **🔍 Modal de Transparencia Metodológica:** Fórmula matemática, calculadora interactiva de tarifas y aclaración de suscripciones planas vs pay-as-you-go.
 * ℹ️ **Modal About:** Documentación embebida del framework accesible desde el navbar.
 
 ---
@@ -217,9 +220,9 @@ Todos los scripts residen en `.ai/agents/scripts/` y estandarizan el ciclo de vi
 | Comando | Propósito | Ejemplo de Uso |
 | :--- | :--- | :--- |
 | **`setup-ide.sh`** | Inicializa `.ai/`, memoria, métricas, KG y reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
-| **`update-ai-agents.sh`** | Actualiza el framework (submodule + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh` |
+| **`update-ai-agents.sh`** | Actualiza el framework (submodule + setup + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | **`new-initiative.sh`** | Bootstrap de nueva iniciativa (`FEAT`, `BUG`, `AUDIT`, `REF`) | `bash .ai/agents/scripts/new-initiative.sh FEAT 042 pagos-stripe` |
-| **`finish-phase.sh`** | Cierre formal de fase (registra memory, metrics y snapshot) | `bash .ai/agents/scripts/finish-phase.sh FEAT-042 qa qa --verdict APROBADO` |
+| **`finish-phase.sh`** | Cierre formal de fase (registra memory, metrics multidimensionales, env, branch y snapshot) | `bash .ai/agents/scripts/finish-phase.sh FEAT-042 qa qa --verdict APROBADO --model claude-3-7-sonnet --env staging` |
 | **`archive-initiative.sh`** | Archiva una iniciativa a `.ai/archive/` con validación QA | `bash .ai/agents/scripts/archive-initiative.sh FEAT-042` |
 | **`sync-initiatives.sh`** | Reconcilia, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .ai/agents/scripts/sync-initiatives.sh --fix --archive-approved` |
 | **`validate-project.sh`** | Auditoría documental y chequeo de conformidad del framework | `bash .ai/agents/scripts/validate-project.sh` |

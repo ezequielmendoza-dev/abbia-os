@@ -23,21 +23,29 @@ El pipeline de `ai-agents` produce artefactos (specs, diseños, QA) y ahora memo
 
 ## 2. Qué se Mide
 
-| Métrica | Unidad | Se registra en |
+| Métrica / Dimensión | Tipo / Unidad | Descripción |
 |:---|:---|:---|
-| `tokens_in` | tokens | Entrada consumida por el agente en la invocación |
-| `tokens_out` | tokens | Salida producida por el agente |
-| `tokens_total` | tokens (`in + out`) | Derivable |
-| `duration_s` | segundos | Tiempo desde activación hasta cierre del agente |
-| `phase` | string | Fase del DAG (ej. `discovery`, `qa`, `tech-review-1`) |
+| `tokens_in` | entero (tokens) | Entrada consumida por el agente en la invocación |
+| `tokens_out` | entero (tokens) | Salida producida por el agente |
+| `tokens_total` | entero (tokens) | `tokens_in + tokens_out` |
+| `duration_s` | entero (segundos)| Tiempo transcurrido desde activación hasta cierre del agente |
+| `phase` | string | Fase del DAG (ej. `discovery`, `implement`, `qa`, `deploy`) |
+| `role` | string | Agente en ejecución (`analyst`, `developer`, `qa`, `architect`, etc.) |
+| `model` | string | Identificador del modelo de IA (ej. `claude-3-7-sonnet`, `deepseek-r1`, `gemini-2.5-pro`) |
+| `provider` | string | IDE o cliente ejecutor (ej. `opencode`, `antigravity`, `cursor`, `claude-code`) |
+| `target_env` | enum | Entorno de validación/ejecución (`local`, `staging`, `production`) |
+| `git_branch` | string | Rama activa de Git durante la ejecución (ej. `main`, `feat/042-slug`) |
 | `attempts` | entero | Nº de intentos del nodo (back-edge con `retry`) |
-| `verdict` | `PASS` \| `FAIL` \| `APROBADO` \| `RECHAZADO` | Resultado del gate, si aplica |
+| `verdict` | enum | Resultado del gate (`APROBADO`, `RECHAZADO`, `PASS`, `FAIL`), si aplica |
+| `source` | enum | Origen del dato (`measured` si proviene de API/IDE, `estimate` si es heurístico) |
 
-**Métricas agregadas (derivadas, no se escriben a mano):**
-- **Costo por fase:** `Σ tokens_total` agrupado por `phase`.
-- **Eficiencia de tokens:** `tokens_out / tokens_total` (qué fracción de lo consumido es útil).
-- **Tiempo de ciclo:** `Σ duration_s` de una feature completa (desde discovery hasta QA gate).
-- **Tasa de retry:** `Σ (attempts - 1)` por fase — un proxy de calidad del gate anterior.
+**Métricas y Agregados Derivados:**
+- **Costo Dinámico en USD (OpenRouter Live Pricing):** El dashboard consulta en tiempo real `https://openrouter.ai/api/v1/models` para tarificar con cero hardcoding:
+  $$\text{Costo USD} = \frac{\text{tokens\_in} \times \text{Tarifa In}}{10^6} + \frac{\text{tokens\_out} \times \text{Tarifa Out}}{10^6}$$
+- **Consumo por Modelo y Proveedor:** Permite comparar el ROI y eficiencia de distintos LLMs e IDEs.
+- **Distribución por Entorno:** Visibilidad de qué fases se validaron en `local`, `staging` o `production`.
+- **Eficiencia de tokens:** `tokens_out / tokens_total` (fracción útil de generación).
+- **Tasa de retry:** `Σ (attempts - 1)` por fase (proxy de calidad del gate anterior).
 
 ---
 
@@ -49,62 +57,82 @@ Las métricas viven en `.ai/metrics/`, separadas de la memoria cualitativa (`.ai
 .ai/metrics/
 ├── README.md               ← Contrato de uso (este sistema, copiado al proyecto)
 ├── executions.yaml         ← Registro append-only por ejecución de agente
-└── aggregates.yaml         ← Agregados por fase/rol (regenerado, no manual)
+└── aggregates.yaml         ← Agregados multidimensionales (regenerado automáticamente)
 ```
 
 ### `executions.yaml` — registro bruto (append-only)
 
-Generado/append por cada agente al cerrar, o por el orquestador (Skill Manager) que envuelve la invocación. **Nunca se reescribe una entrada previa.**
+Generado/append por cada agente al cerrar (`finish-phase.sh`), o por el orquestador (Skill Manager). **Nunca se reescribe una entrada previa.**
 
 ```yaml
 executions:
-  - ts: 2026-09-11T15:30:00Z
+  - ts: 2026-09-16T15:30:00Z
     initiative: FEAT-042
-    role: architect
-    phase: architecture
+    role: developer
+    phase: implement
     mode: estandar
-    tokens_in: 18423
-    tokens_out: 5912
+    model: deepseek/deepseek-r1
+    provider: opencode
+    target_env: local
+    git_branch: feat/042-pagos
+    tokens_in: 24500
+    tokens_out: 6200
     duration_s: 812
     attempts: 1
     verdict: null
+    source: measured
 
-  - ts: 2026-09-11T16:02:00Z
+  - ts: 2026-09-16T16:02:00Z
     initiative: FEAT-042
-    role: tech-lead
-    phase: tech-review-1
+    role: qa
+    phase: qa
     mode: estandar
-    tokens_in: 7421
-    tokens_out: 1804
-    duration_s: 233
-    attempts: 2            # 1er gate RECHAZADO → devuelto al analyst
+    model: anthropic/claude-3.7-sonnet
+    provider: opencode
+    target_env: staging
+    git_branch: feat/042-pagos
+    tokens_in: 18000
+    tokens_out: 4100
+    duration_s: 430
+    attempts: 1
     verdict: APROBADO
+    source: measured
 ```
 
 Reglas de escritura:
 
 1. **Una ejecución = una entrada.** Cada invocación de un agente sobre un nodo del DAG.
 2. **Siempre con `ts` ISO-8601** y `initiative` (`FEAT-NNN` / `BUG-NNN`).
-3. **`attempts` refleja back-edges** — si un nodo fue devuelto 2 veces, `attempts: 3`.
-4. **Los `verdict` se completan si la fase es un gate** (`tech-review-N`, `qa`, `approval`).
-5. Si el agente no puede medir tokens (interfaz sin API), dejar `null` y lo estima el orquestador.
+3. **Inferencia automática de entorno:** `finish-phase.sh` deduce `target_env: local` para diseño/código, `staging` para QA y `production` para deploy.
+4. **Auto-detección de Git:** Se registra la rama activa (`git_branch`) para total trazabilidad.
+5. **Los `verdict` se completan si la fase es un gate** (`qa`, `approval`, `tech-review-N`).
 
-### `aggregates.yaml` — agregados (regenerado por Skill Manager)
+### `aggregates.yaml` — agregados multidimensionales (regenerado)
 
 ```yaml
+generated_at: 2026-09-16T16:30:00Z
+summary:
+  total_executions: 94
+  total_tokens_in: 1420500
+  total_tokens_out: 395000
+  total_tokens: 1815500
+  total_duration_s: 48920
 per_phase:
-  discovery:   { tokens_total: 31240, duration_s: 1205, sample: 3 }
-  architecture: { tokens_total: 24335, duration_s: 812, sample: 1 }
-  qa:          { tokens_total: 9180,  duration_s: 340, sample: 2 }
+  implement:   { tokens_total: 820000, duration_s: 24100, executions: 35 }
+  qa:          { tokens_total: 410000, duration_s: 11200, executions: 22 }
 per_role:
-  analyst:  { tokens_total: 31240, duration_s: 1205, attempts_total: 2 }
-  architect: { tokens_total: 24335, duration_s: 812, attempts_total: 1 }
-  tech-lead: { tokens_total: 14842, duration_s: 466, attempts_total: 1 }
-per_feature:
-  FEAT-042:  { tokens_total: 122398, duration_s: 7680, retry_rate: 0.21 }
+  developer:   { tokens_total: 820000, duration_s: 24100, executions: 35 }
+  qa:          { tokens_total: 410000, duration_s: 11200, executions: 22 }
+per_model:
+  anthropic/claude-3.7-sonnet: { tokens_total: 980000, executions: 48 }
+  deepseek/deepseek-r1:        { tokens_total: 650000, executions: 32 }
+per_env:
+  local:       { tokens_total: 1200000, executions: 60 }
+  staging:     { tokens_total: 515500,  executions: 30 }
+  production:  { tokens_total: 100000,  executions: 4 }
 ```
 
-`aggregates.yaml` **no se edita a mano** — lo regenera el Skill Manager al compactar (mismo ciclo que `context-snapshot.md`), típicamente al final de una sesión o al superar ~20 ejecuciones.
+`aggregates.yaml` **no se edita a mano** — lo regenera `finish-phase.sh` o el Skill Manager al compactar.
 
 ---
 
