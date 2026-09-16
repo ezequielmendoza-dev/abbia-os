@@ -10,7 +10,7 @@
         "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/analyst.md. Escribe únicamente especificaciones funcionales y criterios de aceptación Gherkin. Al concluir, ejecuta obligatoriamente: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst."
+      "customInstructions": "Consulta roles/analyst.md. Escribe únicamente especificaciones funcionales y criterios de aceptación Gherkin. Al concluir, ejecuta obligatoriamente: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "ui-designer",
@@ -22,7 +22,7 @@
         "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/ui-designer.md. Define componentes, tokens de diseño y layouts responsivos. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer."
+      "customInstructions": "Consulta roles/ui-designer.md. Define componentes, tokens de diseño y layouts responsivos. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "architect",
@@ -34,7 +34,7 @@
         "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/architect.md. Diseña contratos de API, esquemas de BD y registra ADRs con ID ARCH-NNN. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect."
+      "customInstructions": "Consulta roles/architect.md. Diseña contratos de API, esquemas de BD y registra ADRs con ID ARCH-NNN. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "tech-lead",
@@ -45,7 +45,7 @@
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/tech-lead.md. Revisa estándares y emite aprobación o rechazo. Al aprobar, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO [--archive]."
+      "customInstructions": "Consulta roles/tech-lead.md. Revisa estándares y emite aprobación o rechazo. Al aprobar, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]."
     },
     {
       "slug": "developer",
@@ -58,7 +58,7 @@
         "browser",
         "mcp"
       ],
-      "customInstructions": "Consulta roles/developer.md. Implementa código limpio, pruebas y registra decision.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer."
+      "customInstructions": "Consulta roles/developer.md. Implementa código limpio, pruebas y registra decision.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "qa",
@@ -69,7 +69,7 @@
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/qa.md. Ejecuta pruebas reales y emite reporte qa.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO>."
+      "customInstructions": "Consulta roles/qa.md. Ejecuta pruebas reales y emite reporte qa.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "devops",
@@ -80,7 +80,7 @@
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/devops.md. Automatiza pipelines y valida despliegues. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS [--archive]."
+      "customInstructions": "Consulta roles/devops.md. Automatiza pipelines y valida despliegues. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]."
     },
     {
       "slug": "skill-manager",

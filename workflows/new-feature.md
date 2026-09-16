@@ -198,8 +198,8 @@ Requerimiento:
 **Criterio de salida:** `spec.md` completa, sin preguntas abiertas bloqueantes, lista para revisión del Tech Lead.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug analysis analyst
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug analysis analyst \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -224,8 +224,8 @@ Estoy presentando para revisión: feature-spec en .ai/features/FEAT-NNN-slug/spe
 
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-1 tech-lead --verdict <APROBADO|RECHAZADO>
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-1 tech-lead --verdict <APROBADO|RECHAZADO> \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -250,8 +250,8 @@ Especificación funcional de referencia:
 **Criterio de salida:** `ui-design.md` completa, con la arquitectura de información, layouts y componentes diseñados para todos los viewports, lista para el desarrollo.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug ui-design ui-designer
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug ui-design ui-designer \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -281,8 +281,8 @@ Diseño visual de referencia:
 
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug architecture architect
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug architecture architect \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -298,8 +298,8 @@ Si es **APROBADO** → continuar al Paso 6.
 
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-2 tech-lead --verdict <APROBADO|RECHAZADO>
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-2 tech-lead --verdict <APROBADO|RECHAZADO> \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -338,8 +338,8 @@ Diseño técnico de referencia:
 **Criterio de salida:** Implementación completa, funcional, con tests unitarios pasando y fiel a la UI y la arquitectura, lista para QA.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug implement developer
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug implement developer \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -381,8 +381,8 @@ Si el resultado es **RECHAZADO / FAIL**:
 4. Si el resultado es **APROBADO / PASS** → continuar al Paso 8.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug qa qa --verdict <APROBADO|RECHAZADO>
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug qa qa --verdict <APROBADO|RECHAZADO> \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -401,8 +401,8 @@ Si el resultado es **RECHAZADO / FAIL**:
 > 4. **Release:** Indicar al usuario si debe proceder con release según [`workflows/release.md`](release.md).
 > 5. **Cierre Obligatorio (R6):**
 >    ```bash
->    bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO [--archive]
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+>    bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO \
+>      --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]
 >    ```
 
 ---
@@ -413,8 +413,8 @@ Si el resultado es **RECHAZADO / FAIL**:
 **Workflow:** Ver [`workflows/release.md`](release.md) para el proceso de deployment.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug deploy devops --verdict PASS --archive
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug deploy devops --verdict PASS --archive \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -430,8 +430,8 @@ Cuando la feature está validada por QA y lista para producción:
    ```bash
    bash .ai/agents/scripts/archive-initiative.sh FEAT-NNN-slug
    # o en un solo paso durante el cierre de fase:
-   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO --archive
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO --archive \
+     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
    ```
    *Esto valida QA, mueve la carpeta a `.ai/archive/`, actualiza `knowledge-graph.yaml`, registra en `workflow-log.md` y regenera `context-snapshot.md`.*
 

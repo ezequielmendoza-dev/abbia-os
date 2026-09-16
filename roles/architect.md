@@ -320,14 +320,14 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 
 > [!IMPORTANT]
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
-> Como Software Architect, una vez generado `architecture.md` y registrados los ADRs en `.ai/knowledge-graph.yaml`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> Como Software Architect, una vez generado `architecture.md` y registrados los ADRs en `.ai/knowledge-graph.yaml`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal el cierre con telemetría:
 > ```bash
 > bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect \
->   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect --tokens-in 22000 --tokens-out 6500 --duration 900 --source measured`  
-> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags y quedarán como `null`.*
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect --model gemini-3.7-flash --tokens-in 22000 --tokens-out 6500 --duration 900 --source measured`  
+> *Es responsabilidad obligatoria del agente pasar su modelo activo y los tokens/duración de la sesión (medidos por el IDE o estimados razonablemente según la complejidad del diseño técnico) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

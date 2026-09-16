@@ -4,6 +4,15 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.5.1] — 2026-09-16
+
+### Modificado
+- **Obligatoriedad de Parámetros de Telemetría para Agentes (Regla R6)** — Se reforzó la regla documental R6 en `AGENTS.md`, `templates/ide-configs/AGENTS.md`, `CLAUDE.md`, `cursorrules`, `windsurfrules`, `clinerules`, `copilot-instructions.md`, `roomodes`, `cursor-rules/general.mdc`, y en todos los roles (`roles/*.md`):
+  - Los agentes tienen ahora la instrucción explícita e ineludible de invocar `finish-phase.sh` pasando obligatoriamente sus flags de telemetría (`--model <MODELO>`, `--tokens-in <IN>`, `--tokens-out <OUT>`, `--duration <SEGUNDOS>`, `--source <measured|estimate>`).
+  - Se eliminó de los roles y workflows la indicación de "omitir flags de tokens dejando valores null", indicando que es responsabilidad directa del agente auto-reportar o estimar con criterio de ingeniería el consumo de su sesión para alimentar el Dashboard y la telemetría del proyecto.
+- **Workflows Actualizados con Comandos de Cierre Completos** — `workflows/new-feature.md` y `workflows/bug-fix.md` ahora especifican llamadas completas a `finish-phase.sh` con flags de modelo, tokens, duración y veredicto en cada uno de sus pasos.
+- **Documentación de Telemetría Sincronizada** — Actualizado `docs/agent-metrics.md` y `roles/prompt-guide.md` para reflejar el nuevo estándar de captura y reporte obligatorio por parte de los agentes autónomos.
+
 ## [3.5.0] — 2026-09-16
 
 ### Agregado

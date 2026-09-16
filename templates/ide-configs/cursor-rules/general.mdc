@@ -16,7 +16,7 @@ Este proyecto sigue la metodología **Specification-Driven Development (SDD)** g
    - **R3:** No crear versiones del tipo `archivo-v2.md`. Modificar el existente.
    - **R4:** Los cambios en roles/workflows deben reflejarse en el changelog correspondiente.
    - **R5:** Los documentos representan el **estado actual**, no el histórico.
-   - **R6:** **Cierre Mandatorio y Telemetría:** Al finalizar cualquier fase de trabajo o entrega, **ejecutar obligatoriamente en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` para registrar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y regenerar `context-snapshot.md`. Nunca omitir este paso.
+   - **R6:** **Cierre Mandatorio y Telemetría:** Al finalizar cualquier fase de trabajo o entrega, **ejecutar obligatoriamente en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` para registrar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y regenerar `context-snapshot.md`. Nunca omitir este paso ni los flags de telemetría.
 
 ## 🧭 Estructura de Consulta Obligatoria
 Antes de proponer o implementar código, consulta:

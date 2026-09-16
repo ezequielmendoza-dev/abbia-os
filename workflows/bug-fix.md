@@ -182,14 +182,14 @@ Al detectar un defecto, se debe abrir un caso de corrección registrando un ID i
 
 Según la clasificación del bug, se activa el agente correspondiente para corregir el diseño antes de tocar código:
 
-#### 1.A. Ajuste de Especificación Funcional (Product Analyst)
+##### 1.A. Ajuste de Especificación Funcional (Product Analyst)
 *Se activa si el bug es funcional o de negocio.*
 - **Entrada:** Reporte de bug.
 - **Acción:** Corregir `.ai/features/FEAT-XXX/spec.md` (o crearla en `.ai/features/BUG-NNN-slug/spec.md` si es general) y actualizar `.ai/business-rules.md` si aplica.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN analysis analyst
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN analysis analyst \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 - **Aprobación:** El Tech Lead debe validar los cambios funcionales antes de que pasen al Developer.
 
@@ -199,8 +199,8 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 - **Acción:** Modificar el diseño en `ui-design.md` para corregir la alineación, adaptabilidad o definir el estado visual omitido.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN ui-design ui-designer
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN ui-design ui-designer \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 #### 1.C. Ajuste de Diseño Técnico (Software Architect)
@@ -209,8 +209,8 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 - **Acción:** Actualizar `architecture.md` de la feature o el archivo de arquitectura global `.ai/architecture.md`. Si se toma una decisión de diseño de impacto general, registrar una nueva decisión `ARCH-NNN` en `.ai/decisions.md` y `.ai/knowledge-graph.yaml`.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN architecture architect
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN architecture architect \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 - **Aprobación:** El Tech Lead debe revisar y aprobar el diseño técnico modificado.
 
@@ -243,8 +243,8 @@ Especificación de corrección de referencia:
 - Si el fix requiere modificar APIs o esquemas de BD no contemplados en el Paso 1.C, detener la implementación y notificar al Architect.
 - **Cierre Obligatorio (R6):** Al finalizar la implementación y tests, el Developer **debe ejecutar obligatoriamente**:
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN implement developer
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN implement developer \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -272,8 +272,8 @@ Cambios realizados: [Lista de commits o descripción de modificaciones de códig
   3. Se repite el ciclo hasta que el veredicto sea `APROBADO` (máximo 3 intentos antes de escalar al Tech Lead).
 - **Cierre Obligatorio (R6):** Al emitir el reporte `qa.md`, ejecutar:
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN qa qa --verdict <APROBADO|RECHAZADO>
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+  bash .ai/agents/scripts/finish-phase.sh BUG-NNN qa qa --verdict <APROBADO|RECHAZADO> \
+    --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 ---
@@ -295,8 +295,8 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 > 4. **Release:** Indicar al usuario si procede release según [`workflows/release.md`](release.md).
 > 5. **Cierre Obligatorio (R6):**
 >    ```bash
->    bash .ai/agents/scripts/finish-phase.sh BUG-NNN approval tech-lead --verdict APROBADO [--archive]
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+>    bash .ai/agents/scripts/finish-phase.sh BUG-NNN approval tech-lead --verdict APROBADO \
+>      --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]
 >    ```
 
 ---
@@ -306,8 +306,8 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 1. Desplegar el fix a producción (ver [`workflows/release.md`](release.md)).
 2. Ejecutar el cierre y archivado final:
    ```bash
-   bash .ai/agents/scripts/finish-phase.sh BUG-NNN deploy devops --verdict PASS --archive
-  # Flags opcionales: --tokens-in <N> --tokens-out <N> --duration <S> --source measured
+   bash .ai/agents/scripts/finish-phase.sh BUG-NNN deploy devops --verdict PASS --archive \
+     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
    ```
 3. Consolidar cambios en la memoria del proyecto:
    - Si se modificó la arquitectura, actualizar `.ai/architecture.md`.

@@ -330,14 +330,14 @@ Pasos a seguir:
 
 > [!IMPORTANT]
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
-> Como Product Analyst, una vez generado el artefacto (`spec.md` o `discovery.md`), **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> Como Product Analyst, una vez generado el artefacto (`spec.md` o `discovery.md`), **NUNCA finalices tu respuesta** sin haber ejecutado en terminal el cierre con telemetría:
 > ```bash
 > bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst \
->   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 analysis analyst --tokens-in 18500 --tokens-out 4200 --duration 480 --source measured`  
-> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA (ej: Antigravity muestra tokens de la sesión). Si no los tenés, omití los flags y quedarán como `null`.*
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh FEAT-113 analysis analyst --model gemini-3.7-flash --tokens-in 18500 --tokens-out 4200 --duration 480 --source measured`  
+> *Es responsabilidad obligatoria del agente pasar su modelo activo y los tokens/duración de la sesión (medidos por el IDE o estimados razonablemente según el tamaño de la especificación generada) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
 Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
 

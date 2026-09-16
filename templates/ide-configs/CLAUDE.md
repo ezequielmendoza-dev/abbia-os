@@ -35,9 +35,11 @@ npm run format       # Formatter
 4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
 5. **Cierre Mandatorio de Fase y Telemetría (Regla R6).** Al culminar cualquier tarea, entrega de código o documento (`spec`, `ui-design`, `architecture`, `implement`, `qa`, `approval`, `deploy`), **ES OBLIGATORIO ejecutar en la terminal**:
    ```bash
-   bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]
+   bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
+     --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+     --duration <SEGUNDOS> --source measured
    ```
-   *Nunca des por finalizada tu respuesta ni pases el control sin haber ejecutado este comando.*
+   *Nunca des por finalizada tu respuesta ni pases el control sin haber ejecutado este comando con los parámetros de telemetría (medidos o estimados razonablemente).*
 
 ---
 

@@ -150,13 +150,13 @@ per_env:
 
 ### Fase 1 — Capturar (al cerrar cada agente)
 
-Todo agente del pipeline registra su ejecución en `executions.yaml`. El **Skill Manager** es el responsable último: si el canal del agente no expone métricas, el orquestador las estima y registra (marcando `source: estimate`).
+Todo agente del pipeline registra su ejecución en `executions.yaml` ejecutando obligatoriamente `finish-phase.sh` con sus flags de telemetría (`--model`, `--tokens-in`, `--tokens-out`, `--duration`, `--source measured|estimate`). Si el canal del agente no expone contadores exactos, el agente debe estimar los tokens y duración en lugar de omitirlos como `null`.
 
-> **Automatización:** `scripts/finish-phase.sh` registra la ejecución (con `source: estimate` por defecto; `--source measured` si hay telemetría real) junto con la entrada de `workflow-log.md` y la regeneración del snapshot.
+> **Automatización:** `scripts/finish-phase.sh` registra la ejecución (con `source: measured` o `source: estimate`), deduciendo el entorno y rama activa, junto con la entrada de `workflow-log.md` y la regeneración del snapshot.
 
 ### Fase 2 — Agregar (al final de sesión, Skill Manager)
 
-1. Lee `executions.yaml` y agrupa por `phase`, `role` y `initiative`.
+1. Lee `executions.yaml` y agrupa por `phase`, `role` e `initiative`.
 2. Calcula `tokens_total`, `duration_s`, `attempts`, `retry_rate`.
 3. Escribe `aggregates.yaml` (regenera, no hace append).
 4. Si hay alertas (retry rate > 0.5, feature con > 150k tokens), las reporta al Tech Lead.
@@ -178,7 +178,7 @@ Las métricas alimentan decisiones del *sistema de agentes*:
 
 | Agente | Acción de métricas obligatoria |
 |:---|:---|
-| **Todos los del pipeline** | Registrar `executions.yaml` al cerrar (tokens, fase, duración, attempts) |
+| **Todos los del pipeline** | Ejecutar obligatoriamente `finish-phase.sh` pasando `--model`, `--tokens-in`, `--tokens-out`, `--duration` y `--source` (Regla R6) |
 | **Skill Manager** | Orquesta `Capture → Agregar → Decidir`; regenera `aggregates.yaml`; reporta alertas |
 | **Tech Lead** | Revisa `aggregates.yaml` en cada gate y decide ajustes del sistema |
 | **Arquitecto (custodio)** | Las métricas no cambian el proceso documental — solo lo hacen visible |

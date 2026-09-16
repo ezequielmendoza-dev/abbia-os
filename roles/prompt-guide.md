@@ -252,10 +252,12 @@ Las preguntas que puede hacer un agente son siempre sobre:
 
 Las decisiones técnicas dentro de su área de expertise las toman sin consultar.
 
-### Tip 5: Cierre Mandatorio de Fase con finish-phase.sh (Regla R6)
-Cada vez que un agente concluye su fase de trabajo, **debe ejecutarse en terminal**:
+### Tip 5: Cierre Mandatorio de Fase con Telemetría (Regla R6)
+Cada vez que un agente concluye su fase de trabajo, **debe ejecutarse en terminal el cierre con sus flags de telemetría**:
 ```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [opciones]
+bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
+  --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+  --duration <SEGUNDOS> --source measured [opciones]
 ```
 
 **Flags disponibles y recomendados:**

@@ -69,7 +69,7 @@ Estas reglas aplican también al desarrollo de este repositorio:
 | **R3** | No crear versiones del tipo `architect-v2.md`. Modificar el existente |
 | **R4** | Los cambios en roles/workflows deben reflejarse en `CHANGELOG.md` |
 | **R5** | Los documentos representan el **estado actual**, no el histórico |
-| **R6** | **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase o tarea, el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` antes de responder o dar por finalizado su turno. |
+| **R6** | **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase o tarea, el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` antes de responder o dar por finalizado su turno. Es responsabilidad directa del agente incluir el modelo activo y los consumos/duración (reales o estimados) para nutrir la telemetría del dashboard. |
 
 ### Convenciones
 - **Idioma:** Todo el contenido del repositorio debe estar en **español**.
@@ -148,7 +148,7 @@ Los scripts se encuentran en `scripts/` y automatizan tareas repetitivas de setu
 | [`setup-ide.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/setup-ide.sh) | Inicializa `.ai/`, seeds de memoria/métricas/KG, genera reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
 | [`update-ai-agents.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/update-ai-agents.sh) | Actualiza el framework en un comando (submodule + setup + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | [`new-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/new-initiative.sh) | Bootstrap automático de feature, bug, auditoría o refactor | `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
-| [`finish-phase.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/finish-phase.sh) | Cierre de fase: registra memory, metrics (model, provider, env, branch) y snapshot automáticamente | `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [--model <M>] [--provider <P>] [--env <E>] [--archive]` |
+| [`finish-phase.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/finish-phase.sh) | Cierre de fase: registra memory, metrics (model, provider, env, branch, tokens, duration) y snapshot automáticamente | `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <M> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate> [--archive]` |
 | [`archive-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/archive-initiative.sh) | Archiva una iniciativa a `.ai/archive/` con validación QA y reconciliación KG | `bash .ai/agents/scripts/archive-initiative.sh <INICIATIVA>` |
 | [`sync-initiatives.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/sync-initiatives.sh) | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .ai/agents/scripts/sync-initiatives.sh [--fix] [--archive-approved]` |
 | [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |

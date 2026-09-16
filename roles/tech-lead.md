@@ -314,7 +314,7 @@ Por favor, revisa el archivo de diseño (.ai/features/FEAT-NNN-slug/architecture
 > [!IMPORTANT]
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL:**  
 > Como Tech Lead, al emitir cualquier veredicto de revisión o aprobación final, **NUNCA des por terminada tu respuesta** sin haber ejecutado en terminal:
-> `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict <APROBADO|RECHAZADO> [--archive] --tokens-in <N> --tokens-out <N> --source measured`
+> `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict <APROBADO|RECHAZADO> --model <MODELO> --tokens-in <N> --tokens-out <N> --duration <S> --source measured [--archive]`
 
 Como Tech Lead, eres el responsable del veredicto final de la iniciativa antes de su pase a producción:
 
@@ -326,16 +326,16 @@ Como Tech Lead, eres el responsable del veredicto final de la iniciativa antes d
    - **Si el usuario desea probar en staging primero:**
      ```bash
      bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO \
-       --tokens-in <N> --tokens-out <N> --duration <SEGUNDOS> --source measured
+       --model <MODELO> --tokens-in <N> --tokens-out <N> --duration <SEGUNDOS> --source measured
      ```
    - **Si el usuario confirma el pase a producción y archivado:**
      ```bash
      bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO --archive \
-       --tokens-in <N> --tokens-out <N> --duration <SEGUNDOS> --source measured
+       --model <MODELO> --tokens-in <N> --tokens-out <N> --duration <SEGUNDOS> --source measured
      # o individualmente:
      bash .ai/agents/scripts/archive-initiative.sh <INICIATIVA>
      ```
-   *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags.*
+   *Es responsabilidad obligatoria del agente pasar su modelo activo, veredicto formal y los tokens/duración de la sesión (medidos por el IDE o estimados según la revisión efectuada) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
 ---
 

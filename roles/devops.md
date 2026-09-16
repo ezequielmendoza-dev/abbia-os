@@ -256,10 +256,10 @@ Tarea:
 
 > [!IMPORTANT]
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL:**  
-> Como DevOps Engineer, tras completar el despliegue a producción o validación de infraestructura, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> Como DevOps Engineer, tras completar el despliegue a producción o validación de infraestructura, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal el cierre con telemetría:
 > ```bash
 > bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
->   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
 
@@ -267,9 +267,9 @@ Una vez completado el deployment a producción y verificado el health check del 
 
 ```bash
 bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
-  --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> --duration <SEGUNDOS> --source measured
+  --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> --duration <SEGUNDOS> --source measured
 ```
-*Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags.*
+*Es responsabilidad obligatoria del agente pasar su modelo activo, veredicto formal y los tokens/duración de la sesión (medidos por el IDE o estimados según las operaciones ejecutadas) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
 El flag `--archive` ejecuta [`scripts/archive-initiative.sh`](../scripts/archive-initiative.sh), moviendo la iniciativa a `.ai/archive/`, actualizando los paths en `.ai/knowledge-graph.yaml`, registrando en `.ai/memory/workflow-log.md` y regenerando `.ai/memory/context-snapshot.md`.
 

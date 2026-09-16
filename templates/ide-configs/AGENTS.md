@@ -44,7 +44,7 @@ Los documentos de especificación, diseño técnico y QA viven **únicamente** d
 | **R3** | No crear versiones del tipo `architecture-v2.md` o `spec-final.md` — modificar el existente |
 | **R4** | No crear documentos de features específicas en la raíz de `.ai/` |
 | **R5** | Los documentos raíz representan el **estado actual**, no el histórico |
-| **R6** | **Cierre Mandatorio y Telemetría:** Al completar cualquier fase (Spec, UI, Architecture, Implementation, QA, Approval, Deploy), el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]` antes de finalizar su turno o entregar la respuesta, garantizando la telemetría y memoria persistente. |
+| **R6** | **Cierre Mandatorio y Telemetría:** Al completar cualquier fase (Spec, UI, Architecture, Implementation, QA, Approval, Deploy), el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` antes de finalizar su turno o entregar la respuesta. Es responsabilidad directa del agente incluir los flags de telemetría para alimentar el dashboard y la memoria técnica. |
 
 ---
 
@@ -139,7 +139,7 @@ El proyecto cuenta con herramientas en `.ai/agents/scripts/` para simplificar fl
 | `setup-ide.sh` | Regenerar configuraciones de IDEs o inicializar carpetas: `bash .ai/agents/scripts/setup-ide.sh` |
 | `update-ai-agents.sh` | Actualizar el framework en un comando (submodule + setup + auto-fix + validación): `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
 | `new-initiative.sh` | Crear nueva iniciativa (FEAT/BUG/AUDIT/REF) automáticamente: `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
-| `finish-phase.sh` | Cierre de fase: registra memory, metrics (model, provider, env, branch) y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL] [--model <M>] [--provider <P>] [--env <E>] [--archive]` |
+| `finish-phase.sh` | Cierre de fase: registra memory, metrics (model, provider, env, branch, tokens, duration) y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <M> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate> [--archive]` |
 | `archive-initiative.sh` | Archivar iniciativa a `.ai/archive/` con validación QA y reconciliación KG: `bash .ai/agents/scripts/archive-initiative.sh <INICIATIVA>` |
 | `sync-initiatives.sh` | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`): `bash .ai/agents/scripts/sync-initiatives.sh [--fix] [--archive-approved]` |
 | `validate-project.sh` | Validar conformidad del proyecto local con las reglas documentales: `bash .ai/agents/scripts/validate-project.sh` |

@@ -312,14 +312,14 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 
 > [!IMPORTANT]
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
-> Como QA Engineer, una vez emitido el reporte `qa.md`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal:
+> Como QA Engineer, una vez emitido el reporte `qa.md`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal el cierre con telemetría:
 > ```bash
 > bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> \
->   --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
+>   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO --tokens-in 9000 --tokens-out 2500 --duration 360 --source measured`  
-> *Los valores de tokens los encontrás en el contador de tu IDE/CLI de IA. Si no los tenés, omití los flags y quedarán como `null`.*
+> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO --model gemini-3.7-flash --tokens-in 9000 --tokens-out 2500 --duration 360 --source measured`  
+> *Es responsabilidad obligatoria del agente pasar su modelo activo, veredicto formal y los tokens/duración de la sesión (medidos por el IDE o estimados según las suites ejecutadas) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
 > **💡 Orientación al Usuario:**  
 > Si el veredicto es **`APROBADO`**, informa al usuario que la iniciativa ha superado las pruebas técnicas y está lista para que pueda realizar sus pruebas funcionales en el **entorno de pruebas/staging** antes de la revisión final del Tech Lead y el pase a producción.

@@ -11,7 +11,7 @@
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
 3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
 4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
-5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega de código o fase, **ejecutar en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]`.
+5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega de código o fase, **ejecutar en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured`.
 
 ---
 
@@ -29,7 +29,7 @@
 
 ### Modo de Operación
 - En **modo Plan**, enfocarse en analizar y proponer. No ejecutar cambios.
-- En **modo Act**, ejecutar los cambios aprobados de forma completa y verificable. Al concluir la tarea, **ejecutar siempre `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> [ROL]`** para registrar memoria y telemetría.
+- En **modo Act**, ejecutar los cambios aprobados de forma completa y verificable. Al concluir la tarea, **ejecutar siempre `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured`** para registrar memoria y telemetría.
 - En **modo Auto-approve**, mantener las mismas precauciones pero documentar cada acción realizada.
 
 ### Gestión de Archivos
