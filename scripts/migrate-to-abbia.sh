@@ -93,6 +93,10 @@ if [ -f "$PROJECT_ROOT/.gitmodules" ]; then
         echo -e "Actualizando ruta de submódulo en .gitmodules -> .abbia/core..."
         sed -i.bak -E 's|\.ai/agents|\.abbia/core|g; s|\.stratum/core|\.abbia/core|g' "$PROJECT_ROOT/.gitmodules" && rm -f "$PROJECT_ROOT/.gitmodules.bak"
     fi
+    if grep -q "ai-agents\.git" "$PROJECT_ROOT/.gitmodules"; then
+        echo -e "Actualizando URL del repositorio en .gitmodules -> abbia-os.git..."
+        sed -i.bak -E 's|ai-agents\.git|abbia-os.git|g' "$PROJECT_ROOT/.gitmodules" && rm -f "$PROJECT_ROOT/.gitmodules.bak"
+    fi
 fi
 
 if [ -d "$PROJECT_ROOT/.stratum/core" ] && [ ! -d "$PROJECT_ROOT/.abbia/core" ]; then
@@ -101,6 +105,11 @@ if [ -d "$PROJECT_ROOT/.stratum/core" ] && [ ! -d "$PROJECT_ROOT/.abbia/core" ];
 elif [ -d "$PROJECT_ROOT/.ai/agents" ] && [ ! -d "$PROJECT_ROOT/.abbia/core" ]; then
     mv "$PROJECT_ROOT/.ai/agents" "$PROJECT_ROOT/.abbia/core"
     echo -e "  ${GREEN}✓${NC} Movido submódulo/directorio .ai/agents a .abbia/core"
+fi
+
+# Sincronizar git submodule si estamos en un repo git
+if [ -d "$PROJECT_ROOT/.git" ] && [ -f "$PROJECT_ROOT/.gitmodules" ]; then
+    (cd "$PROJECT_ROOT" && git submodule sync 2>/dev/null || true)
 fi
 
 # Limpiar directorio origen residual
