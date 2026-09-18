@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# abbia — Abbia OS CLI Entrypoint
+# abbia — Abbia OS CLI Entrypoint & Console Control Center
 # ==============================================================================
 # CLI wrapper para ejecutar rápidamente los comandos de Abbia OS desde la
-# raíz del proyecto.
+# raíz del proyecto o abrir el Terminal Dashboard interactivo.
 # ==============================================================================
 
 set -euo pipefail
@@ -20,8 +20,12 @@ elif [ -d "$CWD/.stratum/core/scripts" ]; then
     CORE_PATH="$CWD/.stratum/core/scripts"
 elif [ -d "$CWD/.ai/agents/scripts" ]; then
     CORE_PATH="$CWD/.ai/agents/scripts"
+elif [ -d "$CWD/scripts" ]; then
+    CORE_PATH="$CWD/scripts"
 elif [ -d "$SCRIPT_DIR/scripts" ]; then
     CORE_PATH="$SCRIPT_DIR/scripts"
+elif [ -d "$SCRIPT_DIR/../scripts" ]; then
+    CORE_PATH="$SCRIPT_DIR/../scripts"
 fi
 
 if [ -z "$CORE_PATH" ] || [ ! -d "$CORE_PATH" ]; then
@@ -29,10 +33,17 @@ if [ -z "$CORE_PATH" ] || [ ! -d "$CORE_PATH" ]; then
     exit 1
 fi
 
-COMMAND="${1:-help}"
+COMMAND="${1:-menu}"
 [ $# -gt 0 ] && shift || true
 
 case "$COMMAND" in
+    menu|cli|tui|"")
+        if [ -f "$CORE_PATH/cli-menu.sh" ]; then
+            bash "$CORE_PATH/cli-menu.sh" "$@"
+        else
+            bash "$CORE_PATH/dashboard.sh" "$@"
+        fi
+        ;;
     new|init-initiative)
         bash "$CORE_PATH/new-initiative.sh" "$@"
         ;;
@@ -50,6 +61,14 @@ case "$COMMAND" in
         ;;
     dashboard|ui)
         bash "$CORE_PATH/dashboard.sh" "$@"
+        ;;
+    snapshot|summary)
+        if [ -f "$CWD/.abbia/memory/context-snapshot.md" ]; then
+            cat "$CWD/.abbia/memory/context-snapshot.md"
+        else
+            bash "$CORE_PATH/sync-initiatives.sh" --fix
+            [ -f "$CWD/.abbia/memory/context-snapshot.md" ] && cat "$CWD/.abbia/memory/context-snapshot.md"
+        fi
         ;;
     update)
         if [ -f "$CORE_PATH/update-abbia.sh" ]; then
@@ -71,22 +90,27 @@ case "$COMMAND" in
         fi
         ;;
     help|--help|-h)
-        echo "Abbia OS CLI (v4.0.0)"
-        echo "Uso: ./abbia <comando> [argumentos]"
+        echo "🎛️ Abbia OS CLI (v4.0.0)"
+        echo "Uso: ./abbia [comando] [argumentos]"
         echo ""
-        echo "Comandos disponibles:"
+        echo "Tip: Ejecutar simplemente './abbia' abre el Panel de Control Interactivo en consola."
+        echo ""
+        echo "Comandos directos:"
+        echo "  (sin args)                 Abrir el Dashboard interactivo en consola"
+        echo "  menu                       Abrir el Dashboard interactivo en consola"
         echo "  new <TIPO> <ID> <slug>     Crear una nueva iniciativa (FEAT, BUG, AUDIT, REF)"
         echo "  finish <INIT> <FASE> [ROL] Cerrar fase con telemetría y snapshot"
-        echo "  archive <INIT>             Archivar iniciativa completada"
+        echo "  archive <INIT>             Archivar iniciativa completada (requiere QA Aprobado)"
         echo "  sync [--fix]               Sincronizar y reconciliar estado y métricas"
         echo "  validate                   Validar consistencia de la estructura Abbia"
-        echo "  dashboard                  Generar y abrir el visualizador interactivo"
+        echo "  dashboard                  Generar y abrir el visualizador interactivo en el navegador"
+        echo "  snapshot                   Ver el Context Snapshot actual en la consola"
         echo "  update [VERSION]           Actualizar el framework Abbia OS"
         echo "  migrate                    Migrar proyecto legacy (.ai/ o .stratum/) a Abbia (.abbia/)"
         echo "  setup                      Regenerar reglas de IDE y estructura base"
         ;;
     *)
-        echo "Comando desconocido: '$COMMAND'. Ejecuta './abbia help' para ver opciones."
+        echo "Comando desconocido: '$COMMAND'. Ejecuta './abbia help' para ver opciones o './abbia' para el menú interactivo."
         exit 1
         ;;
 esac
