@@ -1,0 +1,24 @@
+{
+  "name": "abbia-cli",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "figures": "^6.1.0",
+    "ink": "^5.1.0",
+    "ink-select-input": "^6.0.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "@types/react": "^18.3.18",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.2"
+  }
+}
