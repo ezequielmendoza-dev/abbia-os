@@ -61,4 +61,4 @@ Ver [`../CHANGELOG.md`](../CHANGELOG.md) para el historial de cambios.
 
 ---
 
-*ai-agents library v3.3.0 | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*ai-agents library v3.3.0 | [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)*

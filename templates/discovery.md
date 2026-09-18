@@ -153,4 +153,4 @@
 
 ---
 
-*Discovery template v1.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Discovery template v1.0 — ai-agents framework | github.com/ezequielmendoza-dev/abbia-os*

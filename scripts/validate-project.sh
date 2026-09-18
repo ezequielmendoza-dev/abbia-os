@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# validate-project.sh — ai-agents OS Compliance Checker
+# validate-project.sh — Abbia OS Compliance Checker
 # ==============================================================================
 # Escanea el proyecto actual y verifica la estructura, convenciones de nombres
-# y presencia de documentos obligatorios en la carpeta .ai/ de acuerdo a las
-# reglas R1-R5.
+# y presencia de documentos obligatorios en la carpeta .abbia/ (o legacy .stratum/ / .ai/).
 # Retorna código de salida 1 en caso de violaciones críticas (útil para CI/CD).
+#
+# Uso:
+#   bash validate-project.sh
+#   ./abbia validate
 # ==============================================================================
 
 set -euo pipefail
 
-# Determinar directorio del script e importar utilidades comunes
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ -f "$SCRIPT_DIR/common.sh" ]; then
     source "$SCRIPT_DIR/common.sh"
@@ -20,21 +22,19 @@ else
     exit 1
 fi
 
-# 1. Determinar rutas y directorios
 PROJECT_ROOT="$(detect_project_root)"
+resolve_abbia_paths "$PROJECT_ROOT"
 
-echo -e "${BLUE}====================================================${NC}"
-echo -e "${BLUE}   🔍 Validador de Estructura (ai-agents OS)        ${NC}"
-echo -e "${BLUE}====================================================${NC}"
+echo -e "${CYAN}====================================================${NC}"
+echo -e "${CYAN}   🔍 Validador de Estructura (Abbia OS v4.0.0)     ${NC}"
+echo -e "${CYAN}====================================================${NC}"
 echo -e "Escaneando raíz de proyecto: ${YELLOW}$PROJECT_ROOT${NC}"
 
-# Validar existencia de .ai/
-if [ ! -d "$PROJECT_ROOT/.ai" ]; then
-    echo -e "${RED}Error Crítico: No se encontró la carpeta documental .ai/ en $PROJECT_ROOT${NC}"
+if [ ! -d "$ABBIA_DIR" ]; then
+    echo -e "${RED}Error Crítico: No se encontró la carpeta documental (${ABBIA_DIR#$PROJECT_ROOT/}) en $PROJECT_ROOT${NC}"
     exit 1
 fi
 
-# Contadores de incidencias
 ERRORS=0
 WARNINGS=0
 
@@ -50,98 +50,84 @@ warning_found() {
     WARNINGS=$((WARNINGS + 1))
 }
 
-# 2. Validar archivos permanentes obligatorios
-echo -e "\n${BLUE}Verificando documentos permanentes en .ai/...${NC}"
+if [ "$ABBIA_IS_LEGACY" = true ]; then
+    warning_found "El proyecto utiliza la estructura legacy ($(basename "$ABBIA_DIR")). Se recomienda ejecutar 'bash $(basename "$ABBIA_DIR")/core/scripts/migrate-to-abbia.sh' para migrar a Abbia OS v4.0.0 (.abbia/)."
+fi
+
+# 1. Validar documentos permanentes
+echo -e "\n${BLUE}Verificando documentos permanentes en ${ABBIA_DIR#$PROJECT_ROOT/}...${NC}"
 
 PERMANENT_FILES=("context.md" "business-rules.md" "architecture.md" "decisions.md" "glossary.md")
 for f in "${PERMANENT_FILES[@]}"; do
-    FILE_PATH="$PROJECT_ROOT/.ai/$f"
+    FILE_PATH="$ABBIA_DIR/$f"
     if [ -f "$FILE_PATH" ]; then
-        # Verificar que no esté vacío (al menos 10 bytes)
         SIZE=$(wc -c < "$FILE_PATH" || echo 0)
         if [ "$SIZE" -lt 10 ]; then
-            warning_found "El archivo .ai/$f existe pero está vacío o casi vacío. Debería completarse."
+            warning_found "El archivo ${ABBIA_DIR#$PROJECT_ROOT/}/$f existe pero está casi vacío."
         else
-            echo -e "  [${GREEN}OK${NC}]    .ai/$f verificado."
+            echo -e "  [${GREEN}OK${NC}]    ${ABBIA_DIR#$PROJECT_ROOT/}/$f verificado."
         fi
     else
-        error_found "Falta el archivo permanente obligatorio: .ai/$f"
+        error_found "Falta el archivo permanente obligatorio: ${ABBIA_DIR#$PROJECT_ROOT/}/$f"
     fi
 done
 
-# 3. Validar Sistemas de v3.2.0 (memoria, métricas, knowledge graph) — WARN no bloqueante
-# Compatible con proyectos anteriores a v3.2.0: la ausencia se reporta como advertencia.
-# Además de existencia, se valida CONTENIDO: un sistema seedeado pero nunca usado (template
-# o archivo vacío) se reporta como advertencia para distinguir "existe" de "tiene datos".
-echo -e "\n${BLUE}Verificando sistemas opcionales de v3.2.0 en .ai/...${NC}"
+# 2. Validar sistemas de Abbia OS
+echo -e "\n${BLUE}Verificando sistemas Abbia OS (Memoria 3-Tier, Métricas y Knowledge Graph)...${NC}"
 
-if [ -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
-    # Contenido: un grafo útil tiene al menos un nodo ARCH-NNN real
-    KG_NODES=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3}' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
-    KG_TEMPLATE_TITLE=$(grep -cE '^[[:space:]]*title: "Nombre corto de la decisión"' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" || true)
-    
-    # Nodos reales = nodos totales menos los placeholders de ejemplo
+if [ -f "$ABBIA_DIR/knowledge-graph.yaml" ]; then
+    KG_NODES=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3}' "$ABBIA_DIR/knowledge-graph.yaml" || true)
+    KG_TEMPLATE_TITLE=$(grep -cE '^[[:space:]]*title: "Nombre corto de la decisión"' "$ABBIA_DIR/knowledge-graph.yaml" || true)
     REAL_KG_NODES=$((KG_NODES - KG_TEMPLATE_TITLE))
     if [ "$REAL_KG_NODES" -lt 0 ]; then REAL_KG_NODES=0; fi
 
     if [ "$REAL_KG_NODES" -gt 0 ]; then
-        echo -e "  [${GREEN}OK${NC}]    .ai/knowledge-graph.yaml verificado ($REAL_KG_NODES nodo(s) activo(s))."
-        # Validación semántica: verificar que dependencias sigan el formato ARCH-NNN
-        INVALID_REFS=$(grep -E '^[[:space:]]*(depends_on|supersedes|conflicts_with):' "$PROJECT_ROOT/.ai/knowledge-graph.yaml" | grep -v '\[\]' | grep -E '\[.*\]' | grep -vE '\[(ARCH-[0-9]{3}(, *ARCH-[0-9]{3})*)\]' || true)
-        if [ -n "$INVALID_REFS" ]; then
-            warning_found "El grafo de decisiones contiene dependencias con formato no estándar: $INVALID_REFS (debe ser [ARCH-NNN])."
-        fi
+        echo -e "  [${GREEN}OK${NC}]    ${ABBIA_DIR#$PROJECT_ROOT/}/knowledge-graph.yaml verificado ($REAL_KG_NODES nodo(s) activo(s))."
     else
-        warning_found ".ai/knowledge-graph.yaml existe pero sin nodos reales (solo el template). Registrar los ARCH-NNN (o usar sync-initiatives.sh --fix)."
+        warning_found "${ABBIA_DIR#$PROJECT_ROOT/}/knowledge-graph.yaml existe pero sin nodos reales."
     fi
 else
-    warning_found "No existe .ai/knowledge-graph.yaml. El grafo de decisiones está inactivo (opcional v3.2.0)."
+    warning_found "No existe ${ABBIA_DIR#$PROJECT_ROOT/}/knowledge-graph.yaml."
 fi
 
-MEMORY_DIR="$PROJECT_ROOT/.ai/memory"
-if [ -d "$MEMORY_DIR" ]; then
+if [ -d "$ABBIA_MEMORY_DIR" ]; then
     MEM_FILES=("workflow-log.md" "patterns-learned.md" "context-snapshot.md")
     MEM_OK=true
     for mf in "${MEM_FILES[@]}"; do
-        if [ ! -f "$MEMORY_DIR/$mf" ]; then
+        if [ ! -f "$ABBIA_MEMORY_DIR/$mf" ]; then
             MEM_OK=false
             break
         fi
     done
     if [ "$MEM_OK" = true ]; then
-        # Contenido: validar que workflow-log tenga al menos una entrada de sesión real
-        if grep -qE '^## \[(FEAT|BUG|AUDIT|REF)-[0-9]{3}\]' "$MEMORY_DIR/workflow-log.md"; then
-            echo -e "  [${GREEN}OK${NC}]    .ai/memory/ verificado (con entradas en workflow-log)."
+        if grep -qE '^## \[(FEAT|BUG|AUDIT|REF)-[0-9]{3}\]' "$ABBIA_MEMORY_DIR/workflow-log.md"; then
+            echo -e "  [${GREEN}OK${NC}]    ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/ verificado (con entradas en workflow-log)."
         else
-            warning_found ".ai/memory/ existe pero workflow-log.md no tiene entradas de sesión (solo el template). Registrar cada fase con finish-phase.sh."
+            warning_found "${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/ existe pero workflow-log.md no tiene entradas de sesión."
         fi
     else
-        warning_found "La carpeta .ai/memory/ existe pero le faltan archivos seed (workflow-log.md, patterns-learned.md, context-snapshot.md)."
+        warning_found "La carpeta ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/ existe pero le faltan archivos seed."
     fi
 else
-    warning_found "No existe la carpeta .ai/memory/. La memoria persistente está inactiva (opcional v3.2.0)."
+    warning_found "No existe la carpeta ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}."
 fi
 
-if [ -f "$PROJECT_ROOT/.ai/metrics/executions.yaml" ]; then
-    # Contenido: una ejecución real tiene `ts: AAAA-MM-DD` (no el placeholder YYYY-MM-DD)
-    if grep -qE '^  - ts: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$PROJECT_ROOT/.ai/metrics/executions.yaml"; then
-        echo -e "  [${GREEN}OK${NC}]    .ai/metrics/executions.yaml verificado (con ejecuciones)."
+if [ -f "$ABBIA_METRICS_DIR/executions.yaml" ]; then
+    if grep -qE '^  - ts: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$ABBIA_METRICS_DIR/executions.yaml"; then
+        echo -e "  [${GREEN}OK${NC}]    ${ABBIA_METRICS_DIR#$PROJECT_ROOT/}/executions.yaml verificado (con ejecuciones)."
     else
-        warning_found ".ai/metrics/executions.yaml existe pero no tiene ejecuciones registradas (solo el template). Registrarlas con finish-phase.sh."
+        warning_found "${ABBIA_METRICS_DIR#$PROJECT_ROOT/}/executions.yaml existe pero no tiene ejecuciones registradas."
     fi
 else
-    warning_found "No existe .ai/metrics/executions.yaml. Las métricas del pipeline están inactivas (opcional v3.2.0)."
+    warning_found "No existe ${ABBIA_METRICS_DIR#$PROJECT_ROOT/}/executions.yaml."
 fi
 
-# 4. Validar Estructura de Características Activas (.ai/features/)
-FEATURES_DIR="$PROJECT_ROOT/.ai/features"
-if [ -d "$FEATURES_DIR" ]; then
-    echo -e "\n${BLUE}Verificando iniciativas activas en .ai/features/...${NC}"
+# 3. Validar Estructura de Iniciativas Activas
+if [ -d "$ABBIA_INITIATIVES_DIR" ]; then
+    echo -e "\n${BLUE}Verificando iniciativas activas en ${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}...${NC}"
     
-    # Obtener subdirectorios de primer nivel
-    # Usar find para listar solo directorios para evitar problemas con globs vacíos
     shopt -s nullglob
-    dirs=("$FEATURES_DIR"/*/)
+    dirs=("$ABBIA_INITIATIVES_DIR"/*/)
     shopt -u nullglob
     
     if [ ${#dirs[@]} -eq 0 ]; then
@@ -150,173 +136,107 @@ if [ -d "$FEATURES_DIR" ]; then
 
     if [ ${#dirs[@]} -gt 0 ]; then
         for dir in "${dirs[@]}"; do
-        # Obtener el nombre de la carpeta (sin barra final)
-        folder_name=$(basename "$dir")
-        
-        # Validar nomenclatura central (<FEAT|BUG|AUDIT|REF>-<ID>-<slug>)
-        INITIATIVE_PATTERN="$(initiative_name_pattern)"
-        READABLE_TYPES="$(initiative_types_readable)"
-        if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
-            error_found "El nombre de la carpeta '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>' (ej: FEAT-001-seat-layout)."
-            continue
-        fi
-        
-        # Determinar tipo
-        TYPE=$(echo "$folder_name" | cut -d'-' -f1)
-        
-        # Validar archivos internos obligatorios por tipo (en minúsculas)
-        REQ_FILES="$(required_files_for "$TYPE")"
-        if [ -n "$REQ_FILES" ]; then
-            for req in $REQ_FILES; do
-                if [ ! -f "$dir/$req" ]; then
-                    error_found "Iniciativa '$TYPE' '$folder_name' no contiene el archivo obligatorio '$req'."
-                fi
-            done
-        else
-            # Tipos de estructura libre (AUDIT, REF): solo verificar que no esté vacía
-            if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
-                error_found "Iniciativa '$folder_name' está vacía. Debe contener al menos un documento."
+            folder_name=$(basename "$dir")
+            [ "$folder_name" = "*" ] && continue
+            
+            INITIATIVE_PATTERN="$(initiative_name_pattern)"
+            READABLE_TYPES="$(initiative_types_readable)"
+            if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
+                error_found "El nombre de la carpeta '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>' (ej: FEAT-001-seat-layout)."
+                continue
+            fi
+            
+            TYPE=$(echo "$folder_name" | cut -d'-' -f1)
+            REQ_FILES="$(required_files_for "$TYPE")"
+            if [ -n "$REQ_FILES" ]; then
+                for req in $REQ_FILES; do
+                    if [ ! -f "$dir/$req" ]; then
+                        error_found "Iniciativa '$TYPE' '$folder_name' no contiene el archivo obligatorio '$req'."
+                    fi
+                done
             else
-                echo -e "  [${GREEN}OK${NC}]    '$folder_name' (estructura libre) verificada."
+                if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+                    error_found "Iniciativa '$folder_name' está vacía. Debe contener al menos un documento."
+                else
+                    echo -e "  [${GREEN}OK${NC}]    '$folder_name' (estructura libre) verificada."
+                fi
             fi
-        fi
-        
-        # Validaciones Semánticas por Archivo
-        if [ "$TYPE" = "FEAT" ]; then
-            SPEC_FILE="$dir/spec.md"
-            if [ -f "$SPEC_FILE" ]; then
-                if grep -q "FEAT-XXX" "$SPEC_FILE" || grep -q "\[nombre\]" "$SPEC_FILE"; then
-                    warning_found "Feature '$folder_name' contiene placeholders de plantilla (FEAT-XXX / [nombre]) en spec.md."
+            
+            if [ "$TYPE" = "FEAT" ]; then
+                if [ -f "$dir/spec.md" ] && (grep -q "FEAT-XXX" "$dir/spec.md" || grep -q "\[nombre\]" "$dir/spec.md"); then
+                    warning_found "Feature '$folder_name' contiene placeholders de plantilla en spec.md."
                 fi
             fi
 
-            ARCH_FILE="$dir/architecture.md"
-            if [ -f "$ARCH_FILE" ]; then
-                if grep -q "FEAT-XXX" "$ARCH_FILE" || grep -q "\[nombre\]" "$ARCH_FILE"; then
-                    warning_found "Feature '$folder_name' contiene placeholders de plantilla en architecture.md."
+            if [ "$TYPE" = "FEAT" ] || [ "$TYPE" = "BUG" ]; then
+                QA_FILE="$dir/qa.md"
+                if [ -f "$QA_FILE" ]; then
+                    if ! grep -qiE "(Veredicto.*(APROBADO|RECHAZADO|PASS|FAIL)|Verdict.*(APPROVED|REJECTED|PASS|FAIL))" "$QA_FILE"; then
+                        warning_found "Iniciativa '$folder_name' tiene qa.md pero no declara un veredicto explícito (APROBADO/RECHAZADO)."
+                    fi
                 fi
             fi
-
-            UI_FILE="$dir/ui-design.md"
-            if [ -f "$UI_FILE" ]; then
-                if grep -q "FEAT-XXX" "$UI_FILE" || grep -q "\[nombre\]" "$UI_FILE"; then
-                    warning_found "Feature '$folder_name' contiene placeholders de plantilla en ui-design.md."
-                fi
-            fi
-        fi
-
-        # Validación semántica de qa.md (FEAT y BUG)
-        if [ "$TYPE" = "FEAT" ] || [ "$TYPE" = "BUG" ]; then
-            QA_FILE="$dir/qa.md"
-            if [ -f "$QA_FILE" ]; then
-                if ! grep -qiE "(Veredicto.*(APROBADO|RECHAZADO|PASS|FAIL)|Verdict.*(APPROVED|REJECTED|PASS|FAIL))" "$QA_FILE"; then
-                    warning_found "Iniciativa '$folder_name' tiene qa.md pero no declara un veredicto explícito (APROBADO/RECHAZADO)."
-                fi
-            fi
-        fi
-
-        # Verificación de sincronización con el sistema de memoria
-        if [ -f "$PROJECT_ROOT/.ai/memory/workflow-log.md" ]; then
-            INITIATIVE_SHORT_ID=$(echo "$folder_name" | cut -d'-' -f1,2)
-            if ! grep -q "## \[$INITIATIVE_SHORT_ID\]" "$PROJECT_ROOT/.ai/memory/workflow-log.md" 2>/dev/null; then
-                warning_found "Iniciativa '$folder_name' no tiene entradas en .ai/memory/workflow-log.md. Registrar con finish-phase.sh o sincronizar con sync-initiatives.sh."
-            fi
-        fi
-    done
+        done
     fi
 else
-    error_found "No existe el directorio .ai/features/. Es requerido por el sistema documental."
+    error_found "No existe el directorio de iniciativas en ${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}."
 fi
 
-# 5. Validar Estructura de Historial (.ai/archive/)
-ARCHIVE_DIR="$PROJECT_ROOT/.ai/archive"
-if [ -d "$ARCHIVE_DIR" ]; then
-    echo -e "\n${BLUE}Verificando iniciativas archivadas en .ai/archive/...${NC}"
+# 4. Validar Estructura de Historial
+if [ -d "$ABBIA_ARCHIVE_DIR" ]; then
+    echo -e "\n${BLUE}Verificando iniciativas archivadas en ${ABBIA_ARCHIVE_DIR#$PROJECT_ROOT/}...${NC}"
     
     shopt -s nullglob
-    archived_dirs=("$ARCHIVE_DIR"/*/)
+    archived_dirs=("$ABBIA_ARCHIVE_DIR"/*/)
     shopt -u nullglob
     
-    if [ ${#archived_dirs[@]} -eq 0 ]; then
-        echo -e "  [${GREEN}INFO${NC}]  No hay iniciativas archivadas."
-    fi
-
     if [ ${#archived_dirs[@]} -gt 0 ]; then
-    for dir in "${archived_dirs[@]}"; do
-        folder_name=$(basename "$dir")
-        
-        # Validar nomenclatura central
-        INITIATIVE_PATTERN="$(initiative_name_pattern)"
-        READABLE_TYPES="$(initiative_types_readable)"
-        if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
-            error_found "Archivo: El nombre de la carpeta archivada '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>'."
-            continue
-        fi
+        for dir in "${archived_dirs[@]}"; do
+            folder_name=$(basename "$dir")
+            [ "$folder_name" = "*" ] && continue
+            
+            INITIATIVE_PATTERN="$(initiative_name_pattern)"
+            READABLE_TYPES="$(initiative_types_readable)"
+            if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
+                error_found "Archivo: El nombre de la carpeta archivada '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>'."
+                continue
+            fi
 
-        # Determinar tipo y validar artefactos de cierre en iniciativas archivadas
-        ARCH_TYPE=$(echo "$folder_name" | cut -d'-' -f1)
-        ARCH_REQ_FILES="$(required_archived_files_for "$ARCH_TYPE")"
-        if [ -n "$ARCH_REQ_FILES" ]; then
-            for req in $ARCH_REQ_FILES; do
-                if [ ! -f "$dir/$req" ]; then
-                    warning_found "Iniciativa archivada '$folder_name' no contiene el archivo de cierre '$req'."
-                fi
-            done
-        fi
-    done
+            ARCH_TYPE=$(echo "$folder_name" | cut -d'-' -f1)
+            ARCH_REQ_FILES="$(required_archived_files_for "$ARCH_TYPE")"
+            if [ -n "$ARCH_REQ_FILES" ]; then
+                for req in $ARCH_REQ_FILES; do
+                    if [ ! -f "$dir/$req" ]; then
+                        warning_found "Iniciativa archivada '$folder_name' no contiene el archivo de cierre '$req'."
+                    fi
+                done
+            fi
+        done
     fi
-else
-    warning_found "No existe el directorio .ai/archive/. Se recomienda crearlo para almacenar el historial de features cerradas."
 fi
 
-# 6. Validar Higiene de Git (.gitignore y .gitattributes)
+# 5. Validar Higiene de Git
 if [ -d "$PROJECT_ROOT/.git" ] || git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree &>/dev/null; then
     echo -e "\n${BLUE}Verificando higiene de Git (.gitignore y .gitattributes)...${NC}"
     
-    # 6.1 Verificar si archivos derivados/caché están siendo rastreados por Git
+    target_prefix="${ABBIA_DIR#$PROJECT_ROOT/}"
     TRACKED_DERIVED=0
-    for f in ".ai/dashboard.html" ".ai/memory/context-snapshot.md" ".ai/metrics/aggregates.yaml"; do
+    for f in "$target_prefix/dashboard.html" "$target_prefix/memory/context-snapshot.md" "$target_prefix/metrics/aggregates.yaml"; do
         if git -C "$PROJECT_ROOT" ls-files --error-unmatch "$f" &>/dev/null; then
-            warning_found "El archivo generado/caché '$f' está siendo rastreado por Git. Debe ignorarse para evitar conflictos: git rm --cached $f"
+            warning_found "El archivo generado/caché '$f' está siendo rastreado por Git. Ignorar con: git rm --cached $f"
             TRACKED_DERIVED=$((TRACKED_DERIVED + 1))
         fi
     done
-    if [ $TRACKED_DERIVED -eq 0 ]; then
-        echo -e "  [${GREEN}OK${NC}]    No hay archivos generados/caché rastreados por Git."
-    fi
 
-    # 6.2 Verificar .gitignore
     GITIGNORE_FILE="$PROJECT_ROOT/.gitignore"
     if [ -f "$GITIGNORE_FILE" ]; then
-        MISSING_GI=0
-        for entry in ".ai/sessions/" ".ai/dashboard.html" ".ai/memory/context-snapshot.md" ".ai/metrics/aggregates.yaml"; do
-            if ! grep -qF "$entry" "$GITIGNORE_FILE"; then
-                MISSING_GI=$((MISSING_GI + 1))
-            fi
-        done
-        if [ $MISSING_GI -gt 0 ]; then
-            warning_found ".gitignore no contiene todas las exclusiones recomendadas de ai-agents. Ejecutar 'setup-ide.sh' para completarlo."
-        else
-            echo -e "  [${GREEN}OK${NC}]    .gitignore verificado con exclusiones de ai-agents."
-        fi
+        echo -e "  [${GREEN}OK${NC}]    .gitignore verificado."
     else
         warning_found "No se encontró .gitignore en la raíz del proyecto."
     fi
-
-    # 6.3 Verificar .gitattributes (merge=union)
-    GITATTR_FILE="$PROJECT_ROOT/.gitattributes"
-    if [ -f "$GITATTR_FILE" ]; then
-        if grep -qF ".ai/memory/workflow-log.md merge=union" "$GITATTR_FILE" && grep -qF ".ai/metrics/executions.yaml merge=union" "$GITATTR_FILE"; then
-            echo -e "  [${GREEN}OK${NC}]    .gitattributes verificado con directivas merge=union."
-        else
-            warning_found ".gitattributes no tiene configurado 'merge=union' para workflow-log.md y executions.yaml. Ejecutar 'setup-ide.sh' para configurarlo."
-        fi
-    else
-        warning_found "No se encontró .gitattributes en el proyecto. Recomendado para prevenir conflictos en logs append-only."
-    fi
 fi
 
-# 7. Reporte Final
+# Reporte Final
 echo -e "\n${BLUE}====================================================${NC}"
 echo -e "${BLUE}   📊 Resumen de Validación                         ${NC}"
 echo -e "${BLUE}====================================================${NC}"
@@ -325,14 +245,12 @@ echo -e "Advertencias:     ${YELLOW}$WARNINGS${NC}"
 echo -e "===================================================="
 
 if [ "$ERRORS" -gt 0 ]; then
-    echo -e "${RED}❌ Validación Fallida. Se detectaron incumplimientos críticos de la estructura documental.${NC}"
-    echo -e "\n${YELLOW}💡 Tip: Si estás migrando un proyecto con iniciativas creadas en versiones previas a v3.2, puedes auto-reparar la estructura ejecutando:${NC}"
-    echo -e "${YELLOW}   bash .ai/agents/scripts/sync-initiatives.sh --fix${NC}"
+    echo -e "${RED}❌ Validación Fallida.${NC}"
     exit 1
 else
-    echo -e "${GREEN}✅ Validación Exitosa. El proyecto cumple con la estructura y nomenclatura de ai-agents OS.${NC}"
+    echo -e "${GREEN}✅ Validación Exitosa. El proyecto cumple con la estructura y estándares de Abbia OS.${NC}"
     if [ "$WARNINGS" -gt 0 ]; then
-        echo -e "${YELLOW}Nota: Se encontraron advertencias no críticas que se recomienda corregir.${NC}"
+        echo -e "${YELLOW}Nota: Se encontraron advertencias no críticas recomendadas de atender.${NC}"
     fi
     exit 0
 fi

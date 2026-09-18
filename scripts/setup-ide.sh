@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# setup-ide.sh — ai-agents OS Installer
+# setup-ide.sh — Abbia OS Installer
 # ==============================================================================
-# Este script inicializa la estructura .ai/ (incl. sistemas v3.x: memoria,
-# métricas y knowledge graph) y genera los archivos de reglas para diferentes
-# IDEs de IA en el proyecto donde se ejecuta.
+# Este script inicializa la estructura canónica .abbia/ (memoria 3-tier,
+# métricas de telemetría y Knowledge Graph de decisiones) y genera los archivos
+# de reglas para diferentes IDEs de IA en el proyecto donde se ejecuta.
+#
 # Uso:
 #   bash setup-ide.sh             # interactivo
-#   bash setup-ide.sh --auto      # no-interactivo (inicializa .ai/ y .gitignore;
-#                                 #  no regenera reglas IDE; usado por update-ai-agents.sh)
+#   bash setup-ide.sh --auto      # no-interactivo
+#   ./abbia setup
 # ==============================================================================
 
 set -euo pipefail
 
-# Modo no-interactivo: salta preguntas, inicializa .ai/ y no regenera reglas IDE.
-# Uso: setup-ide.sh --auto   (usado por update-ai-agents.sh)
 AUTO_MODE=false
 if [ "${1:-}" = "--auto" ]; then
     AUTO_MODE=true
 fi
 
-# Determinar directorio del script e importar utilidades comunes
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ -f "$SCRIPT_DIR/common.sh" ]; then
     source "$SCRIPT_DIR/common.sh"
@@ -30,32 +28,30 @@ else
     exit 1
 fi
 
-echo -e "${BLUE}====================================================${NC}"
-echo -e "${BLUE}   🤖 Instalador de Configuración de IDEs de IA      ${NC}"
-echo -e "${BLUE}            ai-agents OS v3.6.0                     ${NC}"
-echo -e "${BLUE}====================================================${NC}"
-
-# 1. Determinar rutas y directorios
 PROJECT_ROOT="$(detect_project_root)"
+resolve_abbia_paths "$PROJECT_ROOT"
+
+echo -e "${CYAN}====================================================${NC}"
+echo -e "${CYAN}   🏗️   Instalador de Configuración de IDEs de IA     ${NC}"
+echo -e "${CYAN}              Abbia OS v4.0.0                       ${NC}"
+echo -e "${CYAN}====================================================${NC}"
 
 # Determinar si está en modo submódulo
-if [ -d "$PROJECT_ROOT/.ai/agents" ]; then
+if [ -d "$ABBIA_CORE" ]; then
     IN_SUBMODULE=true
     echo -e "${GREEN}✓ Detectado proyecto raíz en: ${PROJECT_ROOT}${NC}"
-    echo -e "${GREEN}✓ ai-agents está integrado como submódulo Git.${NC}"
-elif [ "$PROJECT_ROOT" = "$AI_AGENTS_ROOT" ]; then
+    echo -e "${GREEN}✓ Abbia OS está integrado como submódulo en ${ABBIA_CORE#$PROJECT_ROOT/}.${NC}"
+elif [ "$PROJECT_ROOT" = "$ABBIA_CORE_ROOT" ]; then
     IN_SUBMODULE=false
-    echo -e "${YELLOW}! Ejecutando directamente en el repositorio ai-agents (modo desarrollo).${NC}"
+    echo -e "${YELLOW}! Ejecutando directamente en el repositorio core de Abbia (modo desarrollo).${NC}"
 else
     IN_SUBMODULE=false
-    echo -e "${YELLOW}! No se detectó la carpeta .ai/agents/. Usando el directorio actual como raíz del proyecto.${NC}"
+    echo -e "${YELLOW}! No se detectó submódulo. Usando el directorio actual como raíz del proyecto.${NC}"
 fi
 
-# Ruta origen de las plantillas (dentro del repo de ai-agents)
-TEMPLATES_DIR="$AI_AGENTS_ROOT/templates"
+TEMPLATES_DIR="$ABBIA_CORE_ROOT/templates"
 IDE_TEMPLATES_DIR="$TEMPLATES_DIR/ide-configs"
 
-# Verificar que existen las plantillas
 if [ ! -d "$IDE_TEMPLATES_DIR" ]; then
     echo -e "${RED}Error: No se encontró el directorio de plantillas en $IDE_TEMPLATES_DIR${NC}"
     exit 1
@@ -63,26 +59,26 @@ fi
 
 echo -e "\n${BLUE}--- Paso 1: Verificación e Inicialización Documental ---${NC}"
 if [ "$AUTO_MODE" = true ]; then
-    init_ai="s"
-    echo -e "${YELLOW}! Modo automático: inicializando estructura .ai/ si no existe.${NC}"
+    init_abbia="s"
+    echo -e "${YELLOW}! Modo automático: inicializando estructura ${ABBIA_DIR#$PROJECT_ROOT/}/ si no existe.${NC}"
 else
-    read -p "¿Deseas inicializar la estructura documental (.ai/) con los archivos base si no existen? (s/n): " init_ai
+    read -p "¿Deseas inicializar la estructura documental (${ABBIA_DIR#$PROJECT_ROOT/}/) con los archivos base si no existen? (s/n): " init_abbia
 fi
 
-if [[ "$init_ai" =~ ^[sS]$ ]]; then
-    echo -e "Creando estructura base en $PROJECT_ROOT/.ai/..."
-    mkdir -p "$PROJECT_ROOT/.ai"
-    mkdir -p "$PROJECT_ROOT/.ai/features"
-    mkdir -p "$PROJECT_ROOT/.ai/archive"
-    mkdir -p "$PROJECT_ROOT/.ai/sessions"
+if [[ "$init_abbia" =~ ^[sS]$ ]]; then
+    echo -e "Creando estructura base en $ABBIA_DIR..."
+    mkdir -p "$ABBIA_DIR"
+    mkdir -p "$ABBIA_INITIATIVES_DIR"
+    mkdir -p "$ABBIA_ARCHIVE_DIR"
+    mkdir -p "$ABBIA_SESSIONS_DIR"
 
-    # Crear context.md si no existe
-    if [ ! -f "$PROJECT_ROOT/.ai/context.md" ]; then
+    # context.md
+    if [ ! -f "$ABBIA_DIR/context.md" ]; then
         if [ -f "$TEMPLATES_DIR/project-context.md" ]; then
-            cp "$TEMPLATES_DIR/project-context.md" "$PROJECT_ROOT/.ai/context.md"
-            echo -e "${GREEN}✓ Creado .ai/context.md desde plantilla.${NC}"
+            cp "$TEMPLATES_DIR/project-context.md" "$ABBIA_DIR/context.md"
+            echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/context.md desde plantilla.${NC}"
         else
-            cat << 'EOF' > "$PROJECT_ROOT/.ai/context.md"
+            cat << 'EOF' > "$ABBIA_DIR/context.md"
 # Contexto General del Proyecto
 
 ## 1. Visión General
@@ -105,31 +101,31 @@ if [[ "$init_ai" =~ ^[sS]$ ]]; then
 - **Última Decisión de Arquitectura:** ARCH-000
 - **Última Regla de Negocio:** RN-000
 EOF
-            echo -e "${GREEN}✓ Creado .ai/context.md inicial.${NC}"
+            echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/context.md inicial.${NC}"
         fi
     else
-        echo -e "  - .ai/context.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_DIR#$PROJECT_ROOT/}/context.md ya existe. Omitido."
     fi
 
-    # Crear business-rules.md si no existe
-    if [ ! -f "$PROJECT_ROOT/.ai/business-rules.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/business-rules.md"
+    # business-rules.md
+    if [ ! -f "$ABBIA_DIR/business-rules.md" ]; then
+        cat << 'EOF' > "$ABBIA_DIR/business-rules.md"
 # Reglas de Negocio del Sistema
 
-Reglas inmutables y de dominio que todo agente y desarrollador debe respetar.
+Reglas inmutables y de dominio que todo agente y desarrollador debe respetar en Abbia OS.
 
 | ID | Regla | Descripción | Entidad Afectada | Estado |
 | :--- | :--- | :--- | :--- | :--- |
 | RN-001 | Regla de Ejemplo | Descripción detallada del comportamiento requerido | Dominio | ACTIVA |
 EOF
-        echo -e "${GREEN}✓ Creado .ai/business-rules.md inicial.${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/business-rules.md inicial.${NC}"
     else
-        echo -e "  - .ai/business-rules.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_DIR#$PROJECT_ROOT/}/business-rules.md ya existe. Omitido."
     fi
 
-    # Crear architecture.md si no existe
-    if [ ! -f "$PROJECT_ROOT/.ai/architecture.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/architecture.md"
+    # architecture.md
+    if [ ! -f "$ABBIA_DIR/architecture.md" ]; then
+        cat << 'EOF' > "$ABBIA_DIR/architecture.md"
 # Arquitectura del Sistema
 
 ## 1. Diagrama de Alto Nivel
@@ -142,14 +138,14 @@ EOF
 - Estilo: Standard
 - Linting: Prettier / ESLint
 EOF
-        echo -e "${GREEN}✓ Creado .ai/architecture.md inicial.${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/architecture.md inicial.${NC}"
     else
-        echo -e "  - .ai/architecture.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_DIR#$PROJECT_ROOT/}/architecture.md ya existe. Omitido."
     fi
 
-    # Crear decisions.md si no existe
-    if [ ! -f "$PROJECT_ROOT/.ai/decisions.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/decisions.md"
+    # decisions.md
+    if [ ! -f "$ABBIA_DIR/decisions.md" ]; then
+        cat << 'EOF' > "$ABBIA_DIR/decisions.md"
 # Registro de Decisiones de Arquitectura y Técnicas (ADR / DEC)
 
 ## [ARCH-001] Decisión de Arquitectura Inicial
@@ -159,14 +155,14 @@ EOF
 *   **Decisión:** [Detalle de la decisión adoptada]
 *   **Consecuencias:** [Lo que ganamos y lo que perdemos con esta decisión]
 EOF
-        echo -e "${GREEN}✓ Creado .ai/decisions.md inicial.${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/decisions.md inicial.${NC}"
     else
-        echo -e "  - .ai/decisions.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_DIR#$PROJECT_ROOT/}/decisions.md ya existe. Omitido."
     fi
 
-    # Crear glossary.md si no existe
-    if [ ! -f "$PROJECT_ROOT/.ai/glossary.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/glossary.md"
+    # glossary.md
+    if [ ! -f "$ABBIA_DIR/glossary.md" ]; then
+        cat << 'EOF' > "$ABBIA_DIR/glossary.md"
 # Glosario del Dominio
 
 Definiciones claras de los conceptos clave utilizados en este proyecto.
@@ -175,24 +171,21 @@ Definiciones claras de los conceptos clave utilizados en este proyecto.
 | :--- | :--- | :--- |
 | Ejemplo | Definición del término de ejemplo | Utilizado en todo el sistema |
 EOF
-        echo -e "${GREEN}✓ Creado .ai/glossary.md inicial.${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/glossary.md inicial.${NC}"
     else
-        echo -e "  - .ai/glossary.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_DIR#$PROJECT_ROOT/}/glossary.md ya existe. Omitido."
     fi
 
-    # Crear los sistemas de v3.2.0: memoria persistente, métricas y knowledge graph
-    echo -e "\n${BLUE}  → Sistemas v3.2.0+: memoria persistente, métricas y knowledge graph${NC}"
+    # Abbia 3-Tier Memory (.abbia/memory/)
+    echo -e "\n${BLUE}  → Sistemas Abbia OS: 3-Tier Memory, Telemetría y Knowledge Graph${NC}"
+    mkdir -p "$ABBIA_MEMORY_DIR"
 
-    # Sistema de Memoria Persistente (.ai/memory/)
-    mkdir -p "$PROJECT_ROOT/.ai/memory"
-    echo -e "  - .ai/memory/ creada."
-
-    # workflow-log.md — memoria episódica append-only
-    if [ ! -f "$PROJECT_ROOT/.ai/memory/workflow-log.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/workflow-log.md"
+    # workflow-log.md
+    if [ ! -f "$ABBIA_MEMORY_DIR/workflow-log.md" ]; then
+        cat << 'EOF' > "$ABBIA_MEMORY_DIR/workflow-log.md"
 # Memoria Episódica — Workflow Log (append-only)
 
-Registro cronológico de las ejecuciones del pipeline. Cada agente, al terminar su
+Registro cronológico de las ejecuciones del pipeline en Abbia OS. Cada agente, al terminar su
 participación, agrega una entrada con fecha ISO-8601. **Nunca se reescribe una
 entrada existente**; se agrega o se marca como `OBSOLETA`.
 
@@ -212,18 +205,16 @@ Reglas:
 2. Decisiones ≠ opiniones: registrar decisión, razón y alternativas.
 3. `⚖️ OBSOLETA` para corregir, nunca borrar.
 
-Referencia: docs/workflow-memory.md (framework ai-agents).
+Referencia: docs/workflow-memory.md (Abbia OS).
 EOF
-        echo -e "${GREEN}✓ Creado .ai/memory/workflow-log.md (memoria episódica).${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/workflow-log.md (Tier 1: Memoria Episódica).${NC}"
     else
-        echo -e "  - .ai/memory/workflow-log.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/workflow-log.md ya existe. Omitido."
     fi
 
-
-
-    # patterns-learned.md — memoria procedimental
-    if [ ! -f "$PROJECT_ROOT/.ai/memory/patterns-learned.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/patterns-learned.md"
+    # patterns-learned.md
+    if [ ! -f "$ABBIA_MEMORY_DIR/patterns-learned.md" ]; then
+        cat << 'EOF' > "$ABBIA_MEMORY_DIR/patterns-learned.md"
 # Patrones Aprendidos — Memoria Procedimental
 
 Lecciones y patrones reutilizables que aceleran el trabajo futuro. Solo patrones
@@ -238,74 +229,77 @@ Formato problema → causa → solución → aplica a:
 - **Solución aplicada:** [qué se hizo para resolverlo]
 - **Aplica a:** [tipo de tarea futura donde aplica]
 
-Referencia: docs/workflow-memory.md (framework ai-agents).
+Referencia: docs/workflow-memory.md (Abbia OS).
 EOF
-        echo -e "${GREEN}✓ Creado .ai/memory/patterns-learned.md (memoria procedimental).${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/patterns-learned.md (Tier 2: Memoria Procedimental).${NC}"
     else
-        echo -e "  - .ai/memory/patterns-learned.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/patterns-learned.md ya existe. Omitido."
     fi
 
-    # context-snapshot.md — memoria compactada (generada por Skill Manager)
-    if [ ! -f "$PROJECT_ROOT/.ai/memory/context-snapshot.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/context-snapshot.md"
-# Context Snapshot — Memoria Compactada
+    # context-snapshot.md
+    if [ ! -f "$ABBIA_MEMORY_DIR/context-snapshot.md" ]; then
+        cat << 'EOF' > "$ABBIA_MEMORY_DIR/context-snapshot.md"
+# Context Snapshot — Memoria Compactada (Abbia 3-Tier Memory)
 
-> Generado por el **Skill Manager** al iniciar cada sesión.
-> Este archivo se regenera (compacta `workflow-log.md` + `decisions-catalog.md` +
-> `patterns-learned.md`) — **no se edita a mano**. Máximo ~30-50 líneas.
+> Generado por finish-phase.sh / Skill Manager al culminar cada fase.
+> Este archivo compacta `workflow-log.md` + `knowledge-graph.yaml` + `patterns-learned.md`.
+> **No se edita a mano**. Máximo ~30-50 líneas.
 
 ## Estado del proyecto
 
-[Resumen ejecutivo de la sesión]
+(inicializado por Abbia OS setup)
 
 ## Decisiones vigentes
 
-[Índice rápido de decisiones ⚖️/🔄]
+(sin decisiones vigentes)
 
 ## Patrones relevantes
 
-[Patrones aún aplicables]
+(sin patrones registrados)
 
-Referencia: docs/workflow-memory.md (framework ai-agents).
+Referencia: docs/workflow-memory.md (Abbia OS).
 EOF
-        echo -e "${GREEN}✓ Creado .ai/memory/context-snapshot.md. Lo regenerará el Skill Manager.${NC}"
+        echo -e "${GREEN}✓ Creado ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/context-snapshot.md.${NC}"
     else
-        echo -e "  - .ai/memory/context-snapshot.md ya existe. Omitido."
+        echo -e "  - ${ABBIA_MEMORY_DIR#$PROJECT_ROOT/}/context-snapshot.md ya existe. Omitido."
     fi
 
-    # Sistema de Métricas (.ai/metrics/executions.yaml)
-    mkdir -p "$PROJECT_ROOT/.ai/metrics"
-    if [ ! -f "$PROJECT_ROOT/.ai/metrics/executions.yaml" ]; then
+    # Métricas (.abbia/metrics/executions.yaml)
+    mkdir -p "$ABBIA_METRICS_DIR"
+    if [ ! -f "$ABBIA_METRICS_DIR/executions.yaml" ]; then
         if [ -f "$TEMPLATES_DIR/metrics-executions.yaml" ]; then
-            cp "$TEMPLATES_DIR/metrics-executions.yaml" "$PROJECT_ROOT/.ai/metrics/executions.yaml"
-            echo -e "${GREEN}✓ Creado .ai/metrics/executions.yaml (registro de métricas por ejecución).${NC}"
-        else
-            echo -e "${YELLOW}! No se encontró templates/metrics-executions.yaml. Se omite el seed de métricas.${NC}"
+            cp "$TEMPLATES_DIR/metrics-executions.yaml" "$ABBIA_METRICS_DIR/executions.yaml"
+            echo -e "${GREEN}✓ Creado ${ABBIA_METRICS_DIR#$PROJECT_ROOT/}/executions.yaml (telemetría de ejecuciones).${NC}"
         fi
     else
-        echo -e "  - .ai/metrics/executions.yaml ya existe. Omitido."
+        echo -e "  - ${ABBIA_METRICS_DIR#$PROJECT_ROOT/}/executions.yaml ya existe. Omitido."
     fi
 
-    # Knowledge Graph (.ai/knowledge-graph.yaml)
-    if [ ! -f "$PROJECT_ROOT/.ai/knowledge-graph.yaml" ]; then
+    # Knowledge Graph (.abbia/knowledge-graph.yaml)
+    if [ ! -f "$ABBIA_DIR/knowledge-graph.yaml" ]; then
         if [ -f "$TEMPLATES_DIR/knowledge-graph.yaml" ]; then
-            cp "$TEMPLATES_DIR/knowledge-graph.yaml" "$PROJECT_ROOT/.ai/knowledge-graph.yaml"
-            echo -e "${GREEN}✓ Creado .ai/knowledge-graph.yaml (grafo de decisiones arquitectónicas).${NC}"
-        else
-            echo -e "${YELLOW}! No se encontró templates/knowledge-graph.yaml. Se omite el seed del grafo.${NC}"
+            cp "$TEMPLATES_DIR/knowledge-graph.yaml" "$ABBIA_DIR/knowledge-graph.yaml"
+            echo -e "${GREEN}✓ Creado ${ABBIA_DIR#$PROJECT_ROOT/}/knowledge-graph.yaml (Tier 3: Grafo de Decisiones).${NC}"
         fi
     else
-        echo -e "  - .ai/knowledge-graph.yaml ya existe. Omitido."
+        echo -e "  - ${ABBIA_DIR#$PROJECT_ROOT/}/knowledge-graph.yaml ya existe. Omitido."
+    fi
+
+    # Copiar CLI wrapper ./abbia si no existe
+    if [ ! -f "$PROJECT_ROOT/abbia" ] && [ -f "$TEMPLATES_DIR/abbia" ]; then
+        cp "$TEMPLATES_DIR/abbia" "$PROJECT_ROOT/abbia"
+        chmod +x "$PROJECT_ROOT/abbia"
+        echo -e "${GREEN}✓ Instalado CLI wrapper ejecutable en ./abbia${NC}"
     fi
 else
-    echo -e "Omitiendo inicialización de estructura documental .ai/"
+    echo -e "Omitiendo inicialización de estructura documental ${ABBIA_DIR#$PROJECT_ROOT/}."
 fi
 
 echo -e "\n${BLUE}--- Paso 2: Generación de Archivos de Reglas para IDEs ---${NC}"
 
 ide_choice=10
 if [ "$AUTO_MODE" = true ]; then
-    echo -e "${YELLOW}! Modo automático: omitiendo generación de reglas de IDEs (ejecuta setup-ide.sh interactivo si lo necesitas).${NC}"
+    echo -e "${YELLOW}! Modo automático: omitiendo generación interactiva de reglas de IDEs.${NC}"
 else
     echo "Selecciona qué archivos de reglas deseas generar en la raíz de tu proyecto:"
     echo "1) Cursor IDE (.cursorrules clásico)"
@@ -327,7 +321,6 @@ copy_rule_file() {
     local name="$3"
     
     if [ -f "$src" ]; then
-        # Crear directorio destino si no existe (ej. .github)
         mkdir -p "$(dirname "$dest")"
         cp "$src" "$dest"
         echo -e "${GREEN}✓ Creado $name en $dest${NC}"
@@ -343,36 +336,18 @@ copy_cursor_mdc_rules() {
         mkdir -p "$dest_dir"
         cp -r "$src_dir/"* "$dest_dir/"
         echo -e "${GREEN}✓ Creadas reglas modulares de Cursor en $dest_dir (.mdc)${NC}"
-    else
-        echo -e "${RED}Error: No se encontró el directorio de reglas modulares en $src_dir${NC}"
     fi
 }
 
 case $ide_choice in
-    1)
-        copy_rule_file "$IDE_TEMPLATES_DIR/cursorrules" "$PROJECT_ROOT/.cursorrules" "Cursor (.cursorrules)"
-        ;;
-    2)
-        copy_cursor_mdc_rules
-        ;;
-    3)
-        copy_rule_file "$IDE_TEMPLATES_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md" "Claude Code (CLAUDE.md)"
-        ;;
-    4)
-        copy_rule_file "$IDE_TEMPLATES_DIR/windsurfrules" "$PROJECT_ROOT/.windsurfrules" "Windsurf (.windsurfrules)"
-        ;;
-    5)
-        copy_rule_file "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" "Cline (.clinerules)"
-        ;;
-    6)
-        copy_rule_file "$IDE_TEMPLATES_DIR/roomodes" "$PROJECT_ROOT/.roomodes" "Roo-Code (.roomodes)"
-        ;;
-    7)
-        copy_rule_file "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md" "Copilot (.github/copilot-instructions.md)"
-        ;;
-    8)
-        copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General (AGENTS.md)"
-        ;;
+    1) copy_rule_file "$IDE_TEMPLATES_DIR/cursorrules" "$PROJECT_ROOT/.cursorrules" "Cursor (.cursorrules)" ;;
+    2) copy_cursor_mdc_rules ;;
+    3) copy_rule_file "$IDE_TEMPLATES_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md" "Claude Code (CLAUDE.md)" ;;
+    4) copy_rule_file "$IDE_TEMPLATES_DIR/windsurfrules" "$PROJECT_ROOT/.windsurfrules" "Windsurf (.windsurfrules)" ;;
+    5) copy_rule_file "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" "Cline (.clinerules)" ;;
+    6) copy_rule_file "$IDE_TEMPLATES_DIR/roomodes" "$PROJECT_ROOT/.roomodes" "Roo-Code (.roomodes)" ;;
+    7) copy_rule_file "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md" "Copilot (.github/copilot-instructions.md)" ;;
+    8) copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General Abbia (AGENTS.md)" ;;
     9)
         copy_rule_file "$IDE_TEMPLATES_DIR/cursorrules" "$PROJECT_ROOT/.cursorrules" "Cursor (.cursorrules)"
         copy_cursor_mdc_rules
@@ -381,7 +356,7 @@ case $ide_choice in
         copy_rule_file "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" "Cline (.clinerules)"
         copy_rule_file "$IDE_TEMPLATES_DIR/roomodes" "$PROJECT_ROOT/.roomodes" "Roo-Code (.roomodes)"
         copy_rule_file "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md" "Copilot (.github/copilot-instructions.md)"
-        copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General (AGENTS.md)"
+        copy_rule_file "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" "Guía General Abbia (AGENTS.md)"
         ;;
     *)
         echo -e "Omitiendo generación de reglas de IDEs."
@@ -389,27 +364,23 @@ case $ide_choice in
 esac
 
 echo -e "\n${BLUE}--- Paso 3: Configuración de .gitignore y .gitattributes ---${NC}"
-# Preguntar si desea configurar el .gitignore y .gitattributes
 if [ "$AUTO_MODE" = true ]; then
     configure_git="s"
-    echo -e "${YELLOW}! Modo automático: configurando .gitignore y .gitattributes para ai-agents.${NC}"
+    echo -e "${YELLOW}! Modo automático: configurando .gitignore y .gitattributes para Abbia OS.${NC}"
 else
     read -p "¿Deseas configurar .gitignore y .gitattributes para evitar conflictos en Git? (s/n): " configure_git
 fi
 
 if [[ "$configure_git" =~ ^[sS]$ ]]; then
     GITIGNORE_PATH="$PROJECT_ROOT/.gitignore"
-    
-    if [ ! -f "$GITIGNORE_PATH" ]; then
-        touch "$GITIGNORE_PATH"
-    fi
+    [ ! -f "$GITIGNORE_PATH" ] && touch "$GITIGNORE_PATH"
 
-    # Configurar entradas en .gitignore
     ENTRIES_ADDED=0
-    for entry in ".ai/sessions/" ".ai/dashboard.html" ".ai/memory/context-snapshot.md" ".ai/metrics/aggregates.yaml"; do
+    target_prefix="${ABBIA_DIR#$PROJECT_ROOT/}"
+    for entry in "$target_prefix/sessions/" "$target_prefix/dashboard.html" "$target_prefix/memory/context-snapshot.md" "$target_prefix/metrics/aggregates.yaml"; do
         if ! grep -qF "$entry" "$GITIGNORE_PATH"; then
-            if [ $ENTRIES_ADDED -eq 0 ] && ! grep -q "ai-agents OS" "$GITIGNORE_PATH"; then
-                echo -e "\n# ==============================================================================\n# ai-agents OS — Archivos temporales, sesiones y cachés generados\n# ==============================================================================" >> "$GITIGNORE_PATH"
+            if [ $ENTRIES_ADDED -eq 0 ] && ! grep -q "Abbia OS" "$GITIGNORE_PATH"; then
+                echo -e "\n# ==============================================================================\n# Abbia OS — Archivos temporales, sesiones y cachés generados\n# ==============================================================================" >> "$GITIGNORE_PATH"
             fi
             echo "$entry" >> "$GITIGNORE_PATH"
             ENTRIES_ADDED=$((ENTRIES_ADDED + 1))
@@ -417,22 +388,19 @@ if [[ "$configure_git" =~ ^[sS]$ ]]; then
     done
 
     if [ $ENTRIES_ADDED -gt 0 ]; then
-        echo -e "${GREEN}✓ Agregadas reglas de ai-agents a .gitignore ($ENTRIES_ADDED nuevas entradas).${NC}"
+        echo -e "${GREEN}✓ Agregadas reglas de Abbia OS a .gitignore ($ENTRIES_ADDED nuevas entradas).${NC}"
     else
         echo -e "  - Reglas de .gitignore ya configuradas."
     fi
 
-    # Configurar .gitattributes (merge=union para append-only logs)
     GITATTRIBUTES_PATH="$PROJECT_ROOT/.gitattributes"
-    if [ ! -f "$GITATTRIBUTES_PATH" ]; then
-        touch "$GITATTRIBUTES_PATH"
-    fi
+    [ ! -f "$GITATTRIBUTES_PATH" ] && touch "$GITATTRIBUTES_PATH"
 
     ATTR_ADDED=0
-    for attr in ".ai/memory/workflow-log.md merge=union" ".ai/metrics/executions.yaml merge=union"; do
+    for attr in "$target_prefix/memory/workflow-log.md merge=union" "$target_prefix/metrics/executions.yaml merge=union"; do
         if ! grep -qF "$attr" "$GITATTRIBUTES_PATH"; then
-            if [ $ATTR_ADDED -eq 0 ] && ! grep -q "ai-agents OS" "$GITATTRIBUTES_PATH"; then
-                echo -e "\n# ==============================================================================\n# ai-agents OS — Reglas de Merge para Git (.gitattributes)\n# ==============================================================================" >> "$GITATTRIBUTES_PATH"
+            if [ $ATTR_ADDED -eq 0 ] && ! grep -q "Abbia OS" "$GITATTRIBUTES_PATH"; then
+                echo -e "\n# ==============================================================================\n# Abbia OS — Reglas de Merge para Git (.gitattributes)\n# ==============================================================================" >> "$GITATTRIBUTES_PATH"
             fi
             echo "$attr" >> "$GITATTRIBUTES_PATH"
             ATTR_ADDED=$((ATTR_ADDED + 1))
@@ -444,20 +412,13 @@ if [[ "$configure_git" =~ ^[sS]$ ]]; then
     else
         echo -e "  - Reglas de .gitattributes ya configuradas."
     fi
-else
-    echo -e "Omitiendo configuración de .gitignore y .gitattributes."
 fi
 
 echo -e "\n${GREEN}====================================================${NC}"
-echo -e "${GREEN}   🎉 ¡Configuración de ai-agents OS Completada!      ${NC}"
+echo -e "${GREEN}     🎉 ¡Configuración de Abbia OS Completada!      ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo -e "Siguientes pasos recomendados:"
-echo -e "1. Abre y edita ${YELLOW}.ai/context.md${NC} con la información técnica de tu proyecto."
-echo -e "2. Completa los sistemas v3.2.0 recién creados:"
-echo -e "   • ${YELLOW}.ai/knowledge-graph.yaml${NC} — indexa los ADRs ya vigentes en decisions.md"
-echo -e "   • ${YELLOW}.ai/memory/workflow-log.md${NC} — memoria episódica del pipeline"
-echo -e "   • ${YELLOW}.ai/metrics/executions.yaml${NC} — se registra automáticamente en cada ejecución"
-echo -e "3. Abre tu IDE de IA y comienza a trabajar siguiendo los agentes en ${YELLOW}AGENTS.md${NC}."
-echo -e "4. Para proyectos que actualizan desde una versión previa: ver la guía de"
-echo -e "   actualización en ${YELLOW}.ai/agents/docs/project-integration.md${NC} (§ Actualización)."
+echo -e "1. Abre y edita ${YELLOW}${ABBIA_DIR#$PROJECT_ROOT/}/context.md${NC} con la información de tu proyecto."
+echo -e "2. Ejecuta ${GREEN}./abbia new FEAT 001 mi-feature${NC} para crear tu primera iniciativa."
+echo -e "3. Abre el visualizador con: ${GREEN}./abbia dashboard${NC}"
 echo -e "===================================================="

@@ -168,4 +168,4 @@ Los documentos en `.ai/` tienen un ciclo de vida diferente: **no tienen estados 
 
 ---
 
-*Ciclo de Vida de Artefactos v1.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Ciclo de Vida de Artefactos v1.0 — ai-agents framework | github.com/ezequielmendoza-dev/abbia-os*

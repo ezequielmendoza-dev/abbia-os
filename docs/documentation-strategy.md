@@ -270,4 +270,4 @@ Ver [`docs/artifact-lifecycle.md`](artifact-lifecycle.md) para el ciclo de vida 
 
 ---
 
-*Estrategia documental v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Estrategia documental v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/abbia-os*

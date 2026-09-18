@@ -1,41 +1,43 @@
-# Reglas de Cursor — ai-agents OS
+# Reglas de Cursor — Abbia OS
 
-> **Importante:** Este archivo contiene instrucciones específicas para Cursor IDE.
+> **Importante:** Este archivo contiene instrucciones específicas para Cursor IDE bajo el framework **Abbia OS**.
 > Para la guía completa de roles, workflows y reglas documentales, consultar `AGENTS.md` en la raíz del proyecto.
+> **Lema de Abbia:** *Layered Context, Structured Memory, Autonomous Delivery.*
 
 ---
 
 ## 📋 Comportamiento General
 
-1. **Leer contexto antes de actuar.** Siempre comenzar leyendo `.ai/context.md` para entender el proyecto.
+1. **Leer contexto antes de actuar.** Comenzar leyendo `.abbia/context.md` y `.abbia/memory/context-snapshot.md`.
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
-3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
-4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
-5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega o fase de trabajo, **ejecutar en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured`.
+3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al rol en `.abbia/core/roles/`.
+4. **Respetar la jerarquía documental.** No crear documentos fuera de `.abbia/initiatives/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
+5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega o fase de trabajo, **ejecutar en terminal**: `bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` (o `./abbia finish ...`).
 
 ---
 
 ## ⚙️ Reglas Específicas de Cursor
 
 ### Composer (Agente)
-- Cuando se trabaje en modo Composer (agente), ejecutar las tareas de forma completa: no dejar `// TODO` ni implementaciones parciales salvo que el usuario lo indique.
-- Al crear archivos nuevos, verificar primero que no exista un archivo equivalente (Regla R1 de `AGENTS.md`).
+- Cuando se trabaje en modo Composer (agente), ejecutar las tareas de forma completa: no dejar `// TODO` ni implementaciones parciales.
+- Al crear archivos nuevos, verificar primero que no exista un archivo equivalente (Regla R1).
 - Si una tarea requiere cambios en múltiples archivos, agrupar los cambios lógicamente y explicar el orden de ejecución.
-- **AL CONCLUIR:** Siempre ejecutar `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` para actualizar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y snapshot.
+- **AL CONCLUIR:** Siempre ejecutar `finish-phase.sh` para actualizar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y snapshot.
 
 ### Chat
 - En modo Chat, priorizar respuestas concisas y contextualmente relevantes.
-- Referenciar archivos del proyecto usando `@` cuando sea útil para el usuario (ej: `@.ai/context.md`).
-- Si el usuario pregunta sobre la arquitectura o reglas de negocio, citar directamente los documentos permanentes de `.ai/`.
+- Referenciar archivos del proyecto usando `@` cuando sea útil para el usuario (ej: `@.abbia/context.md`).
+- Si el usuario pregunta sobre la arquitectura o reglas de negocio, citar directamente los documentos permanentes de `.abbia/`.
 
 ### Edición Inline (Cmd+K)
 - Mantener el estilo del código circundante.
 - No alterar imports o funciones que no estén directamente relacionadas con la edición solicitada.
-- Respetar las convenciones de naming definidas en `.ai/context.md`.
+- Respetar las convenciones de naming definidas en `.abbia/context.md`.
 
 ### Archivos de Contexto
-- Si Cursor solicita archivos adicionales de contexto, priorizar en este orden:
-  1. `.ai/context.md`
-  2. `.ai/architecture.md`
-  3. `.ai/business-rules.md`
-  4. El archivo del rol activo (ej: `.ai/agents/roles/developer.md`)
+- Priorizar el contexto en este orden:
+  1. `.abbia/context.md`
+  2. `.abbia/memory/context-snapshot.md`
+  3. `.abbia/architecture.md`
+  4. `.abbia/business-rules.md`
+  5. El archivo del rol activo (ej: `.abbia/core/roles/developer.md`)

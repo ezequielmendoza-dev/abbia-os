@@ -350,4 +350,4 @@ Discovery → Draft → Reviewed → Approved → In Progress → Done → Archi
 
 ---
 
-*Feature folder template v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Feature folder template v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/abbia-os*

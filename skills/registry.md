@@ -43,7 +43,7 @@ Cuando el orquestador encuentra múltiples skills con el mismo **ID** o **Alias*
 Los conflictos ocurren cuando se detectan skills con **IDs diferentes** pero que son lógicamente incompatibles (ej. detectar skills de `express` y `nestjs` simultáneamente para un microservicio monolítico).
 
 ### Reglas de Manejo de Conflictos:
-1. **Revisión de Contexto Duro:** El Skill Manager debe examinar los manifiestos del proyecto (`package.json`, `Cargo.toml`, etc.) o el `.ai/context.md`. La skill que esté respaldada por el manifiesto se mantiene; las demás se descartan.
+1. **Revisión de Contexto Duro:** El Skill Manager debe examinar los manifiestos del proyecto (`package.json`, `Cargo.toml`, etc.) o el `.abbia/context.md`. La skill que esté respaldada por el manifiesto se mantiene; las demás se descartan.
 2. **Intervención Humana Exigida:** Si los manifiestos no resuelven la ambigüedad, el Skill Manager **debe detener la ejecución** (usando herramientas como `ask_question`) para que el desarrollador humano decida. Nunca debe avanzar con un contexto tecnológico esquizofrénico o mezclado.
 
 ## 2.1 Categorías Framework (skills `type: method`)

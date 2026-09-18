@@ -100,7 +100,7 @@ echo "🤖 Inicializando ai-agents en $PROJECT_PATH..."
 mkdir -p "$PROJECT_PATH/.ai"
 cd "$PROJECT_PATH"
 
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+git submodule add https://github.com/ezequielmendoza-dev/abbia-os.git .ai/agents
 cp .ai/agents/templates/project-context.md .ai/context.md
 
 echo "✅ Listo. Completa .ai/context.md con el contexto del proyecto."
@@ -246,4 +246,4 @@ ai-agents/
 
 ---
 
-*Roadmap versión 2.0 — ai-agents framework | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*Roadmap versión 2.0 — ai-agents framework | [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)*

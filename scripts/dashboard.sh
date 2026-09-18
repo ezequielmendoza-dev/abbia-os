@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# dashboard.sh — ai-agents Interactive Dashboard & Visualizer
+# dashboard.sh — Abbia OS Interactive Dashboard & Visualizer
 # ==============================================================================
-# Dashboard visual y autónomo para el equipo de desarrollo (ai-agents OS).
+# Dashboard visual y autónomo para el equipo de desarrollo (Abbia OS).
 # Proporciona visibilidad real y objetiva sobre:
 #   1. Iniciativas & Pipeline SDD (Features, Bugs, Refactors, Documentación y QA)
 #   2. Knowledge Graph (Grafo de Decisiones Arquitectónicas ADR y dependencias)
@@ -32,36 +32,39 @@ for arg in "$@"; do
             NO_OPEN=1
             ;;
         -h|--help)
-            echo "Uso: bash dashboard.sh [--no-open]"
-            echo "Genera y abre el dashboard visual interactivo (.ai/dashboard.html)"
+            echo "Uso: bash dashboard.sh [--no-open] o ./abbia dashboard"
+            echo "Genera y abre el dashboard visual interactivo (.abbia/dashboard.html)"
             exit 0
             ;;
     esac
 done
 
-echo -e "${BLUE}====================================================${NC}"
-echo -e "${BLUE}   📊 Visualizador Interactivo (ai-agents OS)       ${NC}"
-echo -e "${BLUE}====================================================${NC}"
+PROJECT_ROOT="$(detect_project_root)"
+resolve_abbia_paths "$PROJECT_ROOT"
+
+echo -e "${CYAN}====================================================${NC}"
+echo -e "${CYAN}   📊 Visualizador Interactivo (Abbia OS v4.0.0)    ${NC}"
+echo -e "${CYAN}====================================================${NC}"
 echo -e "Raíz del proyecto: ${YELLOW}$PROJECT_ROOT${NC}\n"
 
-AI_DIR="$PROJECT_ROOT/.ai"
+AI_DIR="$ABBIA_DIR"
 if [ ! -d "$AI_DIR" ]; then
-    echo -e "${RED}Error: No se encontró la carpeta .ai/ en $PROJECT_ROOT${NC}"
+    echo -e "${RED}Error: No se encontró la carpeta ($AI_DIR) en $PROJECT_ROOT${NC}"
     exit 1
 fi
 
-KG_FILE="$AI_DIR/knowledge-graph.yaml"
-METRICS_FILE="$AI_DIR/metrics/executions.yaml"
-MEM_DIR="$AI_DIR/memory"
+KG_FILE="$ABBIA_DIR/knowledge-graph.yaml"
+METRICS_FILE="$ABBIA_METRICS_DIR/executions.yaml"
+MEM_DIR="$ABBIA_MEMORY_DIR"
 LOG_FILE="$MEM_DIR/workflow-log.md"
 CATALOG_FILE="$MEM_DIR/decisions-catalog.md"
 PATTERNS_FILE="$MEM_DIR/patterns-learned.md"
 SNAPSHOT_FILE="$MEM_DIR/context-snapshot.md"
-CONTEXT_FILE="$AI_DIR/context.md"
-RULES_FILE="$AI_DIR/business-rules.md"
-GLOSSARY_FILE="$AI_DIR/glossary.md"
-FEATURES_DIR="$AI_DIR/features"
-ARCHIVE_DIR="$AI_DIR/archive"
+CONTEXT_FILE="$ABBIA_DIR/context.md"
+RULES_FILE="$ABBIA_DIR/business-rules.md"
+GLOSSARY_FILE="$ABBIA_DIR/glossary.md"
+FEATURES_DIR="$ABBIA_INITIATIVES_DIR"
+ARCHIVE_DIR="$ABBIA_ARCHIVE_DIR"
 
 # Leer y sanitizar contenidos para inyección JSON
 read_file_or_default() {
@@ -210,7 +213,7 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ai-agents OS — Dashboard de Desarrollo</title>
+  <title>Abbia OS — Interactive Visualizer</title>
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -396,10 +399,10 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
     <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       <!-- Project Info Brand -->
       <div class="flex items-center gap-3 min-w-0">
-        <span class="text-2xl flex-shrink-0">🤖</span>
+        <span class="text-2xl flex-shrink-0">🏛️</span>
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 id="nav-project-name" class="text-base sm:text-lg font-black bg-gradient-to-r from-sky-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent truncate">ai-agents OS</h1>
+            <h1 id="nav-project-name" class="text-base sm:text-lg font-black bg-gradient-to-r from-sky-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent truncate">Abbia OS</h1>
             <span id="nav-project-status" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex-shrink-0">Activo</span>
           </div>
           <p id="nav-project-subtitle" class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
@@ -422,7 +425,7 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
           <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🧠 Memoria</button>
           <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">📊 Telemetría</button>
         </nav>
-        <button onclick="openAboutModal()" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 border border-slate-700/70 shadow-sm flex items-center gap-1.5 transition" title="Acerca de ai-agents OS">
+        <button onclick="openAboutModal()" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 border border-slate-700/70 shadow-sm flex items-center gap-1.5 transition" title="Acerca de Abbia OS">
           <span>ℹ️</span> <span class="hidden md:inline text-[11px] font-bold bg-gradient-to-r from-sky-400 to-indigo-300 bg-clip-text text-transparent">About</span>
         </button>
       </div>
@@ -536,7 +539,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <div class="min-w-0">
             <div class="text-[11px] font-medium text-slate-400">Framework AI</div>
             <div class="text-xs font-bold text-amber-300 mt-0.5 flex items-center gap-1.5">
-              <span>ai-agents OS v3.3.1</span>
+              <span>Abbia OS v4.0.0</span>
               <button onclick="openAboutModal()" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded hover:bg-amber-500/30 transition">ℹ️</button>
             </div>
           </div>
@@ -558,7 +561,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <span>📋</span> Ficha Técnica & Entorno
         </button>
         <button onclick="switchProjectSubTab('context')" id="btn-project-sub-context" class="project-subtab-btn px-4 py-2 rounded-xl font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-2 flex-shrink-0">
-          <span>📖</span> Memoria Permanente (.ai/context.md)
+          <span>📖</span> Memoria Permanente (.abbia/context.md)
         </button>
       </div>
 
@@ -568,7 +571,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
             <span>🎯</span> Objetivos de Negocio del Producto
           </h3>
-          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md (§2)</span>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.abbia/context.md (§2)</span>
         </div>
         <div id="project-goals-content" class="prose prose-invert max-w-none w-full mt-4"></div>
       </div>
@@ -578,7 +581,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
             <span>👥</span> Matriz de Usuarios, Actores & Permisos
           </h3>
-          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md (§3)</span>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.abbia/context.md (§3)</span>
         </div>
         <div id="project-actors-content" class="prose prose-invert max-w-none w-full mt-4"></div>
       </div>
@@ -588,7 +591,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
             <span>⚡</span> Arquitectura & Stack Tecnológico
           </h3>
-          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.ai/context.md (§4)</span>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">.abbia/context.md (§4)</span>
         </div>
         <div id="project-stack-content" class="prose prose-invert max-w-none w-full mt-4"></div>
       </div>
@@ -598,7 +601,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
             <span>📋</span> Ficha Técnica del Proyecto & Configuración
           </h3>
-          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">ai-agents OS</span>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">Abbia OS</span>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -613,21 +616,21 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
           <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 space-y-1">
             <span class="text-slate-500 block text-[10px] uppercase font-semibold">Submódulo Framework</span>
             <div class="flex items-center justify-between">
-              <span class="font-mono text-sky-400 text-xs">.ai/agents/ (ai-agents OS)</span>
+              <span class="font-mono text-sky-400 text-xs">.abbia/core/ (Abbia OS)</span>
               <button onclick="openAboutModal()" class="text-[10px] bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-md hover:bg-sky-500/30 transition">Info</button>
             </div>
           </div>
           <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 space-y-1">
             <span class="text-slate-500 block text-[10px] uppercase font-semibold">Directorio de Iniciativas</span>
-            <span class="font-mono text-indigo-400 text-xs">.ai/features/ & .ai/archive/</span>
+            <span class="font-mono text-indigo-400 text-xs">.abbia/initiatives/ & .abbia/archive/</span>
           </div>
           <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 space-y-1">
             <span class="text-slate-500 block text-[10px] uppercase font-semibold">Memoria Técnica Persistente</span>
-            <span class="font-mono text-emerald-400 text-xs">.ai/memory/</span>
+            <span class="font-mono text-emerald-400 text-xs">.abbia/memory/</span>
           </div>
           <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 space-y-1">
             <span class="text-slate-500 block text-[10px] uppercase font-semibold">Telemetría de Agentes</span>
-            <span class="font-mono text-amber-400 text-xs">.ai/metrics/executions.yaml</span>
+            <span class="font-mono text-amber-400 text-xs">.abbia/metrics/executions.yaml</span>
           </div>
         </div>
       </div>
@@ -1254,21 +1257,21 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
     </div>
   </div>
 
-  <!-- About ai-agents Modal Dialog -->
+  <!-- About Abbia OS Modal Dialog -->
   <div id="about-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-modal">
       <!-- Modal Header -->
       <div class="p-5 sm:p-6 border-b border-slate-800/80 bg-slate-900/95 flex items-start justify-between gap-4">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/20 to-teal-500/20 border border-sky-500/30 flex items-center justify-center text-2xl shadow-inner flex-shrink-0">
-            🤖
+            🏛️
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-base sm:text-lg font-black bg-gradient-to-r from-sky-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent">ai-agents OS</h3>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">v3.3.1</span>
+              <h3 class="text-base sm:text-lg font-black bg-gradient-to-r from-sky-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent">Abbia OS</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">v4.0.0</span>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5">Sistema Operativo & Framework Metodológico para Desarrollo Asistido por IA (SDD)</p>
+            <p class="text-xs text-slate-400 mt-0.5">Layered Context, Structured Memory, Autonomous Delivery (SDD)</p>
           </div>
         </div>
         <button onclick="closeAboutModal()" class="text-slate-400 hover:text-slate-200 text-lg font-bold p-1 rounded-lg hover:bg-slate-800 transition">✕</button>
@@ -1279,10 +1282,10 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         <!-- Overview Banner -->
         <div class="bg-slate-950/70 border border-slate-800/80 p-4 rounded-xl space-y-2">
           <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
-            <span>🎯</span> ¿Qué es ai-agents?
+            <span>🎯</span> ¿Qué es Abbia OS?
           </h4>
           <p class="text-slate-300 leading-relaxed">
-            <strong>ai-agents</strong> es una biblioteca reutilizable y framework de orquestación para transformar el desarrollo de software asistido por IA. Implementa la metodología <strong>Spec-Driven Development (SDD)</strong>: primero la especificación funcional, el diseño visual y la arquitectura técnica aprobada por humanos, luego la implementación guiada por agentes especializados con control de calidad continuo.
+            <strong>Abbia OS</strong> es un sistema operativo de ingeniería y framework de orquestación para desarrollo de software asistido por IA. Implementa la metodología <strong>Specification-Driven Development (SDD)</strong>: primero la especificación funcional, el diseño visual y la arquitectura técnica aprobada, luego la implementación guiada por agentes especializados con control de calidad continuo y memoria técnica persistente.
           </p>
         </div>
 
@@ -1292,7 +1295,7 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
             <div class="font-bold text-sky-400 flex items-center gap-1.5 text-xs">
               <span>👥</span> 8 Roles Especializados
             </div>
-            <p class="text-[11px] text-slate-400">Analyst, UI Designer, Architect, Tech Lead, Senior Developer, QA Engineer, DevOps y Skill Manager colaborando en fases claras.</p>
+            <p class="text-[11px] text-slate-400">Analyst, UI Designer, Architect, Tech Lead, Senior Developer, QA Engineer, DevOps y Skill Manager colaborando en fases claras con Context Contracts.</p>
           </div>
 
           <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 space-y-1.5">
@@ -1304,37 +1307,37 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
 
           <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 space-y-1.5">
             <div class="font-bold text-emerald-400 flex items-center gap-1.5 text-xs">
-              <span>🧠</span> Memoria Persistente
+              <span>🧠</span> 3-Tier Persistent Memory
             </div>
-            <p class="text-[11px] text-slate-400">Context Snapshot (trabajo), Workflow Log (episódica), Knowledge Graph (semántica) y Patterns Learned (procedimental).</p>
+            <p class="text-[11px] text-slate-400">Context Snapshot (Tier 2), Workflow Log (Tier 1), Knowledge Graph (Tier 3) y Patterns Learned (procedimental).</p>
           </div>
         </div>
 
         <!-- Automation Scripts & CLI Reference -->
         <div class="space-y-2.5">
           <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-            <span>⚙️</span> Scripts de Automatización (CLI)
+            <span>⚙️</span> Comandos CLI de Abbia OS
           </h4>
           <div class="space-y-2 font-mono text-[11px]">
             <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-sky-300 truncate">bash .ai/agents/scripts/new-initiative.sh &lt;TIPO&gt; &lt;ID&gt; &lt;slug&gt;</span>
+              <span class="text-sky-300 truncate">./abbia new &lt;TIPO&gt; &lt;ID&gt; &lt;slug&gt;</span>
               <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Crear iniciativa</span>
             </div>
             <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-indigo-300 truncate">bash .ai/agents/scripts/finish-phase.sh &lt;INICIATIVA&gt; &lt;FASE&gt; [ROL]</span>
+              <span class="text-indigo-300 truncate">./abbia finish &lt;INICIATIVA&gt; &lt;FASE&gt; [ROL]</span>
               <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Registrar fase & telemetría</span>
             </div>
             <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-emerald-300 truncate">bash .ai/agents/scripts/sync-initiatives.sh --fix</span>
+              <span class="text-emerald-300 truncate">./abbia sync --fix</span>
               <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Auto-reparar & sincronizar</span>
             </div>
             <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-amber-300 truncate">bash .ai/agents/scripts/validate-project.sh</span>
-              <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Validar salud del framework</span>
+              <span class="text-amber-300 truncate">./abbia validate</span>
+              <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Validar estructura</span>
             </div>
             <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-teal-300 truncate">bash .ai/agents/scripts/dashboard.sh</span>
-              <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Generar este dashboard</span>
+              <span class="text-teal-300 truncate">./abbia dashboard</span>
+              <span class="text-slate-500 font-sans text-[10px] flex-shrink-0">Abrir visualizador</span>
             </div>
           </div>
         </div>
@@ -1342,10 +1345,10 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
         <!-- Links & Submodule Info -->
         <div class="border-t border-slate-800/80 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px]">
           <div class="text-slate-400">
-            Submódulo integrado en: <code class="text-sky-400 font-mono">.ai/agents/</code>
+            Núcleo integrado en: <code class="text-sky-400 font-mono">.abbia/core/</code>
           </div>
           <div class="flex items-center gap-3">
-            <a href="https://github.com/ezequielmendoza-dev/ai-agents" target="_blank" class="text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 transition">
+            <a href="https://github.com/ezequielmendoza-dev/abbia-os" target="_blank" class="text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 transition">
               <span>🌐</span> Repositorio GitHub ↗
             </a>
           </div>

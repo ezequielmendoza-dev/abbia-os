@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# ==============================================================================
+# abbia — Abbia OS CLI Entrypoint
+# ==============================================================================
+# CLI wrapper para ejecutar rápidamente los comandos de Abbia OS desde la
+# raíz del proyecto.
+# ==============================================================================
+
+set -euo pipefail
+
+CWD="$(pwd)"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Detectar ruta del core de Abbia
+CORE_PATH=""
+if [ -d "$CWD/.abbia/core/scripts" ]; then
+    CORE_PATH="$CWD/.abbia/core/scripts"
+elif [ -d "$CWD/.stratum/core/scripts" ]; then
+    CORE_PATH="$CWD/.stratum/core/scripts"
+elif [ -d "$CWD/.ai/agents/scripts" ]; then
+    CORE_PATH="$CWD/.ai/agents/scripts"
+elif [ -d "$SCRIPT_DIR/scripts" ]; then
+    CORE_PATH="$SCRIPT_DIR/scripts"
+fi
+
+if [ -z "$CORE_PATH" ] || [ ! -d "$CORE_PATH" ]; then
+    echo "Error: No se encontró el directorio de scripts de Abbia OS (.abbia/core/scripts)."
+    exit 1
+fi
+
+COMMAND="${1:-help}"
+[ $# -gt 0 ] && shift || true
+
+case "$COMMAND" in
+    new|init-initiative)
+        bash "$CORE_PATH/new-initiative.sh" "$@"
+        ;;
+    finish|finish-phase)
+        bash "$CORE_PATH/finish-phase.sh" "$@"
+        ;;
+    archive|archive-initiative)
+        bash "$CORE_PATH/archive-initiative.sh" "$@"
+        ;;
+    sync)
+        bash "$CORE_PATH/sync-initiatives.sh" "$@"
+        ;;
+    validate|check)
+        bash "$CORE_PATH/validate-project.sh" "$@"
+        ;;
+    dashboard|ui)
+        bash "$CORE_PATH/dashboard.sh" "$@"
+        ;;
+    update)
+        if [ -f "$CORE_PATH/update-abbia.sh" ]; then
+            bash "$CORE_PATH/update-abbia.sh" "$@"
+        elif [ -f "$CORE_PATH/update-stratum.sh" ]; then
+            bash "$CORE_PATH/update-stratum.sh" "$@"
+        else
+            bash "$CORE_PATH/update-ai-agents.sh" "$@"
+        fi
+        ;;
+    setup)
+        bash "$CORE_PATH/setup-ide.sh" "$@"
+        ;;
+    migrate)
+        if [ -f "$CORE_PATH/migrate-to-abbia.sh" ]; then
+            bash "$CORE_PATH/migrate-to-abbia.sh" "$@"
+        else
+            bash "$CORE_PATH/migrate-to-stratum.sh" "$@"
+        fi
+        ;;
+    help|--help|-h)
+        echo "Abbia OS CLI (v4.0.0)"
+        echo "Uso: ./abbia <comando> [argumentos]"
+        echo ""
+        echo "Comandos disponibles:"
+        echo "  new <TIPO> <ID> <slug>     Crear una nueva iniciativa (FEAT, BUG, AUDIT, REF)"
+        echo "  finish <INIT> <FASE> [ROL] Cerrar fase con telemetría y snapshot"
+        echo "  archive <INIT>             Archivar iniciativa completada"
+        echo "  sync [--fix]               Sincronizar y reconciliar estado y métricas"
+        echo "  validate                   Validar consistencia de la estructura Abbia"
+        echo "  dashboard                  Generar y abrir el visualizador interactivo"
+        echo "  update [VERSION]           Actualizar el framework Abbia OS"
+        echo "  migrate                    Migrar proyecto legacy (.ai/ o .stratum/) a Abbia (.abbia/)"
+        echo "  setup                      Regenerar reglas de IDE y estructura base"
+        ;;
+    *)
+        echo "Comando desconocido: '$COMMAND'. Ejecuta './abbia help' para ver opciones."
+        exit 1
+        ;;
+esac

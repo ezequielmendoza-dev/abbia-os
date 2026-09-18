@@ -224,4 +224,4 @@ graph LR
 
 ---
 
-*Documentación versión 3.0 — ai-agents library | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*Documentación versión 3.0 — ai-agents library | [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)*

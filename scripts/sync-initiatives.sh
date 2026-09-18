@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# sync-initiatives.sh — ai-agents Auto-Reconciler & Sync Tool
+# sync-initiatives.sh — Abbia OS Auto-Reconciler & Sync Tool
 # ==============================================================================
-# Escanea las carpetas en .ai/features/ (y opcionalmente .ai/archive/) y reconcilia
-# de forma automática cualquier iniciativa que no haya sido registrada en los
-# sistemas globales:
-#   1. .ai/knowledge-graph.yaml (Nodos ADR ARCH-NNN)
-#   2. .ai/memory/workflow-log.md (Memoria episódica)
-#   3. .ai/memory/decisions-catalog.md (Memoria semántica)
-#   4. .ai/metrics/executions.yaml (Telemetría de ejecuciones)
-#   5. .ai/memory/context-snapshot.md (Regeneración compactada)
+# Escanea las carpetas de iniciativas y reconcilia de forma automática cualquier
+# iniciativa que no haya sido registrada en los sistemas globales:
+#   1. .abbia/knowledge-graph.yaml (Nodos ADR ARCH-NNN)
+#   2. .abbia/memory/workflow-log.md (Memoria episódica)
+#   3. .abbia/metrics/executions.yaml (Telemetría de ejecuciones)
+#   4. .abbia/memory/context-snapshot.md (Regeneración compactada)
 # ==============================================================================
 
 set -euo pipefail
 
-# Determinar directorio del script e importar utilidades comunes
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ -f "$SCRIPT_DIR/common.sh" ]; then
     source "$SCRIPT_DIR/common.sh"
@@ -25,10 +22,11 @@ else
 fi
 
 PROJECT_ROOT="$(detect_project_root)"
+resolve_abbia_paths "$PROJECT_ROOT"
 
-echo -e "${BLUE}====================================================${NC}"
-echo -e "${BLUE}   🔄 Sincronizador de Iniciativas (ai-agents OS)   ${NC}"
-echo -e "${BLUE}====================================================${NC}"
+echo -e "${CYAN}====================================================${NC}"
+echo -e "${CYAN}   🔄 Sincronizador de Iniciativas (Abbia OS)       ${NC}"
+echo -e "${CYAN}====================================================${NC}"
 echo -e "Raíz del proyecto: ${YELLOW}$PROJECT_ROOT${NC}\n"
 
 FIX_MODE=false
@@ -38,7 +36,7 @@ for arg in "$@"; do
     case "$arg" in
         --fix|-f|--repair)
             FIX_MODE=true
-            echo -e "${YELLOW}🔧 Modo reparación activado (--fix): auto-reparando artefactos legacy y placeholders.${NC}\n"
+            echo -e "${YELLOW}🔧 Modo reparación activado (--fix): auto-reparando artefactos y placeholders.${NC}\n"
             ;;
         --archive-approved)
             ARCHIVE_APPROVED=true
@@ -47,26 +45,24 @@ for arg in "$@"; do
     esac
 done
 
-FEATURES_DIR="$PROJECT_ROOT/.ai/features"
-if [ ! -d "$FEATURES_DIR" ]; then
-    echo -e "${RED}Error: No se encontró el directorio .ai/features/ en $PROJECT_ROOT${NC}"
+if [ ! -d "$ABBIA_INITIATIVES_DIR" ]; then
+    echo -e "${RED}Error: No se encontró el directorio de iniciativas en $ABBIA_INITIATIVES_DIR${NC}"
     exit 1
 fi
 
-KG_FILE="$PROJECT_ROOT/.ai/knowledge-graph.yaml"
-MEM_DIR="$PROJECT_ROOT/.ai/memory"
+KG_FILE="$ABBIA_DIR/knowledge-graph.yaml"
+MEM_DIR="$ABBIA_MEMORY_DIR"
 LOG_FILE="$MEM_DIR/workflow-log.md"
-METRICS_FILE="$PROJECT_ROOT/.ai/metrics/executions.yaml"
+METRICS_FILE="$ABBIA_METRICS_DIR/executions.yaml"
 
 mkdir -p "$MEM_DIR"
-mkdir -p "$PROJECT_ROOT/.ai/metrics"
+mkdir -p "$ABBIA_METRICS_DIR"
 
-# Asegurar cabeceras base si no existen
 if [ ! -f "$LOG_FILE" ]; then
     cat << 'EOF' > "$LOG_FILE"
 # Memoria Episódica — Workflow Log (append-only)
 
-Registro cronológico de las ejecuciones del pipeline.
+Registro cronológico de las ejecuciones del pipeline en Abbia OS.
 
 EOF
 fi
@@ -80,7 +76,7 @@ fi
 if [ ! -f "$KG_FILE" ]; then
     cat << 'EOF' > "$KG_FILE"
 version: 1
-updated: 2026-09-11
+updated: 2026-09-18
 maintained_by: architect
 
 nodes:
@@ -91,14 +87,11 @@ fi
 CURRENT_DATE=$(date -u +"%Y-%m-%d")
 CURRENT_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# Limpieza de template en knowledge-graph.yaml si estamos en modo --fix o si tiene placeholders
 if [ "$FIX_MODE" = true ] && [ -f "$KG_FILE" ]; then
-    # Actualizar fecha placeholder si existe
     if grep -q "updated: YYYY-MM-DD" "$KG_FILE"; then
         sed -i.bak "s/updated: YYYY-MM-DD/updated: $CURRENT_DATE/" "$KG_FILE" 2>/dev/null || sed -i '' "s/updated: YYYY-MM-DD/updated: $CURRENT_DATE/" "$KG_FILE" 2>/dev/null || true
         rm -f "$KG_FILE.bak"
     fi
-    # Eliminar nodo placeholder de ejemplo si existe
     if grep -q 'title: "Nombre corto de la decisión"' "$KG_FILE"; then
         awk '
         /^[[:space:]]*- id: ARCH-001/ { in_placeholder=1; next }
@@ -112,19 +105,18 @@ fi
 SYNCED_COUNT=0
 HEALED_COUNT=0
 shopt -s nullglob
-dirs=("$FEATURES_DIR"/*/)
+dirs=("$ABBIA_INITIATIVES_DIR"/*/)
 shopt -u nullglob
 
 for dir in "${dirs[@]}"; do
     folder_name=$(basename "$dir")
+    [ "$folder_name" = "*" ] && continue
     
-    # Extraer ID y Tipo
     TYPE=$(echo "$folder_name" | cut -d'-' -f1)
     NUM=$(echo "$folder_name" | cut -d'-' -f2)
     SLUG=$(echo "$folder_name" | cut -d'-' -f3-)
     INITIATIVE_ID="$TYPE-$NUM"
 
-    # --- Auto-reparación documental (Modo --fix) ---
     if [ "$FIX_MODE" = true ]; then
         dir_healed=false
         
@@ -133,10 +125,10 @@ for dir in "${dirs[@]}"; do
                 cat > "$dir/spec.md" << EOF
 # Especificación Funcional — $folder_name
 
-> Documento autogenerado en migración a ai-agents OS v3.x.
+> Documento generado en reconciliación Abbia OS.
 
 ## 1. Resumen
-Iniciativa migrada desde versión previa de la suite.
+Iniciativa registrada en Abbia OS.
 EOF
                 dir_healed=true
             fi
@@ -145,7 +137,7 @@ EOF
                 cat > "$dir/decision.md" << EOF
 # Decisión Arquitectónica — ARCH-$NUM
 
-> Documento generado automáticamente durante la migración a ai-agents OS v3.x.
+> Documento generado en reconciliación Abbia OS.
 
 - **Estado:** Aceptado
 - **Iniciativa:** $INITIATIVE_ID
@@ -154,16 +146,15 @@ EOF
                 dir_healed=true
             fi
 
-            # Si se solicita auto-archivado, asegurar que existan los archivos de cierre
             if [ "$ARCHIVE_APPROVED" = true ]; then
                 if [ ! -f "$dir/architecture.md" ]; then
                     cat > "$dir/architecture.md" << EOF
 # Diseño Técnico — $folder_name
 
-> Documento autogenerado en migración a ai-agents OS v3.x.
+> Documento generado en reconciliación Abbia OS.
 
 ## 1. Resumen de Arquitectura
-Diseño técnico migrado desde versión previa de la suite.
+Diseño técnico consolidado.
 EOF
                     dir_healed=true
                 fi
@@ -172,7 +163,7 @@ EOF
                     cat > "$dir/qa.md" << EOF
 # Reporte de QA — $folder_name
 
-> **Veredicto:** APROBADO (Migración Legacy)
+> **Veredicto:** APROBADO (Reconciliación)
 
 Validación histórica consolidada.
 EOF
@@ -185,10 +176,10 @@ EOF
                 cat > "$dir/bug-report.md" << EOF
 # Reporte de Bug — $folder_name
 
-> Documento autogenerado en migración a ai-agents OS v3.x.
+> Documento generado en reconciliación Abbia OS.
 
 ## 1. Descripción
-Corrección migrada desde versión previa de la suite.
+Corrección registrada.
 EOF
                 dir_healed=true
             fi
@@ -197,7 +188,7 @@ EOF
                 cat > "$dir/qa.md" << EOF
 # Reporte de QA — $folder_name
 
-> **Veredicto:** APROBADO (Migración Legacy)
+> **Veredicto:** APROBADO (Reconciliación)
 
 Validación histórica consolidada.
 EOF
@@ -205,10 +196,9 @@ EOF
             fi
         fi
 
-        # Auto-reparar semántica de veredicto en qa.md si no contiene APROBADO/RECHAZADO
         if [ -f "$dir/qa.md" ]; then
             if ! grep -qiE "(Veredicto.*(APROBADO|RECHAZADO|PASS|FAIL)|Verdict.*(APPROVED|REJECTED|PASS|FAIL))" "$dir/qa.md"; then
-                echo -e "\n\n> **Veredicto:** APROBADO (Migración Legacy)" >> "$dir/qa.md"
+                echo -e "\n\n> **Veredicto:** APROBADO (Reconciliación)" >> "$dir/qa.md"
                 dir_healed=true
             fi
         fi
@@ -219,11 +209,9 @@ EOF
         fi
     fi
 
-    # Verificar si ya está en workflow-log.md
     if ! grep -q "## \[$INITIATIVE_ID\]" "$LOG_FILE" 2>/dev/null; then
         echo -e "${YELLOW}⚡ Sincronizando iniciativa no registrada:${NC} $folder_name"
         
-        # 1. Extraer título o resumen
         TITLE="$folder_name"
         if [ -f "$dir/spec.md" ]; then
             EXTRACTED_TITLE=$(grep -E '^# ' "$dir/spec.md" | head -1 | sed 's/^# *//' || true)
@@ -233,22 +221,19 @@ EOF
             if [ -n "$EXTRACTED_TITLE" ]; then TITLE="$EXTRACTED_TITLE"; fi
         fi
 
-        # 2. Registrar en workflow-log.md
         cat >> "$LOG_FILE" << EOF
 
 ## [$INITIATIVE_ID] S1 — Pipeline Sync ($CURRENT_TS)
 
-- **Insumos consumidos:** Documentos de iniciativa en `.ai/features/$folder_name`.
+- **Insumos consumidos:** Documentos de iniciativa en `${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}/$folder_name`.
 - **Decisión:** Implementación y cierre de iniciativa '$TITLE'.
 - **Razón:** Sincronización histórica y auto-reconciliación del pipeline.
-- **Outputs producidos:** [$folder_name](../features/$folder_name)
+- **Outputs producidos:** [$folder_name](../${ABBIA_INITIATIVES_DIR#$ABBIA_DIR/}/$folder_name)
 EOF
 
-        # 3. Registrar ADR en Knowledge Graph y Decisions Catalog si tiene arquitectura/decisión/spec
         ARCH_ID="ARCH-$NUM"
         if [ -f "$dir/decision.md" ] || [ -f "$dir/architecture.md" ] || [ -f "$dir/spec.md" ]; then
             if ! grep -q "id: $ARCH_ID" "$KG_FILE" 2>/dev/null; then
-                # Agregar nodo al knowledge-graph.yaml antes de la línea edges:
                 if grep -q "nodes:" "$KG_FILE"; then
                     awk -v arch_id="$ARCH_ID" -v title="$TITLE" -v num="$NUM" -v date="$CURRENT_DATE" '
                     /^edges:/ {
@@ -273,12 +258,11 @@ EOF
     fi
 done
 
-# --- Modo Auto-Archivado en Lote (--archive-approved) ---
 ARCHIVED_COUNT=0
 if [ "$ARCHIVE_APPROVED" = true ]; then
     echo -e "\n${BLUE}➔ Evaluando iniciativas listas para archivar...${NC}"
     shopt -s nullglob
-    active_dirs=("$FEATURES_DIR"/*/)
+    active_dirs=("$ABBIA_INITIATIVES_DIR"/*/)
     shopt -u nullglob
     for dir in "${active_dirs[@]}"; do
         fname=$(basename "$dir")
@@ -292,11 +276,10 @@ if [ "$ARCHIVE_APPROVED" = true ]; then
     done
 fi
 
-# Regenerar context-snapshot
 regenerate_context_snapshot "$PROJECT_ROOT"
 
 echo -e "\n${GREEN}====================================================${NC}"
-echo -e "${GREEN}   ✅ Sincronización Finalizada                     ${NC}"
+echo -e "${GREEN}   ✅ Sincronización Finalizada en Abbia OS         ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo -e "Iniciativas reconciliadas: ${YELLOW}$SYNCED_COUNT${NC}"
 if [ "$FIX_MODE" = true ]; then

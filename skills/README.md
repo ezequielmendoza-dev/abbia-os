@@ -120,7 +120,7 @@ version: 1.0
 | Herramienta con convenciones específicas | ✅ Sí |
 | Librería trivial sin configuración especial | ❌ No |
 | Patrón que ya está cubierto por otro skill | ❌ No — extender el existente |
-| Regla de negocio de un proyecto | ❌ No — eso va en `.ai/business-rules.md` |
+| Regla de negocio de un proyecto | ❌ No — eso va en `.abbia/business-rules.md` |
 
 ---
 
@@ -156,4 +156,4 @@ Ver [`docs/skill-system.md`](../docs/skill-system.md) para la guía completa del
 
 ---
 
-*Skills versión 1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Skills versión 1.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

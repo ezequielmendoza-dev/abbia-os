@@ -30,7 +30,7 @@
 
 ```mermaid
 flowchart TD
-    A[💡 Propuesta de cambio arquitectónico] --> B[Leer .ai/decisions.md y .ai/architecture.md]
+    A[💡 Propuesta de cambio arquitectónico] --> B[Leer .abbia/decisions.md y .abbia/architecture.md]
     B --> C[Tech Lead: Evaluar necesidad y riesgo]
     C --> D{¿Es necesario ahora?}
     D -->|No| E[Documentar como propuesta en decisions.md y pausar]
@@ -38,8 +38,8 @@ flowchart TD
     F --> G[Tech Lead: Revisión profunda del diseño]
     G --> H{¿Aprobado?}
     H -->|Rechazado| F
-    H -->|Aprobado| I[Actualizar .ai/architecture.md]
-    I --> J[Registrar ARCH-NNN en .ai/decisions.md]
+    H -->|Aprobado| I[Actualizar .abbia/architecture.md]
+    I --> J[Registrar ARCH-NNN en .abbia/decisions.md]
     J --> K[💻 Developer: Implementar en fases]
     K --> L[🧪 QA: Validar cada fase]
     L --> M{¿Regresiones?}
@@ -140,9 +140,9 @@ hotfix:
 
 Antes de proponer cualquier cambio arquitectónico:
 
-1. Leer `.ai/architecture.md` — entender el estado actual completo
-2. Leer `.ai/decisions.md` — entender por qué la arquitectura es como es
-3. Leer `.ai/context.md` — entender restricciones del proyecto
+1. Leer `.abbia/architecture.md` — entender el estado actual completo
+2. Leer `.abbia/decisions.md` — entender por qué la arquitectura es como es
+3. Leer `.abbia/context.md` — entender restricciones del proyecto
 4. Verificar si ya existe una propuesta similar en `decisions.md`
 
 **Preguntas que el Tech Lead debe responder:**
@@ -161,9 +161,9 @@ Antes de proponer cualquier cambio arquitectónico:
 ```
 Actúa como el agente Software Architect definido en roles/architect.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
-Arquitectura actual: [contenido de .ai/architecture.md]
-Historial de decisiones: [contenido de .ai/decisions.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
+Arquitectura actual: [contenido de .abbia/architecture.md]
+Historial de decisiones: [contenido de .abbia/decisions.md]
 
 Necesito diseñar un cambio arquitectónico:
 [descripción del cambio propuesto]
@@ -211,11 +211,11 @@ Esta revisión es más exigente que una revisión de feature normal. El Tech Lea
 
 **Antes de comenzar la implementación** (no después):
 
-1. **Actualizar `.ai/architecture.md`** con el estado objetivo del sistema:
+1. **Actualizar `.abbia/architecture.md`** con el estado objetivo del sistema:
    - Marcar claramente qué secciones están "en migración"
    - Describir el estado final objetivo
    
-2. **Registrar en `.ai/decisions.md`** con el ADR completo:
+2. **Registrar en `.abbia/decisions.md`** con el ADR completo:
 
 ```markdown
 ## ARCH-NNN: [Título de la decisión]
@@ -252,8 +252,8 @@ Los cambios arquitectónicos se implementan en **fases pequeñas y verificables*
 ```
 Actúa como el agente Senior Developer definido en roles/developer.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
-Arquitectura objetivo: [contenido de .ai/architecture.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
+Arquitectura objetivo: [contenido de .abbia/architecture.md]
 ADR de referencia: ARCH-NNN — [título]
 
 Implementar Fase [N] del cambio arquitectónico:
@@ -284,8 +284,8 @@ Después de cada fase implementada, QA verifica:
 
 Cuando todas las fases están completadas y en producción:
 
-1. **Actualizar `.ai/architecture.md`** para reflejar el estado final (remover las marcas de "en migración")
-2. **Actualizar el ADR en `.ai/decisions.md`** con el resultado real vs. el planeado
+1. **Actualizar `.abbia/architecture.md`** para reflejar el estado final (remover las marcas de "en migración")
+2. **Actualizar el ADR en `.abbia/decisions.md`** con el resultado real vs. el planeado
 3. **Actualizar `CHANGELOG.md`** con el cambio arquitectónico y la versión correspondiente
 4. **Comunicar al equipo** que el cambio está completo y qué implica para el trabajo futuro
 
@@ -297,13 +297,13 @@ Cuando todas las fases están completadas y en producción:
 - [ ] Tech Lead evaluó necesidad, timing y riesgo
 - [ ] Architect diseñó el cambio con ADR y plan de migración por fases
 - [ ] Tech Lead aprobó el diseño en revisión profunda
-- [ ] `.ai/architecture.md` actualizado con estado objetivo antes de implementar
-- [ ] `ARCH-NNN` registrado en `.ai/decisions.md`
+- [ ] `.abbia/architecture.md` actualizado con estado objetivo antes de implementar
+- [ ] `ARCH-NNN` registrado en `.abbia/decisions.md`
 - [ ] Implementación completada por fases
 - [ ] QA validó cada fase sin regresiones
 - [ ] Veredicto del Tech Lead: `APROBADO`
 - [ ] Todas las fases en producción y estables
-- [ ] `.ai/architecture.md` actualizado con estado final (sin marcas de migración)
+- [ ] `.abbia/architecture.md` actualizado con estado final (sin marcas de migración)
 - [ ] `CHANGELOG.md` actualizado
 
 ---
@@ -320,4 +320,4 @@ Cuando todas las fases están completadas y en producción:
 
 ---
 
-*Workflow architecture-change v1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow architecture-change v1.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

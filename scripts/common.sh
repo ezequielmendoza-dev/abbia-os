@@ -1,45 +1,140 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# common.sh — ai-agents OS Shared Utilities
+# common.sh — Abbia OS Shared Utilities
 # ==============================================================================
-# Archivo de utilidades compartidas para evitar duplicidad de código.
+# Archivo de utilidades compartidas para el framework Abbia OS (v4.0.0).
+# Soporta la estructura canónica .abbia/ y provee retrocompatibilidad con .stratum/ y .ai/.
 # ==============================================================================
 
 # Evitar doble inclusión
-if [ -n "${AI_AGENTS_COMMON_LOADED:-}" ]; then
+if [ -n "${ABBIA_COMMON_LOADED:-}" ]; then
     return 0
 fi
-AI_AGENTS_COMMON_LOADED=1
+ABBIA_COMMON_LOADED=1
+STRATUM_COMMON_LOADED=1   # retrocompatibilidad
+AI_AGENTS_COMMON_LOADED=1 # retrocompatibilidad
+
+# Metadatos de Abbia OS
+ABBIA_NAME="Abbia OS"
+ABBIA_VERSION="v4.0.0"
+ABBIA_MOTTO="Layered Context, Structured Memory, Autonomous Delivery"
+
+# Alias retrocompatibles
+STRATUM_NAME="$ABBIA_NAME"
+STRATUM_VERSION="$ABBIA_VERSION"
+STRATUM_MOTTO="$ABBIA_MOTTO"
 
 # Colores para la consola
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
+CYAN='\033[0;36m'
 NC='\033[0m' # Sin color
 
 # Rutas base comunes
-# Nota: Cada script debe definir SCRIPT_DIR antes de hacer source de este archivo
 if [ -z "${SCRIPT_DIR:-}" ]; then
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 fi
 
-AI_AGENTS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ABBIA_CORE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+STRATUM_CORE_ROOT="$ABBIA_CORE_ROOT" # alias retrocompatible
+AI_AGENTS_ROOT="$ABBIA_CORE_ROOT"   # alias retrocompatible
 CWD="$(pwd)"
 
+# Función para detectar la raíz del proyecto
+detect_project_root() {
+    local curr="$CWD"
+    while [ "$curr" != "/" ] && [ "$curr" != "." ]; do
+        if [ -d "$curr/.abbia" ] || [ -d "$curr/.stratum" ] || [ -d "$curr/.ai" ] || [ -f "$curr/.gitmodules" ]; then
+            echo "$curr"
+            return 0
+        fi
+        curr="$(dirname "$curr")"
+    done
+    echo "$CWD"
+}
+
+# Resolver rutas del entorno Abbia en el proyecto destino
+resolve_abbia_paths() {
+    local root="${1:-$(detect_project_root)}"
+    PROJECT_ROOT="$root"
+
+    if [ -d "$root/.abbia" ]; then
+        ABBIA_DIR="$root/.abbia"
+        ABBIA_IS_LEGACY=false
+    elif [ -d "$root/.stratum" ]; then
+        ABBIA_DIR="$root/.stratum"
+        ABBIA_IS_LEGACY=true
+    elif [ -d "$root/.ai" ]; then
+        ABBIA_DIR="$root/.ai"
+        ABBIA_IS_LEGACY=true
+    else
+        # Por defecto para inicializaciones nuevas
+        ABBIA_DIR="$root/.abbia"
+        ABBIA_IS_LEGACY=false
+    fi
+
+    # Submódulo / core
+    if [ -d "$ABBIA_DIR/core" ]; then
+        ABBIA_CORE="$ABBIA_DIR/core"
+    elif [ -d "$ABBIA_DIR/agents" ]; then
+        ABBIA_CORE="$ABBIA_DIR/agents"
+    else
+        ABBIA_CORE="$ABBIA_DIR/core"
+    fi
+
+    # Directorio de iniciativas (soporta initiatives y features)
+    if [ -d "$ABBIA_DIR/initiatives" ]; then
+        ABBIA_INITIATIVES_DIR="$ABBIA_DIR/initiatives"
+    elif [ -d "$ABBIA_DIR/features" ]; then
+        ABBIA_INITIATIVES_DIR="$ABBIA_DIR/features"
+    else
+        ABBIA_INITIATIVES_DIR="$ABBIA_DIR/initiatives"
+    fi
+
+    ABBIA_MEMORY_DIR="$ABBIA_DIR/memory"
+    ABBIA_METRICS_DIR="$ABBIA_DIR/metrics"
+    ABBIA_ARCHIVE_DIR="$ABBIA_DIR/archive"
+    ABBIA_SESSIONS_DIR="$ABBIA_DIR/sessions"
+
+    # Alias de compatibilidad para Stratum y AI-Agents
+    STRATUM_DIR="$ABBIA_DIR"
+    STRATUM_IS_LEGACY="$ABBIA_IS_LEGACY"
+    STRATUM_CORE="$ABBIA_CORE"
+    STRATUM_INITIATIVES_DIR="$ABBIA_INITIATIVES_DIR"
+    STRATUM_MEMORY_DIR="$ABBIA_MEMORY_DIR"
+    STRATUM_METRICS_DIR="$ABBIA_METRICS_DIR"
+    STRATUM_ARCHIVE_DIR="$ABBIA_ARCHIVE_DIR"
+    STRATUM_SESSIONS_DIR="$ABBIA_SESSIONS_DIR"
+
+    AI_DIR="$ABBIA_DIR"
+    FEATURES_DIR="$ABBIA_INITIATIVES_DIR"
+    ARCHIVE_DIR="$ABBIA_ARCHIVE_DIR"
+    MEM_DIR="$ABBIA_MEMORY_DIR"
+    METRICS_DIR="$ABBIA_METRICS_DIR"
+}
+
+# Alias funcional retrocompatible
+resolve_stratum_paths() {
+    resolve_abbia_paths "$@"
+}
+
+# Inicializar resolución de rutas por defecto
+resolve_abbia_paths "$CWD"
+
 # ---------- Iniciativas: tipos y patrón de nomenclatura ----------
-# Tipos de iniciativa soportados en .ai/features/ y .ai/archive/.
+# Tipos de iniciativa soportados en .abbia/initiatives/ y .abbia/archive/.
 # - FEAT: feature | BUG: corrección | AUDIT: auditoría/seguridad | REF: refactor
 INITIATIVE_TYPES="FEAT BUG AUDIT REF"
 
 # Patrón central de nomenclatura: <TIPO>-<ID 3 dígitos>-<slug>
-# Se construye dinámicamente desde INITIATIVE_TYPES.
 initiative_name_pattern() {
     printf '^(%s)-[0-9]{3}-[a-z0-9-]+$' "$(echo "$INITIATIVE_TYPES" | tr ' ' '|')"
 }
 
-# Devuelve los archivos obligatorios de inicio para un tipo (activos en .ai/features/).
+# Devuelve los archivos obligatorios de inicio para un tipo.
 # Uso: required_files_for <FEAT|BUG|AUDIT|REF>
 required_files_for() {
     case "$1" in
@@ -69,19 +164,23 @@ initiative_id_pattern() {
     printf '^(%s)-[0-9]{3}$' "$(echo "$INITIATIVE_TYPES" | tr ' ' '|')"
 }
 
-# Roles del pipeline que cierran fases y registran ejecuciones en metrics
-AGENT_ROLES="analyst ui-designer architect developer qa tech-lead devops"
+# Roles del pipeline de Abbia OS
+AGENT_ROLES="analyst ui-designer architect developer qa tech-lead devops skill-manager"
 
-# Re-genera .ai/memory/context-snapshot.md compactando workflow-log + knowledge-graph/decisions + patterns.
-# Uso: regenerate_context_snapshot <PROJECT_ROOT>  (destructivo: reescribe el snapshot)
+# Re-genera .abbia/memory/context-snapshot.md compactando workflow-log + knowledge-graph + patterns.
+# Uso: regenerate_context_snapshot <PROJECT_ROOT>
 regenerate_context_snapshot() {
-    local project_root="${1:-$CWD}"
-    local mem_dir="$project_root/.ai/memory"
+    local project_root="${1:-$(detect_project_root)}"
+    resolve_abbia_paths "$project_root"
+
+    local mem_dir="$ABBIA_MEMORY_DIR"
     local log="$mem_dir/workflow-log.md"
-    local kg_file="$project_root/.ai/knowledge-graph.yaml"
-    local dec_file="$project_root/.ai/decisions.md"
+    local kg_file="$ABBIA_DIR/knowledge-graph.yaml"
+    local dec_file="$ABBIA_DIR/decisions.md"
     local patterns="$mem_dir/patterns-learned.md"
     local out="$mem_dir/context-snapshot.md"
+
+    mkdir -p "$mem_dir"
 
     # --- Últimas entradas del workflow-log (hasta 8) ---
     local recent=""
@@ -118,7 +217,7 @@ regenerate_context_snapshot() {
         decisions="(sin decisiones registradas en knowledge-graph.yaml o decisions.md)"
     fi
 
-    # --- Patrones aprendidos (encabezados ##, sin el template Problema:) ---
+    # --- Patrones aprendidos ---
     local pats=""
     if [ -f "$patterns" ]; then
         pats=$(grep -E '^## ' "$patterns" | grep -v '^## Problema:' | tail -5 || true)
@@ -128,35 +227,32 @@ regenerate_context_snapshot() {
     fi
 
     cat > "$out" << EOF
-# Context Snapshot — Memoria Compactada
+# Context Snapshot — Abbia 3-Tier Memory
 
-> Generado automáticamente por finish-phase.sh al cerrar una fase.
+> Generado automáticamente por finish-phase.sh al culminar una fase en Abbia OS.
 > Compacta \`workflow-log.md\` + \`knowledge-graph.yaml\` + \`patterns-learned.md\` —
 > **no se edita a mano**. Máximo ~30-50 líneas.
 
-## Estado del proyecto
-
-Últimas fases cerradas:
+## Estado del proyecto (Últimas fases cerradas)
 
 $recent
 
-## Decisiones vigentes
+## Decisiones vigentes (Knowledge Graph)
 
 $decisions
 
-## Patrones relevantes
+## Patrones relevantes (Procedural Memory)
 
 $pats
 
 EOF
 
-    # --- Resumen de métricas (últimas sesiones de executions.yaml) ---
-    local metrics_file="$project_root/.ai/metrics/executions.yaml"
+    # --- Resumen de telemetría ---
+    local metrics_file="$ABBIA_METRICS_DIR/executions.yaml"
     if [ -f "$metrics_file" ]; then
         local total_sessions=0
         local null_tokens=0
         local measured_sessions=0
-        # Garantizar que son números enteros simples de una sola línea
         total_sessions=$( (grep -c '^\s*- ts:' "$metrics_file" 2>/dev/null || true) | tr -cd '0-9' )
         null_tokens=$( (grep -c '^\s*tokens_in: null' "$metrics_file" 2>/dev/null || true) | tr -cd '0-9' )
         total_sessions=${total_sessions:-0}
@@ -167,36 +263,21 @@ EOF
             warn_line="> ⚠ Hay ${null_tokens} sesión(es) sin telemetría real. Pasá \`--tokens-in <N> --tokens-out <N> --source measured\` al llamar \`finish-phase.sh\`."
         fi
         cat >> "$out" << EOF
-## Métricas de telemetría
+## Métricas de telemetría (Abbia Observability)
 
 - Total sesiones registradas: **$total_sessions**
 - Con tokens medidos: **$measured_sessions** | Sin tokens (null): **$null_tokens**
 $warn_line
 
-Referencia: docs/agent-metrics.md (framework ai-agents).
+Referencia: docs/agent-metrics.md (Abbia OS $ABBIA_VERSION).
 EOF
     else
         cat >> "$out" << EOF
-## Métricas de telemetría
+## Métricas de telemetría (Abbia Observability)
 
-> Sin datos en .ai/metrics/executions.yaml aún.
+> Sin datos en $ABBIA_METRICS_DIR/executions.yaml aún.
 
-Referencia: docs/agent-metrics.md (framework ai-agents).
+Referencia: docs/agent-metrics.md (Abbia OS $ABBIA_VERSION).
 EOF
-    fi
-}
-
-# Función para detectar la raíz del proyecto
-detect_project_root() {
-    if [ -d "$CWD/.ai" ]; then
-        echo "$CWD"
-    elif [ -d "$CWD/../.ai" ]; then
-        (cd "$CWD/.." && pwd)
-    elif [ -d "$CWD/../../.ai" ]; then
-        (cd "$CWD/../.." && pwd)
-    elif [ -d "$CWD/.ai/agents" ]; then
-        echo "$CWD"
-    else
-        echo "$CWD"
     fi
 }

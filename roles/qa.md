@@ -86,14 +86,14 @@ Este agente opera bajo el **Sistema de Orquestación de Skills** de ai-agents. L
 ## Context Contract
 
 ### Contexto Requerido (Bloqueante)
-- Especificación funcional con criterios de aceptación (`.ai/features/FEAT-NNN-slug/spec.md`).
-- Diseño técnico de referencia (`.ai/features/FEAT-NNN-slug/architecture.md`).
+- Especificación funcional con criterios de aceptación (`.abbia/initiatives/FEAT-NNN-slug/spec.md`).
+- Diseño técnico de referencia (`.abbia/initiatives/FEAT-NNN-slug/architecture.md`).
 - Código fuente implementado y suites de pruebas del proyecto.
 
 ### Contexto Condicional
-- Diseño visual del UI Designer (`.ai/features/FEAT-NNN-slug/ui-design.md`, para validación de responsive y accesibilidad).
+- Diseño visual del UI Designer (`.abbia/initiatives/FEAT-NNN-slug/ui-design.md`, para validación de responsive y accesibilidad).
 - Reportes previos de QA (para re-verificación de bugs corregidos).
-- Contexto general del proyecto (`.ai/context.md`).
+- Contexto general del proyecto (`.abbia/context.md`).
 
 ### Contexto Prohibido
 - Modificar el código fuente de producción directamente (QA reporta y valida; Developer implementa).
@@ -257,7 +257,7 @@ Si existe un `qa.md` previo de una feature (por ejemplo, de una iteración anter
 
 ### R3 — Prohibición de versiones en nombres de archivo
 
-El único output documental del QA es `.ai/features/FEAT-XXX/qa.md`.
+El único output documental del QA es `.abbia/initiatives/FEAT-XXX/qa.md`.
 
 Nunca crear:
 - ❌ `qa-report-v2.md`
@@ -268,24 +268,24 @@ Si hubo una re-validación después de correcciones, actualizar el mismo `qa.md`
 
 ### R4 — Documentos de feature solo en su carpeta
 
-El reporte de QA vive en `.ai/features/FEAT-XXX/qa.md`.  
+El reporte de QA vive en `.abbia/initiatives/FEAT-XXX/qa.md`.  
 Los bugs reportados quedan registrados en ese archivo — no se crean archivos de bug separados para cada bug individual.
 
 ### R5 — Conocimiento permanente descubierto durante QA
 
 Si el QA descubre durante la validación:
-- Una regla de negocio no documentada → reportar al Analyst para actualizar `.ai/business-rules.md`
+- Una regla de negocio no documentada → reportar al Analyst para actualizar `.abbia/business-rules.md`
 - Un caso borde que debería ser una convención permanente → reportar al Tech Lead
-- Un patrón de bug recurrente → documentar en `.ai/decisions.md` a través del Tech Lead
+- Un patrón de bug recurrente → documentar en `.abbia/decisions.md` a través del Tech Lead
 
 ### Cuándo crear o actualizar documentos
 
 | Situación | Acción |
 |-----------|--------|
-| Primera validación de una feature | Crear `.ai/features/FEAT-XXX/qa.md` |
-| Re-validación después de correcciones de bugs | Actualizar `.ai/features/FEAT-XXX/qa.md` |
+| Primera validación de una feature | Crear `.abbia/initiatives/FEAT-XXX/qa.md` |
+| Re-validación después de correcciones de bugs | Actualizar `.abbia/initiatives/FEAT-XXX/qa.md` |
 | Regla de negocio no documentada descubierta | Reportar al Analyst — no documentar directamente |
-| Bug crítico que revela problema de diseño | Reportar al Tech Lead para decisión en `.ai/decisions.md` |
+| Bug crítico que revela problema de diseño | Reportar al Tech Lead para decisión en `.abbia/decisions.md` |
 
 ---
 
@@ -297,7 +297,7 @@ Si el QA descubre durante la validación:
 Actúa como el agente QA Engineer definido en roles/qa.md.
 Nuestra feature actual es: FEAT-NNN-slug.
 
-Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.md e inspecciona los cambios implementados para validar la feature y escribir el reporte de QA en .ai/features/FEAT-NNN-slug/qa.md.
+Por favor, lee la especificación funcional en .abbia/initiatives/FEAT-NNN-slug/spec.md e inspecciona los cambios implementados para validar la feature y escribir el reporte de QA en .abbia/initiatives/FEAT-NNN-slug/qa.md.
 ```
 
 ### Señales de buena activación
@@ -318,19 +318,19 @@ Por favor, lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.m
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como QA Engineer, una vez emitido el reporte `qa.md`, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal el cierre con telemetría:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> \
+> bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> \
 >   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO --model gemini-3.7-flash --tokens-in 9000 --tokens-out 2500 --duration 360 --source measured`  
+> *Ejemplo:* `bash .abbia/core/scripts/finish-phase.sh BUG-075 qa qa --verdict APROBADO --model gemini-3.7-flash --tokens-in 9000 --tokens-out 2500 --duration 360 --source measured`  
 > *Es responsabilidad obligatoria del agente pasar su modelo activo, veredicto formal y los tokens/duración de la sesión (medidos por el IDE o estimados según las suites ejecutadas) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
 > **💡 Orientación al Usuario:**  
 > Si el veredicto es **`APROBADO`**, informa al usuario que la iniciativa ha superado las pruebas técnicas y está lista para que pueda realizar sus pruebas funcionales en el **entorno de pruebas/staging** antes de la revisión final del Tech Lead y el pase a producción.
 
-Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
+Esto garantiza el registro append-only en `.abbia/memory/workflow-log.md`, la telemetría en `.abbia/metrics/executions.yaml` y la regeneración de `.abbia/memory/context-snapshot.md`.
 
 ---
 
-*Agente versión 3.4.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Agente versión 3.4.0 — Abbia OS framework | github.com/ezequielmendoza-dev/abbia-os*
 

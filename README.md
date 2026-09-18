@@ -1,107 +1,100 @@
 <div align="center">
 
-# 🤖 ai-agents OS
-### *Framework de Specification-Driven Development (SDD) para Ingeniería Asistida por IA*
+# 🎛️ Abbia OS
+### *De la improvisación en el chat a la precisión de un estudio de ingeniería.*
+**Framework de Specification-Driven Development (SDD) & Orquestación Multi-Agente Asistida por IA**
 
-[![Version](https://img.shields.io/badge/version-v3.7.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v4.0.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-stable-success.svg?style=for-the-badge)](README.md)
 [![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-purple.svg?style=for-the-badge)](docs/sdd-philosophy.md)
 [![Memory](https://img.shields.io/badge/memory-3--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
+[![License](https://img.shields.io/badge/license-MIT-orange.svg?style=for-the-badge)](LICENSE)
 
-**Transforma tu IDE en un equipo de ingeniería de software autónomo y coordinado.**  
-*Documentos como fuente de verdad · Agentes especializados · Workflows con DAG · Memoria persistente · Grafo de decisiones · Dashboard visual*
+<br/>
+
+**Transforma tu IDE en un estudio de ingeniería de software autónomo, estructurado y auditable.**  
+*Layered Context · Structured Memory · Autonomous Delivery · Artefactos como verdad · Workflows con DAG · Visualizador web*
 
 ---
 
 </div>
 
-## 📑 Tabla de Contenidos
+## 💡 ¿Por qué Abbia OS?
 
-1. [✨ ¿Qué es ai-agents OS?](#-qué-es-ai-agents-os)
-2. [⚡ Quick Start (3 Minutos)](#-quick-start-3-minutos)
-3. [🏛️ Arquitectura del Sistema](#️-arquitectura-del-sistema)
-   - [👥 8 Agentes Especializados & Context Contracts](#-8-agentes-especializados--context-contracts)
-   - [🧩 15 Framework Skills](#-15-framework-skills)
-   - [🔄 5 Workflows con DAG](#-5-workflows-con-dag)
-   - [🧠 Memoria Persistente (3-Tier Persistent Memory)](#-memoria-persistente-3-tier-persistent-memory)
-   - [🕸️ Knowledge Graph de Decisiones (ADR)](#️-knowledge-graph-de-decisiones-adr)
-   - [📦 Sistema de Archivado Automático e Interactivo](#-sistema-de-archivado-automático-e-interactivo)
-   - [📊 Visualizador Interactivo (Dashboard Web)](#-visualizador-interactivo-dashboard-web)
-   - [🏆 Proyecto de Referencia Canónico (Golden Project)](#-proyecto-de-referencia-canónico-golden-project)
-4. [🛠️ Suite de Automatización CLI & Tests](#️-suite-de-automatización-cli--tests)
-5. [📂 Estructura Documental y Convenciones](#-estructura-documental-y-convenciones)
-6. [💡 Filosofía y Principios SDD](#-filosofía-y-principios-sdd)
-7. [📚 Documentación del Repositorio](#-documentación-del-repositorio)
+Desarrollar software complejo con IA hoy suele sentirse como una sesión caótica de improvisación:
+* 😵 **Context Drift & Amnesia:** El chat olvida decisiones tomadas 10 mensajes atrás.
+* 🌪️ **El Chatbot "Sabelotodo":** Un único prompt gigante intenta ser analista, arquitecto, frontend, backend y QA al mismo tiempo, fallando en los detalles críticos.
+* 💣 **Refactors a Ciegas:** La IA reescribe código rompiendo contratos previos e invariantes de negocio no documentadas.
+
+### 🎙️ La Filosofía del Estudio de Grabación
+
+En los legendarios estudios de grabación (como *Abbey Road*, de donde nace nuestro nombre y donde bandas icónicas como *Pink Floyd* y *The Beatles* crearon sus obras maestras), **nada queda al azar**:
+1. Cada instrumento se graba en su propia **pista aislada** con micrófonos dedicados (*Agentes con roles y contextos acotados*).
+2. La cinta matriz y las notas de sesión registran cada toma (*Memoria persistente en 3 capas*).
+3. La mezcla y la masterización validan que cada frecuencia esté en su lugar antes de ir al vinilo (*QA adversarial y Quality Gates*).
+
+**Abbia OS** traslada esta disciplina al desarrollo de software con IA: sustituimos los hilos de chat efímeros por **artefactos versionados en Git**, **contratos de contexto claros** y **flujos DAG deterministas**.
 
 ---
 
-## ✨ ¿Qué es ai-agents OS?
+## ⚡ Quick Start (En 3 Minutos)
 
-`ai-agents` es un **sistema operativo de desarrollo asistido por IA** diseñado para elevar el desarrollo de software con modelos de lenguaje a un estándar de ingeniería riguroso y profesional.
+### 1️⃣ Agrega Abbia OS como Git Submodule
+En la raíz del repositorio de tu aplicación:
+```bash
+git submodule add https://github.com/ezequielmendoza-dev/abbia-os.git .abbia/core
+git commit -m "chore: integrate Abbia OS core submodule"
+```
+
+### 2️⃣ Inicializa el entorno e integra tu IDE
+```bash
+bash .abbia/core/scripts/setup-ide.sh
+```
+> 🪄 *El script creará automáticamente el directorio `.abbia/`, sembrará la memoria persistente, instalará el ejecutable `./abbia` y configurará las reglas de tu IDE favorito (**Cursor, Claude Code, Windsurf, Cline o GitHub Copilot**).*
+
+### 3️⃣ Crea tu primera iniciativa
+```bash
+# Crear estructura de una nueva feature
+./abbia new FEAT 001 autenticacion-mfa
+
+# Abrir el Dashboard interactivo con telemetría y grafo en tiempo real
+./abbia dashboard
+```
+
+---
+
+## 🏛️ ¿Cómo Funciona Abbia OS?
 
 ```mermaid
 flowchart LR
-    A["💡 Requerimiento / Idea"] --> B["📝 Spec-Driven Discovery"]
-    B --> C["🏗️ Arquitectura & ADRs"]
-    C --> D["💻 Implementación Enfocada"]
-    D --> E["🧪 QA & Self-Healing Loop"]
-    E --> F["🚀 Deploy & Archivado Seguro"]
+    A["💡 Requerimiento / Idea"] --> B["📝 Spec Discovery\n(Analyst)"]
+    B --> C["🎨 UI & Tokens\n(UI Designer)"]
+    C --> D["🏗️ Arquitectura & ADRs\n(Architect)"]
+    D --> E["💻 Código & Tests\n(Developer)"]
+    E --> F["🧪 QA & Self-Healing\n(QA Engineer)"]
+    F --> G["🚀 Deploy & Archivado\n(DevOps & Sync)"]
 ```
 
-* **No es un chatbot monolítico:** Convierte el IDE en un equipo coordinado con roles especializados (Analyst, UI Designer, Architect, Developer, QA, Tech Lead, DevOps, Skill Manager).
-* **Documentos > Conversación:** El conocimiento vive en artefactos inmutables y trazables (`spec.md`, `architecture.md`, `qa.md`), no en chats efímeros.
-* **Memoria Persistente entre Sesiones:** Nunca repite explicaciones ni pierde contexto gracias al sistema `Capture → Compact → Recall`.
-* **Grafo de Decisiones Conectado:** Modela relaciones arquitectónicas (`depends_on`, `supersedes`, `conflicts_with`) para prevenir deuda técnica.
+### 👥 8 Agentes Especializados (Tus pistas de producción)
 
----
+Cada agente cuenta con un rol definido, herramientas específicas y un **Context Contract** que garantiza que solo consuma la información que necesita, maximizando la precisión del modelo y minimizando el gasto de tokens.
 
-## ⚡ Quick Start (3 Minutos)
-
-### 1️⃣ Agregar como Git Submodule en tu proyecto
-```bash
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
-git commit -m "chore: add ai-agents OS submodule"
-```
-
-### 2️⃣ Inicializar entorno y reglas de IDE
-```bash
-bash .ai/agents/scripts/setup-ide.sh
-```
-*El script interactivo creará `.ai/`, generará los seeds de memoria/métricas/grafo y configurará tu IDE (Cursor, Claude Code, Windsurf, Roo-Code/Cline o Copilot).*
-
-### 3️⃣ Crear y desarrollar tu primera iniciativa
-```bash
-# Crear estructura
-bash .ai/agents/scripts/new-initiative.sh FEAT 001 login-mfa
-
-# Abrir el Dashboard interactivo
-bash .ai/agents/scripts/dashboard.sh
-```
-
----
-
-## 🏛️ Arquitectura del Sistema
-
-### 👥 8 Agentes Especializados & Context Contracts
-
-Cada agente opera bajo un rol estricto con un **Context Contract** formal (Contexto Requerido, Condicional y Prohibido), consumiendo los artefactos de la fase previa y generando contratos verificables:
-
-| Rol | Archivo | Responsabilidad Principal | Artefacto de Salida |
+| Rol | Definición | Responsabilidad Principal | Artefacto de Salida |
 | :--- | :--- | :--- | :--- |
-| 🧙‍♂️ **Skill Manager** | [`roles/skill-manager.md`](roles/skill-manager.md) | Capability & Context Advisor, resolución de skills y memoria | `context-snapshot.md` |
-| 📋 **Product Analyst** | [`roles/analyst.md`](roles/analyst.md) | Requerimientos, reglas de negocio y discovery | `spec.md`, `discovery.md` |
+| 🧙‍♂️ **Skill Manager** | [`roles/skill-manager.md`](roles/skill-manager.md) | Capability Advisor, resolución de skills y memoria técnica | `context-snapshot.md` |
+| 📋 **Product Analyst** | [`roles/analyst.md`](roles/analyst.md) | Discovery, especificación funcional y casos de borde | `spec.md`, `discovery.md` |
 | 🎨 **UI Designer** | [`roles/ui-designer.md`](roles/ui-designer.md) | Tokens de diseño, maquetas UI, estados y a11y | `ui-design.md` |
-| 🏗️ **Software Architect** | [`roles/architect.md`](roles/architect.md) | Diseño técnico, esquemas de BD y ADRs | `architecture.md`, `decision.md` |
+| 🏗️ **Software Architect** | [`roles/architect.md`](roles/architect.md) | Diseño técnico, esquemas de BD y ADRs vinculados | `architecture.md`, `decision.md` |
 | 💻 **Senior Developer** | [`roles/developer.md`](roles/developer.md) | Implementación de código y tests automatizados | Código + Test Suites |
-| 🧪 **QA Engineer** | [`roles/qa.md`](roles/qa.md) | Validación técnica, regresión y Self-Healing loop | `qa.md` (`APROBADO`/`RECHAZADO`) |
+| 🧪 **QA Engineer** | [`roles/qa.md`](roles/qa.md) | Validación adversarial, tests E2E y Self-Healing loop | `qa.md` (`APROBADO`/`RECHAZADO`) |
 | 🛡️ **Tech Lead** | [`roles/tech-lead.md`](roles/tech-lead.md) | Code review, supervisión, staging gate y hand-off | Veredicto Final & Merge |
 | 🚀 **DevOps Engineer** | [`roles/devops.md`](roles/devops.md) | CI/CD, infraestructura, release y deployment | Pipelines, Despliegue |
 
 ---
 
-### 🧩 15 Framework Skills
+### 🧩 15 Framework Skills (Metodologías Plug & Play)
 
-Metodologías de ingeniería listas para ser activadas dinámicamente por cualquier rol:
+Metodologías de ingeniería listas para ser activadas dinámicamente según la tarea:
 
 ```
 skills/
@@ -112,210 +105,126 @@ skills/
 └── workflow/       ➔ release-readiness · devops-pipeline
 ```
 
-> **Descubrimiento Externo:** El Skill Manager descubre dinámicamente skills instaladas por el usuario, servidores MCP y catálogos globales como [skills.sh](https://www.skills.sh/).
+---
+
+### 🧠 Abbia 3-Tier Memory (Memoria Persistente)
+
+La memoria del proyecto no se pierde entre chats o reinicios de IDE:
+
+1. **Tier 1 — Memoria Episódica (`.abbia/memory/workflow-log.md`):** Registro cronológico e inmutable de cada fase completada, qué agente intervino y qué archivos cambió.
+2. **Tier 2 — Memoria Compactada (`.abbia/memory/context-snapshot.md`):** Resumen ejecutivo regenerado automáticamente con el estado actual, iniciativas activas y bloqueos.
+3. **Tier 3 — Memoria Semántica (`.abbia/knowledge-graph.yaml`):** Grafo de Decisiones de Arquitectura (ADRs) con dependencias, conflictos y reemplazos.
 
 ---
 
-### 🔄 5 Workflows con DAG (Directed Acyclic Graph)
+### 🛠️ Suite de Comandos CLI (`./abbia`)
 
-Flujos estructurados con dependencias formales, gates de calidad y bucles de autocorrección:
-
-| Workflow | Propósito | Secuencia de Agentes |
-| :--- | :--- | :--- |
-| 🚀 [`new-feature.md`](workflows/new-feature.md) | Desarrollo end-to-end de nueva funcionalidad | `Analyst → UI → Architect → Tech Lead → Dev → QA → Tech Lead/DevOps` |
-| 🐛 [`bug-fix.md`](workflows/bug-fix.md) | Diagnóstico y corrección por severidad | `Triage → Analyst/Architect/UI → Dev → QA (Self-Healing Loop)` |
-| 🧹 [`refactor.md`](workflows/refactor.md) | Reestructuración de código sin alterar comportamiento | `Architect → Developer → QA (Regression Tests)` |
-| 📦 [`release.md`](workflows/release.md) | Despliegue controlado a producción con rollback | `Tech Lead → DevOps → QA Post-Deploy` |
-| 🏛️ [`architecture-change.md`](workflows/architecture-change.md) | Modificación estructural con ADR obligatorio | `Architect → Tech Lead → Knowledge Graph Sync` |
-
-**Modos de Ejecución:**
-* 🟢 **Rápido:** Trunca contexto para tareas menores y cambios cosméticos.
-* 🟡 **Estándar (Default):** Flujo completo con validación rigurosa de artefactos.
-* 🔴 **Profundo:** Revisión adversarial, auditoría de seguridad y múltiples pasadas de QA.
-
----
-
-### 🧠 Memoria Persistente (3-Tier Persistent Memory)
-
-Evita que los agentes olviden decisiones o re-expliquen conceptos entre sesiones con una arquitectura limpia de 3 archivos:
-
-```
-.ai/memory/
-├── workflow-log.md         ← Memoria Episódica: Log append-only cronológico de ejecuciones
-├── patterns-learned.md     ← Memoria Procedimental: Lecciones aprendidas y buenas prácticas
-└── context-snapshot.md     ← Memoria Compactada: Resumen ejecutivo generado automáticamente
-```
-
-> **Decisiones Arquitectónicas Consolidadas:** Las decisiones ya no se duplican en catálogos manuales intermedios; residen directamente en `.ai/knowledge-graph.yaml` (grafo estructurado de relaciones) y `.ai/decisions.md` (registro ADR en prosa técnica), sincronizándose automáticamente hacia `context-snapshot.md`.
-
----
-
-### 🕸️ Knowledge Graph de Decisiones (ADR)
-
-Indexa las decisiones arquitectónicas (`.ai/knowledge-graph.yaml`) como un grafo de relaciones tipadas:
-
-```yaml
-# .ai/knowledge-graph.yaml
-nodes:
-  - id: ARCH-115
-    title: "Bloqueo de Acceso por Reserva Fuera de Horario"
-    status: ACTIVE
-    depends_on: [ARCH-103, ARCH-112]
-    supersedes: []
-    conflicts_with: []
-```
-
-* 🔵 **`depends_on`**: Relación de dependencia directa.
-* 🟡 **`supersedes`**: Decisión que reemplaza y vuelve obsoleta a una anterior.
-* 🔴 **`conflicts_with`**: Incompatibilidad condicionada.
-* 🌐 **`related`**: Decisiones complementarias en el mismo dominio.
-
----
-
-### 📦 Sistema de Archivado Automático e Interactivo (v3.4.0)
-
-Garantiza la higiene del contexto y una mesa de trabajo limpia, moviendo iniciativas completadas desde `.ai/features/` a `.ai/archive/`:
-
-* 🛡️ **Gate de Calidad Inquebrantable:** Verifica que `qa.md` tenga veredicto `APROBADO`.
-* 🔗 **Reconciliación de Rutas en el Grafo:** Actualiza automáticamente `ref: features/...` $\rightarrow$ `ref: archive/...` en `knowledge-graph.yaml`.
-* 📝 **Registro de Memoria:** Agrega el cierre a `workflow-log.md` y regenera `context-snapshot.md`.
-* 🧪 **Protocolo Staging Interactivo:** El Tech Lead / QA consulta al usuario para validar en el entorno de pruebas antes de autorizar el archivado definitivo.
+Abbia OS incluye un CLI wrapper listo para usar en tu terminal:
 
 ```bash
-# Archivar una iniciativa individualmente
-bash .ai/agents/scripts/archive-initiative.sh FEAT-113
+# Iniciar una iniciativa (feature, bug, audit, refactor)
+./abbia new FEAT 042 checkout-stripe
 
-# Cerrar fase y archivar en un solo comando
-bash .ai/agents/scripts/finish-phase.sh FEAT-113 approval tech-lead --verdict APROBADO --archive
+# Finalizar fase y registrar telemetría (tokens, duración, snapshot)
+./abbia finish FEAT-042 spec analyst --model gpt-4o --tokens-in 1200 --tokens-out 800
 
-# Auto-archivar en lote todas las iniciativas aprobadas
-bash .ai/agents/scripts/sync-initiatives.sh --archive-approved
+# Archivar iniciativa completada a .abbia/archive/ tras QA aprobado
+./abbia archive FEAT-042
+
+# Sincronizar y auto-reparar métricas y grafo
+./abbia sync --fix
+
+# Validar conformidad documental del proyecto
+./abbia validate
+
+# Lanzar el visualizador web interactivo
+./abbia dashboard
+
+# Actualizar el framework a la última versión
+./abbia update
+
+# Migrar proyecto existente desde .ai/ o .stratum/
+./abbia migrate
 ```
 
 ---
 
-### 📊 Visualizador Interactivo (Dashboard Web Autónomo v3.5.1)
+### 📊 Dashboard Interactivo (Visualizador Web)
 
-Explora todo el ecosistema de tu proyecto en una aplicación web interactiva local de ancho completo:
-
-```bash
-bash .ai/agents/scripts/dashboard.sh
-```
-
-* 🏢 **Tab Proyecto:** Visor completo de identidad, objetivos de negocio, actores/roles, stack y ficha técnica.
-* 📁 **Tab Iniciativas:** Matriz de features/bugs con buscador, filtros por estado (`Listas para Archivar`, `Activas`, `Archivadas`), filtros de entorno (`💻 Local`, `🌐 Staging`, `🚀 Producción`), visualizador de artefactos SDD, modelo utilizado y rama de Git.
-* 🕸️ **Tab Grafo ADR:** Visualización 2D interactiva (Vis.js) con física de nodos, herramientas de zoom, búsqueda y panel de detalle.
-* 📜 **Tab Reglas:** Reglas de negocio e invariantes del sistema (`business-rules.md`).
-* 🧠 **Tab Memoria:** Snapshot ejecutivo, log episódico, catálogo de decisiones y patrones aprendidos.
-* 📈 **Tab Telemetría & Observabilidad (AgentOps / LLMOps):** 
-  - **4 Gráficos Interactivos (2x2):** Tokens por Rol, Tokens por Fase, Consumo por Modelo de IA y Distribución por Entorno.
-  - **🌐 OpenRouter Live Pricing API (Cero Hardcoding):** Consulta en tiempo real más de 440 modelos para tarificar tokens en USD al día.
-  - **🔍 Modal de Transparencia Metodológica:** Fórmula matemática, calculadora interactiva de tarifas y aclaración de suscripciones planas vs pay-as-you-go.
-* ℹ️ **Modal About:** Documentación embebida del framework accesible desde el navbar.
+Con un simple `./abbia dashboard`, abre una aplicación visual en tu navegador para auditar tu proyecto:
+* 📈 **Telemetría & FinOps:** Gráficos 2x2 de consumo de tokens, costos en USD estimados (OpenRouter API) y duración por fase/modelo.
+* 🕸️ **Grafo 2D Interactivo:** Visualización física de decisiones de arquitectura y sus dependencias (Vis.js).
+* 📋 **Matriz de Iniciativas:** Estado en vivo de especificaciones, diseños y veredictos de QA.
+* 📜 **Reglas de Negocio:** Consulta centralizada de invariantes del sistema.
 
 ---
 
-### 🏆 Proyecto de Referencia Canónico (Golden Project)
-
-El repositorio incluye un proyecto de ejemplo completamente funcional y normativo en [`examples/golden-project/`](examples/golden-project/):
-* Estructura `.ai/` 100% canónica y validada.
-* Iniciativa archivada de referencia (`.ai/archive/FEAT-001-user-auth/`) con todos sus artefactos SDD (`spec.md`, `ui-design.md`, `architecture.md`, `decision.md`, `qa.md`).
-* Iniciativa activa en curso (`.ai/features/FEAT-002-order-checkout/`) ilustrando el ciclo de vida real.
-* Configuración estricta de `.gitignore` y `.gitattributes` (`merge=union`).
-* Sirve como fixture permanente de pruebas automatizadas y modelo de integración para nuevos proyectos.
-
----
-
-## 🛠️ Suite de Automatización CLI & Tests
-
-Todos los scripts residen en `.ai/agents/scripts/` (y la suite de pruebas en `tests/`) para estandarizar y validar el ciclo de vida del proyecto:
-
-| Comando | Propósito | Ejemplo de Uso |
-| :--- | :--- | :--- |
-| **`setup-ide.sh`** | Inicializa `.ai/`, memoria, métricas, KG y reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
-| **`update-ai-agents.sh`** | Actualiza el framework (submodule + setup + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
-| **`new-initiative.sh`** | Bootstrap de nueva iniciativa (`FEAT`, `BUG`, `AUDIT`, `REF`) | `bash .ai/agents/scripts/new-initiative.sh FEAT 042 pagos-stripe` |
-| **`finish-phase.sh`** | Cierre formal de fase (registra memory, metrics multidimensionales, env, branch y snapshot) | `bash .ai/agents/scripts/finish-phase.sh FEAT-042 qa qa --verdict APROBADO --model claude-3-7-sonnet --env staging` |
-| **`archive-initiative.sh`** | Archiva una iniciativa a `.ai/archive/` con validación QA | `bash .ai/agents/scripts/archive-initiative.sh FEAT-042` |
-| **`sync-initiatives.sh`** | Reconcilia, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .ai/agents/scripts/sync-initiatives.sh --fix --archive-approved` |
-| **`validate-project.sh`** | Auditoría documental y chequeo de conformidad del framework | `bash .ai/agents/scripts/validate-project.sh` |
-| **`dashboard.sh`** | Genera y abre el visualizador interactivo (`dashboard.html`) | `bash .ai/agents/scripts/dashboard.sh` |
-| **`test-runner.sh`** | Suite integral de 26+ pruebas automatizadas para el framework | `bash tests/test-runner.sh` |
-
----
-
-## 📂 Estructura Documental y Convenciones
+### 📂 Anatomía de un Proyecto con Abbia OS
 
 ```
 mi-proyecto/
-├── .ai/
-│   ├── agents/                  ← Submódulo Git (ai-agents framework)
-│   ├── context.md               ← Identidad, stack, convenciones y registro de IDs
+├── .abbia/
+│   ├── core/                    ← Submódulo Git (Abbia OS Framework)
+│   ├── context.md               ← Identidad, stack tecnológico y registro de IDs
 │   ├── business-rules.md        ← Reglas de negocio e invariantes permanentes
-│   ├── architecture.md          ← Arquitectura actual del sistema en producción
+│   ├── architecture.md          ← Arquitectura viva del sistema
 │   ├── decisions.md             ← Registro cronológico de ADRs
-│   ├── knowledge-graph.yaml     ← Grafo ligero de decisiones arquitectónicas
+│   ├── knowledge-graph.yaml     ← Grafo de decisiones arquitectónicas
 │   ├── glossary.md              ← Glosario y términos del dominio
-│   ├── memory/                  ← Memoria persistente del pipeline
+│   ├── memory/                  ← Memoria en 3 Capas
 │   │   ├── workflow-log.md      ← Log episódico de sesiones
 │   │   ├── patterns-learned.md  ← Lecciones y patrones aprendidos
 │   │   └── context-snapshot.md  ← Snapshot compactado de contexto
-│   ├── metrics/                 ← Métricas y telemetría de tokens
-│   │   └── executions.yaml      ← Registro de ejecuciones
-│   ├── features/                ← Iniciativas activas en desarrollo (FEAT-XXX, BUG-XXX)
-│   ├── archive/                 ← Iniciativas cerradas y en producción (Read-Only)
-│   └── dashboard.html           ← Dashboard visual interactivo generado
+│   ├── metrics/                 ← Telemetría y observabilidad
+│   │   └── executions.yaml      ← Registro de ejecuciones y costos
+│   ├── initiatives/             ← Iniciativas activas (FEAT-XXX, BUG-XXX)
+│   ├── archive/                 ← Iniciativas finalizadas en producción
+│   └── dashboard.html           ← Dashboard visual interactivo
+├── abbia                        ← CLI wrapper ejecutable
 ├── AGENTS.md                    ← Fuente de verdad para agentes en el proyecto
-└── .cursorrules / CLAUDE.md     ← Reglas de configuración según tu IDE
+└── .cursorrules / CLAUDE.md     ← Reglas según tu IDE preferido
 ```
 
-> 💡 **¿Buscas un ejemplo completo?** Revisa [`examples/golden-project/`](examples/golden-project/) para ver un proyecto real completamente documentado y validado.
+---
 
-### 📋 Las 6 Reglas Documentales (R1-R6)
+## 🏆 Proyecto de Referencia Canónico (Golden Project)
 
-1. **R1:** Antes de crear un documento, verificar si existe uno equivalente para actualizar.
-2. **R2:** Priorizar la **actualización** sobre la creación.
-3. **R3:** Nunca crear versiones paralelas (`spec-v2.md`). Modificar el documento canónico.
-4. **R4:** Los cambios estructurales deben reflejarse en `CHANGELOG.md` y documentos globales.
-5. **R5:** Los documentos representan el **estado actual**, no el histórico.
-6. **R6:** **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase, el agente debe ejecutar siempre `bash .ai/agents/scripts/finish-phase.sh` con sus métricas de telemetría antes de finalizar su turno.
-
-### 🌿 Higiene de Git y Trabajo Concurrente Multi-Rama
-
-Para equipos con múltiples desarrolladores trabajando en ramas paralelas:
-* **Archivos Derivados y Caché Local en `.gitignore`:** `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml` y `.ai/sessions/` se generan automáticamente bajo demanda y no deben commitearse.
-* **Logs Append-Only con `merge=union` en `.gitattributes`:** Los archivos `.ai/memory/workflow-log.md` y `.ai/metrics/executions.yaml` se fusionan automáticamente sin generar conflictos.
-* **Reconciliación Post-Merge:** Tras fusionar ramas (`merge` o `pull`), ejecutar `bash .ai/agents/scripts/sync-initiatives.sh` para reconstruir agregados y snapshots al instante.
+Explora [`examples/golden-project/`](examples/golden-project/) para ver un proyecto real configurado con Abbia OS:
+* Incluye iniciativas en curso (`.abbia/initiatives/FEAT-002-order-checkout/`).
+* Incluye iniciativas cerradas en producción (`.abbia/archive/FEAT-001-user-auth/`).
+* Grafo de arquitectura interconectado y telemetría de muestra.
 
 ---
 
-## 💡 Filosofía y Principios SDD
+## 🔄 ¿Vienes de `.ai/` o versiones previas?
 
-* **Artefactos como Fuente de Verdad:** Las decisiones se escriben en documentos formales, no en el historial de chat.
-* **Discovery antes de Spec:** Se investiga el problema antes de redactar especificaciones.
-* **Localization Step:** El Developer delimita con exactitud los archivos a intervenir antes de escribir código.
-* **Economía de Contexto:** Cada agente recibe únicamente los documentos pertinentes a su rol.
+¡Migrar es facilísimo y 100% seguro! Revisa nuestra [Guía de Migración a Abbia OS v4.0.0](docs/migration-guide-v4.md) o simplemente ejecuta:
+```bash
+./abbia migrate
+```
 
 ---
 
-## 📚 Documentación del Repositorio
+## 📚 Documentación Técnica Detallada
 
-| Guía | Propósito |
+| Guía | Tema |
 | :--- | :--- |
+| 📖 [`docs/migration-guide-v4.md`](docs/migration-guide-v4.md) | Guía paso a paso para migrar a Abbia OS v4.0.0 |
 | 📖 [`docs/sdd-philosophy.md`](docs/sdd-philosophy.md) | Modelo mental de Specification-Driven Development |
-| 🧠 [`docs/workflow-memory.md`](docs/workflow-memory.md) | Sistema de Memoria Persistente en 4 capas |
+| 🧠 [`docs/workflow-memory.md`](docs/workflow-memory.md) | Arquitectura de la Memoria Persistente en 3 capas |
 | 🔄 [`docs/workflow-dag.md`](docs/workflow-dag.md) | Definición y modos de ejecución de workflows con DAG |
 | 🕸️ [`docs/knowledge-graph.md`](docs/knowledge-graph.md) | Modelado del Grafo de Decisiones Arquitectónicas |
-| 📊 [`docs/agent-metrics.md`](docs/agent-metrics.md) | Telemetría de tokens, duración y costos por fase |
+| 📊 [`docs/agent-metrics.md`](docs/agent-metrics.md) | Telemetría de tokens, duración y observabilidad FinOps |
 | 🧩 [`docs/skill-discovery.md`](docs/skill-discovery.md) | Descubrimiento, resolución y aislamiento de skills |
-| 🔌 [`docs/project-integration.md`](docs/project-integration.md) | Guía de instalación, migración y submódulos Git |
+| 🔌 [`docs/project-integration.md`](docs/project-integration.md) | Integración con submódulos Git en proyectos destino |
 | 📝 [`roles/prompt-guide.md`](roles/prompt-guide.md) | Guía de prompts efectivos por rol |
 
 ---
 
 <div align="center">
 
-**ai-agents OS** · *Desarrollado para pensar en grande, empezar en pequeño y escalar con orden y disciplina.*  
-Distribuido bajo licencia MIT.
+**Abbia OS** · *Layered Context, Structured Memory, Autonomous Delivery.*  
+Construido con pasión para llevar el desarrollo con IA al siguiente nivel de calidad.  
+Distribuido bajo licencia [MIT](LICENSE).
 
 </div>

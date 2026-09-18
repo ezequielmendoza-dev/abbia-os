@@ -84,11 +84,11 @@ Este agente opera bajo el **Sistema de Orquestación de Skills** de ai-agents. L
 ## Context Contract
 
 ### Contexto Requerido (Bloqueante)
-- Contexto general del proyecto (`.ai/context.md`) — stack tecnológico, infraestructura y entornos.
+- Contexto general del proyecto (`.abbia/context.md`) — stack tecnológico, infraestructura y entornos.
 - Veredicto de aprobación de QA (`qa.md` con veredicto `APROBADO` o `PASS`) antes de autorizar pases a producción.
 
 ### Contexto Condicional
-- Diseño técnico de infraestructura (`.ai/features/FEAT-NNN-slug/architecture.md`).
+- Diseño técnico de infraestructura (`.abbia/initiatives/FEAT-NNN-slug/architecture.md`).
 - Configuraciones existentes de CI/CD (GitHub Actions, Dockerfiles, Terraform).
 - Reporte de incidentes o logs de ejecución.
 
@@ -216,9 +216,9 @@ El DevOps **no debe crear**:
 - ❌ Documentos de arquitectura de software
 - ❌ Documentos de QA
 
-### R5 — `.ai/context.md` como fuente de verdad de infraestructura
+### R5 — `.abbia/context.md` como fuente de verdad de infraestructura
 
-La sección de infraestructura (servicios, entornos, variables de entorno clave) vive en `.ai/context.md`.  
+La sección de infraestructura (servicios, entornos, variables de entorno clave) vive en `.abbia/context.md`.  
 Si el DevOps detecta que esa información está desactualizada, debe indicarlo al Tech Lead para actualizarlo.
 
 ### Cuándo crear o actualizar documentos
@@ -226,9 +226,9 @@ Si el DevOps detecta que esa información está desactualizada, debe indicarlo a
 | Situación | Acción |
 |-----------|--------|
 | Nuevo pipeline de CI/CD | Crear config en el repo del proyecto (no en `.ai/`) |
-| Cambio en variables de entorno | Actualizar la sección de infraestructura en `.ai/context.md` |
+| Cambio en variables de entorno | Actualizar la sección de infraestructura en `.abbia/context.md` |
 | Plan de rollback de un release | Documentar en el output del agente DevOps |
-| Nuevo entorno configurado | Actualizar `.ai/context.md` con los detalles del entorno |
+| Nuevo entorno configurado | Actualizar `.abbia/context.md` con los detalles del entorno |
 
 ---
 
@@ -262,7 +262,7 @@ Tarea:
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL:**  
 > Como DevOps Engineer, tras completar el despliegue a producción o validación de infraestructura, **NUNCA finalices tu respuesta** sin haber ejecutado en terminal el cierre con telemetría:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
+> bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
 >   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
@@ -270,13 +270,13 @@ Tarea:
 Una vez completado el deployment a producción y verificado el health check del sistema:
 
 ```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
+bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --archive \
   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> --duration <SEGUNDOS> --source measured
 ```
 *Es responsabilidad obligatoria del agente pasar su modelo activo, veredicto formal y los tokens/duración de la sesión (medidos por el IDE o estimados según las operaciones ejecutadas) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
-El flag `--archive` ejecuta [`scripts/archive-initiative.sh`](../scripts/archive-initiative.sh), moviendo la iniciativa a `.ai/archive/`, actualizando los paths en `.ai/knowledge-graph.yaml`, registrando en `.ai/memory/workflow-log.md` y regenerando `.ai/memory/context-snapshot.md`.
+El flag `--archive` ejecuta [`scripts/archive-initiative.sh`](../scripts/archive-initiative.sh), moviendo la iniciativa a `.abbia/archive/`, actualizando los paths en `.abbia/knowledge-graph.yaml`, registrando en `.abbia/memory/workflow-log.md` y regenerando `.abbia/memory/context-snapshot.md`.
 
 ---
 
-*Agente versión 3.4.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Agente versión 3.4.0 — Abbia OS framework | github.com/ezequielmendoza-dev/abbia-os*

@@ -1,232 +1,146 @@
-# 🤖 Agentes de IA — Guía de Desarrollo Asistido
+# 🏛️ Abbia OS — Guía de Desarrollo Asistido por IA
 
-> Este documento es la **fuente de verdad** sobre cómo funciona el sistema de desarrollo asistido por IA en este proyecto.
-> Debe ser leído por cualquier asistente de IA (Cursor, Claude Code, Windsurf, Cline, Copilot) antes de realizar cualquier tarea.
-> **Importante:** Para comprender el contexto de negocio, stack técnico y especificaciones particulares de este proyecto, la IA debe leer primero [.ai/context.md](file:///.ai/context.md).
-
-> **ℹ️ Relación con `AGENTS.md` (raíz):** Este archivo es la plantilla instalada en los proyectos que **consumen** `ai-agents`. El `AGENTS.md` que vive en la raíz del *repo* `ai-agents` es un documento **distinto**: describe cómo portar cambios al framework (reglas documentales R1–R5, estructura interna del repo). No confundir ambos roles — si estás contribuyendo al repo, usa el de la raíz; si estás trabajando en un proyecto integrado, usa este.
+> Este documento es la **fuente de verdad** sobre cómo opera el sistema de ingeniería asistida por IA (**Abbia OS**) en este proyecto.
+> Debe ser leído por cualquier asistente o agente de IA (Cursor, Claude Code, Windsurf, Cline, Copilot, Antigravity) antes de realizar cualquier tarea.
+> **Lema de Abbia:** *Layered Context, Structured Memory, Autonomous Delivery.*
+> **Contexto de Negocio:** Para comprender el stack técnico, entidades y especificaciones del proyecto, leer primero [.abbia/context.md](file:///.abbia/context.md).
 
 ---
 
-## 📂 Arquitectura Documental y Memoria (.ai/)
+## 📂 Arquitectura Documental y Memoria (.abbia/)
 
-Este proyecto mantiene una jerarquía estricta de dos niveles en la carpeta `.ai/`:
+Este proyecto mantiene una estructura modular y jerárquica en la carpeta `.abbia/`:
 
-### 1. Memoria Permanente (raíz de `.ai/`)
+### 1. Memoria Permanente y Gobernanza (raíz de `.abbia/`)
 
-Estos archivos representan el **estado actual** del proyecto y deben consultarse antes de cualquier tarea:
+Estos artefactos representan el **estado actual** del proyecto:
 
 | Archivo | Propósito |
 | :--- | :--- |
-| `.ai/context.md` | Identidad del proyecto: stack, módulos, convenciones, entornos |
-| `.ai/business-rules.md` | Reglas de negocio permanentes del dominio |
-| `.ai/architecture.md` | Arquitectura actual del sistema en producción |
-| `.ai/decisions.md` | Log histórico de decisiones técnicas (ADRs: `ARCH-NNN`) |
-| `.ai/glossary.md` | Términos de negocio acordados con definiciones |
-| `.ai/knowledge-graph.yaml` | Grafo de relaciones entre decisiones (depends_on, supersedes, conflicts_with) |
-| `.ai/memory/*` | Memoria persistente del pipeline (workflow-log, patterns-learned, context-snapshot) |
-| `.ai/metrics/*` | Métricas por ejecución de agente (tokens, duración, fase, veredicto) |
+| `.abbia/context.md` | Identidad del proyecto: stack, módulos, convenciones, entornos |
+| `.abbia/business-rules.md` | Reglas de negocio permanentes e inmutables del dominio |
+| `.abbia/architecture.md` | Arquitectura actual del sistema en producción |
+| `.abbia/decisions.md` | Log histórico de decisiones técnicas (ADRs: `ARCH-NNN`) |
+| `.abbia/glossary.md` | Términos de negocio acordados con definiciones |
+| `.abbia/knowledge-graph.yaml` | Tier 3: Grafo de relaciones entre decisiones (depends_on, supersedes, conflicts_with) |
+| `.abbia/memory/*` | Abbia 3-Tier Memory (workflow-log, patterns-learned, context-snapshot) |
+| `.abbia/metrics/*` | Abbia Observability: Telemetría por ejecución de agente (tokens, duración, fase) |
 
-### 2. Trabajo Activo (`.ai/features/`)
+### 2. Trabajo Activo (`.abbia/initiatives/`)
 
-Toda nueva iniciativa (feature, bug, refactor) se desarrolla dentro de su propia carpeta:
-- Features: `.ai/features/FEAT-NNN-slug/`
-- Bugs: `.ai/features/BUG-NNN-slug/`
+Toda nueva iniciativa (feature, bug, refactor, auditoría) se desarrolla dentro de su propia carpeta:
+- Features: `.abbia/initiatives/FEAT-NNN-slug/`
+- Bugs: `.abbia/initiatives/BUG-NNN-slug/`
+- Auditorías: `.abbia/initiatives/AUDIT-NNN-slug/`
+- Refactors: `.abbia/initiatives/REF-NNN-slug/`
 
-Los documentos de especificación, diseño técnico y QA viven **únicamente** dentro de estas carpetas hasta que se consoliden en la memoria permanente al finalizar el ciclo.
+Los documentos de especificación (`spec.md`), diseño técnico (`architecture.md`) y validación (`qa.md`) viven dentro de estas carpetas hasta consolidarse en la memoria permanente al archivarse a `.abbia/archive/`.
 
-### 📋 Reglas Documentales Críticas
+### 📋 Reglas Documentales Críticas (R1-R6)
 
 | Regla | Enunciado |
 | :--- | :--- |
 | **R1** | Antes de crear un documento, verificar si existe uno equivalente para actualizar |
 | **R2** | Priorizar la **actualización** sobre la creación |
 | **R3** | No crear versiones del tipo `architecture-v2.md` o `spec-final.md` — modificar el existente |
-| **R4** | No crear documentos de features específicas en la raíz de `.ai/` |
+| **R4** | No crear documentos de features específicas en la raíz de `.abbia/` |
 | **R5** | Los documentos raíz representan el **estado actual**, no el histórico |
-| **R6** | **Cierre Mandatorio y Telemetría:** Al completar cualquier fase (Spec, UI, Architecture, Implementation, QA, Approval, Deploy), el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` antes de finalizar su turno o entregar la respuesta. Es responsabilidad directa del agente incluir los flags de telemetría para alimentar el dashboard y la memoria técnica. |
+| **R6** | **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase o tarea, el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` antes de finalizar su turno. |
 
 ---
 
-## 👥 Roles de los Agentes
+## 👥 Roles de los Agentes en Abbia OS
 
-Para cualquier tarea compleja, la IA debe asumir uno de los siguientes roles especializados. Antes de actuar, **leer completo** el archivo del rol correspondiente:
+Para cualquier tarea, la IA debe asumir uno de los siguientes roles especializados con su correspondiente **Context Contract**:
 
 | Agente / Rol | Archivo de Instrucciones | Responsabilidad Principal |
 | :--- | :--- | :--- |
-| **Skill Manager** | `.ai/agents/roles/skill-manager.md` | Orquestación, descubrimiento, resolución de skills y recomendación de catálogo externo (skills.sh) |
-| **Product Analyst** | `.ai/agents/roles/analyst.md` | Clarificar requerimientos y escribir especificaciones funcionales (`spec.md`) |
-| **UI Designer** | `.ai/agents/roles/ui-designer.md` | Diseñar la interfaz visual, layout, estados y lineamientos de accesibilidad (`ui-design.md`) |
-| **Software Architect** | `.ai/agents/roles/architect.md` | Diseñar soluciones técnicas y documentar en `architecture.md` (ADRs) |
-| **Tech Lead** | `.ai/agents/roles/tech-lead.md` | Revisar diseños y código, validar adherencia a estándares, actuar como árbitro |
-| **Senior Developer** | `.ai/agents/roles/developer.md` | Escribir código limpio, tests unitarios y asegurar calidad de implementación |
-| **QA Engineer** | `.ai/agents/roles/qa.md` | Validar la implementación contra las especificaciones, crear reportes de prueba |
-| **DevOps Engineer** | `.ai/agents/roles/devops.md` | Configurar pipelines, CI/CD, infraestructura y configuraciones de nube |
-
-### Restricciones por Diseño
-
-- Cada agente tiene **constraints explícitos** que definen lo que **NO** puede hacer.
-- Ningún agente debe invadir el rol de otro.
-- Cada agente tiene reglas de documentación que establecen cuándo crear, cuándo actualizar, y cómo distinguir información permanente vs. temporal.
-
-### 💬 Protocolo de Clarificación Proactiva
-
-Todos los agentes siguen este protocolo antes de producir su output:
-
-1. **Evaluar ambigüedades de negocio:** Antes de actuar, el agente evalúa si existen dudas sobre la lógica de negocio, el alcance funcional o las prioridades del proyecto que le impidan producir un output completo y correcto.
-2. **Preguntar solo lo necesario:** Si existen ambigüedades, el agente se detiene y formula preguntas concisas al usuario (idealmente 3-5 preguntas agrupadas, nunca un interrogatorio extenso).
-3. **Autonomía técnica total:** Las decisiones dentro del área de expertise del agente (patrones de diseño, estructura de código, estrategia de testing, configuración de infraestructura, diseño visual, etc.) se resuelven de forma autónoma sin consultar al usuario.
-4. **No preguntar lo documentado:** El agente no debe preguntar sobre convenciones, stack o arquitectura que ya estén documentados en `.ai/context.md`, `.ai/architecture.md` o `.ai/business-rules.md`.
-5. **Asumir con criterio experto:** Ante detalles menores o no críticos, el agente puede tomar decisiones razonables y documentar las asunciones realizadas en su output.
+| **Skill Manager** | `.abbia/core/roles/skill-manager.md` | Capability & Context Advisor, resolución de skills y memoria técnica |
+| **Product Analyst** | `.abbia/core/roles/analyst.md` | Requerimientos, reglas de negocio y especificación funcional (`spec.md`) |
+| **UI Designer** | `.abbia/core/roles/ui-designer.md` | Diseño de interfaz visual, tokens, estados y accesibilidad (`ui-design.md`) |
+| **Software Architect** | `.abbia/core/roles/architect.md` | Diseño técnico, esquemas de base de datos y ADRs (`architecture.md`) |
+| **Tech Lead** | `.abbia/core/roles/tech-lead.md` | Code review, supervisión, staging gate y veredicto final |
+| **Senior Developer** | `.abbia/core/roles/developer.md` | Implementación de código limpio, pruebas unitarias y cobertura |
+| **QA Engineer** | `.abbia/core/roles/qa.md` | Validación funcional, pruebas E2E, regresión y reporte de QA (`qa.md`) |
+| **DevOps Engineer** | `.abbia/core/roles/devops.md` | Pipelines CI/CD, infraestructura, release y despliegue a producción |
 
 ---
 
-## 🔄 Flujos de Trabajo (Workflows)
+## 🔄 Abbia Workflows (Flujos con DAG)
 
-La IA debe seguir estrictamente los workflows detallados en `.ai/agents/workflows/`:
+Seguir estrictamente los flujos definidos en `.abbia/core/workflows/`:
 
 | Workflow | Archivo | Pipeline |
 | :--- | :--- | :--- |
 | **Nueva Feature** | `new-feature.md` | Analyst (Spec) ➡️ UI Designer (UI) ➡️ Architect (Design) ➡️ Tech Lead (Approval) ➡️ Developer (Code) ➡️ QA (Validation) ➡️ Release |
-| **Corrección de Bugs** | `bug-fix.md` | Dinámico (QA ➡️ Triaje ➡️ Analyst/UI/Architect [según origen] ➡️ Developer ➡️ QA ➡️ Tech Lead) |
-| **Refactorización** | `refactor.md` | Plan ➡️ Cobertura de tests ➡️ Modificación incremental ➡️ Verificación de comportamiento |
-| **Release** | `release.md` | Verificación QA completa ➡️ Checklists ➡️ Deploy |
-| **Cambio Arquitectónico** | `architecture-change.md` | Creación de ADR ➡️ Actualización de planos globales ➡️ Ejecución migratoria |
+| **Corrección de Bugs** | `bug-fix.md` | Dinámico (QA ➡️ Triaje ➡️ Analyst/UI/Architect ➡️ Developer ➡️ QA ➡️ Tech Lead) |
+| **Refactorización** | `refactor.md` | Plan ➡️ Cobertura de tests ➡️ Modificación incremental ➡️ Verificación |
+| **Release** | `release.md` | Verificación QA completa ➡️ Checklists ➡️ Deploy ➡️ Archivado |
+| **Cambio Arquitectónico** | `architecture-change.md` | Creación de ADR ➡️ Actualización de planos globales ➡️ Ejecución |
 
 ---
 
-## 📝 Templates Disponibles
+## ⚙️ CLI y Scripts de Automatización
 
-Los templates se encuentran en `.ai/agents/templates/` y deben usarse como base para crear documentos:
+Puedes usar el CLI `./abbia` desde la raíz o ejecutar los scripts en `.abbia/core/scripts/`:
 
-| Template | Uso |
-| :--- | :--- |
-| `feature-spec.md` | Especificación funcional de una feature |
-| `ui-design-spec.md` | Plantilla para el diseño visual de interfaz de una feature |
-| `architecture-spec.md` | Diseño técnico de una feature |
-| `technical-task.md` | Tarea técnica con paso de localización y living checklist |
-| `qa-report.md` | Reporte de validación de QA y diagnóstico self-healing |
-| `bug-report.md` | Reporte estructurado de bugs |
-| `project-context.md` | Plantilla base para `.ai/context.md` |
-| `feature-folder-template.md` | Estructura estándar de carpeta por feature |
-| `ide-configs/cursor-rules/` | Reglas modulares de Cursor (`.cursor/rules/*.mdc`) |
-| `ide-configs/roomodes` | Custom modes preconfigurados para Roo-Code / Cline |
-
----
-
-## ✅ Checklists
-
-Antes de un release o revisión, verificar los checklists en `.ai/agents/checklists/`:
-
-| Checklist | Área / Propósito |
-| :--- | :--- |
-| `frontend-review.md` | Revisión de código frontend, semántica HTML y responsividad |
-| `ui-review.md` | Revisión de UI/UX, consistencia visual y accesibilidad |
-| `backend-review.md` | Revisión de código backend, APIs y manejo de errores |
-| `database-review.md` | Revisión de base de datos, índices y consistencia de datos |
-| `security-review.md` | Auditoría de seguridad: autenticación, validación de datos y secretos |
-| `performance-review.md` | Validación de rendimiento: optimizaciones, consultas lentas y leaks |
-| `release-review.md` | Checklist operacional para lanzamientos seguros y planes de rollback |
-
----
-
-## ⚙️ Scripts de Automatización
-
-El proyecto cuenta con herramientas en `.ai/agents/scripts/` para simplificar flujos comunes de desarrollo:
-
-| Script | Uso / Propósito |
-| :--- | :--- |
-| `setup-ide.sh` | Regenerar configuraciones de IDEs o inicializar carpetas: `bash .ai/agents/scripts/setup-ide.sh` |
-| `update-ai-agents.sh` | Actualizar el framework en un comando (submodule + setup + auto-fix + validación): `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
-| `new-initiative.sh` | Crear nueva iniciativa (FEAT/BUG/AUDIT/REF) automáticamente: `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
-| `finish-phase.sh` | Cierre de fase: registra memory, metrics (model, provider, env, branch, tokens, duration) y snapshot automáticamente: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <M> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate> [--archive]` |
-| `archive-initiative.sh` | Archivar iniciativa a `.ai/archive/` con validación QA y reconciliación KG: `bash .ai/agents/scripts/archive-initiative.sh <INICIATIVA>` |
-| `sync-initiatives.sh` | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`): `bash .ai/agents/scripts/sync-initiatives.sh [--fix] [--archive-approved]` |
-| `validate-project.sh` | Validar conformidad del proyecto local con las reglas documentales: `bash .ai/agents/scripts/validate-project.sh` |
-| `dashboard.sh` | Visualizador interactivo en el navegador (Proyecto, Grafo ADR, Telemetría de tokens, Memoria): `bash .ai/agents/scripts/dashboard.sh` |
-| `common.sh` | Librería compartida de soporte (interno, DRY) |
-
----
-
-## 🏷️ Convenciones de Nomenclatura
-
-| Tipo | Formato | Ejemplo |
+| Comando CLI | Script Equivalente | Propósito |
 | :--- | :--- | :--- |
-| Feature | `FEAT-NNN-slug` | `FEAT-001-user-login` |
-| Bug | `BUG-NNN-slug` | `BUG-024-db-connection-timeout` |
-| ADR | `ARCH-NNN` | `ARCH-003` |
-| Branch feature | `feat/NNN-slug` | `feat/001-user-login` |
-| Branch fix | `fix/NNN-slug` | `fix/024-db-connection-timeout` |
+| `./abbia new <TIPO> <ID> <slug>` | `new-initiative.sh` | Crear nueva iniciativa (FEAT/BUG/AUDIT/REF) |
+| `./abbia finish <INIT> <FASE> [ROL]` | `finish-phase.sh` | Cierre de fase con telemetría y actualización de snapshot |
+| `./abbia archive <INIT>` | `archive-initiative.sh` | Archivar iniciativa a `.abbia/archive/` tras QA Aprobado |
+| `./abbia sync [--fix]` | `sync-initiatives.sh` | Sincronizar, reconciliar memoria y auto-reparar |
+| `./abbia validate` | `validate-project.sh` | Validar conformidad del proyecto con estándares Abbia |
+| `./abbia dashboard` | `dashboard.sh` | Generar y abrir el visualizador interactivo en el navegador |
+| `./abbia update [VERSION]` | `update-abbia.sh` | Actualizar el framework Abbia OS a la última versión |
 
 ---
 
 ## 🌿 Higiene de Git y Prevención de Conflictos
 
-Para proyectos con múltiples ramas o desarrolladores trabajando simultáneamente:
-1. **Exclusiones en `.gitignore`:** Los archivos de sesión y cachés locales (`.ai/sessions/`, `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml`) deben mantenerse ignorados.
-2. **Estrategia `merge=union` en `.gitattributes`:** Los logs cronológicos (`.ai/memory/workflow-log.md`, `.ai/metrics/executions.yaml`) deben configurarse con `merge=union` para resolver automáticamente inserciones simultáneas.
-3. **Reconciliación Post-Merge:** Tras realizar `git pull` o `git merge`, ejecutar:
-   ```bash
-   bash .ai/agents/scripts/sync-initiatives.sh
-   ```
+1. **Exclusiones en `.gitignore`:**
+   `.abbia/sessions/`, `.abbia/dashboard.html`, `.abbia/memory/context-snapshot.md`, `.abbia/metrics/aggregates.yaml`.
+2. **Logs Append-Only en `.gitattributes` (`merge=union`):**
+   `.abbia/memory/workflow-log.md merge=union`, `.abbia/metrics/executions.yaml merge=union`.
+3. **Reconciliación Post-Merge:**
+   Tras realizar `git pull` o `git merge`, ejecutar: `./abbia sync`.
 
 ---
 
-## 💡 Cómo Instanciar un Agente (Prompts)
-
-Para activar un agente de IA en su rol respectivo, utilizar una de las siguientes plantillas:
+## 💡 Cómo Instanciar un Agente
 
 ### Product Analyst (Análisis de Feature)
 ```
-Actúa como el agente Product Analyst definido en .ai/agents/roles/analyst.md.
-Nuestra feature actual es: FEAT-NNN-slug
-Requerimiento original: [Descripción breve de la idea]
-Genera el archivo .ai/features/FEAT-NNN-slug/spec.md.
-```
-
-### Product Analyst (Bootstrap / Auto-Contextualización)
-```
-Actúa como el agente Product Analyst definido en .ai/agents/roles/analyst.md y genera el archivo `.ai/context.md` de este proyecto basándote en la plantilla `.ai/agents/templates/project-context.md` tras escanear la estructura y archivos de configuración.
+Actúa como el agente Product Analyst de Abbia OS (.abbia/core/roles/analyst.md).
+Iniciativa: FEAT-NNN-slug
+Requerimiento original: [Descripción de la idea]
+Genera el artefacto .abbia/initiatives/FEAT-NNN-slug/spec.md.
 ```
 
 ### UI Designer
 ```
-Actúa como el agente UI Designer definido en .ai/agents/roles/ui-designer.md.
-Nuestra feature actual es: FEAT-NNN-slug
-Genera el diseño visual en .ai/features/FEAT-NNN-slug/ui-design.md basándote en la especificación en .ai/features/FEAT-NNN-slug/spec.md.
+Actúa como el agente UI Designer de Abbia OS (.abbia/core/roles/ui-designer.md).
+Iniciativa: FEAT-NNN-slug
+Genera el diseño en .abbia/initiatives/FEAT-NNN-slug/ui-design.md basándote en spec.md.
 ```
 
 ### Software Architect
 ```
-Actúa como el agente Software Architect definido en .ai/agents/roles/architect.md.
-Nuestra feature actual es: FEAT-NNN-slug.
-Lee la especificación funcional en .ai/features/FEAT-NNN-slug/spec.md y genera el diseño técnico en .ai/features/FEAT-NNN-slug/architecture.md, incluyendo cualquier ADR nuevo que deba registrarse en .ai/decisions.md.
-```
-
-### Tech Lead
-```
-Actúa como el agente Tech Lead definido en .ai/agents/roles/tech-lead.md.
-Nuestra feature actual es: FEAT-NNN-slug
-Revisa el archivo de especificación (.ai/features/FEAT-NNN-slug/spec.md) y de diseño (.ai/features/FEAT-NNN-slug/architecture.md). Evalúa si cumplen con los estándares y convenciones del proyecto y da tu feedback o aprobación.
+Actúa como el agente Software Architect de Abbia OS (.abbia/core/roles/architect.md).
+Iniciativa: FEAT-NNN-slug.
+Lee spec.md y genera el diseño técnico en .abbia/initiatives/FEAT-NNN-slug/architecture.md, registrando ADRs en .abbia/decisions.md si aplica.
 ```
 
 ### Senior Developer
 ```
-Actúa como el agente Senior Developer definido en .ai/agents/roles/developer.md.
-Nuestra feature actual es: FEAT-NNN-slug
-Implementa el código correspondiente a la tarea detallada en la especificación (.ai/features/FEAT-NNN-slug/spec.md) y el diseño técnico (.ai/features/FEAT-NNN-slug/architecture.md). Escribe tests y adhiérete a las guías de estilo.
+Actúa como el agente Senior Developer de Abbia OS (.abbia/core/roles/developer.md).
+Iniciativa: FEAT-NNN-slug
+Implementa el código siguiendo spec.md y architecture.md. Escribe tests unitarios y asegura cobertura.
 ```
 
 ### QA Engineer
 ```
-Actúa como el agente QA Engineer definido en .ai/agents/roles/qa.md.
-Nuestra feature actual es: FEAT-NNN-slug
-Efectúa la verificación de la implementación. Revisa el código frente a la especificación funcional y el diseño, y redacta el reporte en .ai/features/FEAT-NNN-slug/qa.md.
+Actúa como el agente QA Engineer de Abbia OS (.abbia/core/roles/qa.md).
+Iniciativa: FEAT-NNN-slug
+Efectúa la verificación de la implementación y redacta el reporte en .abbia/initiatives/FEAT-NNN-slug/qa.md con veredicto explícito.
 ```
-
----
-
-## 📚 Guía de Prompts Completa
-
-Para ejemplos avanzados de prompts y patrones de activación de agentes, consultar:
-`.ai/agents/roles/prompt-guide.md`

@@ -1,7 +1,7 @@
 # ==============================================================================
-# ai-agents OS — Archivos temporales, sesiones y cachés generados
+# Abbia OS — Archivos temporales, sesiones y cachés generados
 # ==============================================================================
-.ai/sessions/
-.ai/dashboard.html
-.ai/memory/context-snapshot.md
-.ai/metrics/aggregates.yaml
+.abbia/sessions/
+.abbia/dashboard.html
+.abbia/memory/context-snapshot.md
+.abbia/metrics/aggregates.yaml

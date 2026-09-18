@@ -4,6 +4,18 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [4.0.0] — 2026-09-18
+
+### 🚀 Rebranding e Identidad de Producto: Abbia OS
+- **Lanzamiento de Abbia OS v4.0.0** — Transformación formal de `ai-agents` en **Abbia OS** (*Layered Context, Structured Memory, Autonomous Delivery*), un sistema operativo de ingeniería asistida por IA integral.
+- **Estructura Canónica `.abbia/`** — Sustitución de la carpeta genérica `.ai/` por `.abbia/` en proyectos destino, con submódulo en `.abbia/core` e iniciativas en `.abbia/initiatives/`.
+- **CLI Wrapper Unificado (`./abbia`)** — Nuevo ejecutable instalado en la raíz del proyecto para ejecutar comandos directos (`./abbia new`, `./abbia finish`, `./abbia archive`, `./abbia sync`, `./abbia validate`, `./abbia dashboard`, `./abbia update`, `./abbia migrate`).
+- **Herramienta de Migración Automatizada (`scripts/migrate-to-abbia.sh`)** — Script interactivo y seguro para migrar proyectos existentes desde la convención `.ai/` o `.stratum/` hacia `.abbia/` preservando iniciativas, historial, submódulos Git y configuraciones de IDE.
+- **Compatibilidad Retroactiva Transparente** — `scripts/common.sh` y todos los scripts de automatización detectan dinámicamente proyectos legacy `.ai/` y `.stratum/` y mantienen plena funcionalidad emitiendo avisos formativos para la migración.
+- **Identidad y Voz de los Agentes Abbia** — Actualización de todos los roles (`roles/*.md`), prompts y plantillas de IDE (`Cursor`, `Claude Code`, `Windsurf`, `Cline/Roo-Code`, `Copilot`) para operar bajo la metodología y estándares de Abbia OS.
+- **Dashboard Visual Abbia OS** — Rebranding completo del visualizador web (`scripts/dashboard.sh`) con estética premium, marca Abbia OS, lectura de `.abbia/` y badges actualizados.
+- **Suite de Pruebas y Fixtures Actualizados** — `tests/test-runner.sh` y `examples/golden-project/` migrados a `.abbia/` con cobertura del 100% (28/28 pruebas superadas, incluyendo test de migración).
+
 ## [3.7.0] — 2026-09-18
 
 ### Agregado
@@ -301,7 +313,7 @@ Los archivos de la raíz eran versiones v1.0 sin headers markdown, sin Chain of 
 - `skills/registry.md` — Transformado de un índice estático de tecnologías a un catálogo dinámico de reglas de orquestación, priorización (Shadowing) y resolución de conflictos.
 - Todos los roles (`analyst.md`, `architect.md`, `ui-designer.md`, `tech-lead.md`, `developer.md`, `qa.md`, `devops.md`) actualizados para incluir la sección **Skill Awareness**, obligándolos a subordinar su conocimiento a las skills activas detectadas.
 - `README.md` y `AGENTS.md` actualizados para reflejar el nuevo paradigma de orquestación agnóstica.
-- Repositorio inicializado como Git repo con remote `https://github.com/ezequielmendoza-dev/ai-agents.git`
+- Repositorio inicializado como Git repo con remote `https://github.com/ezequielmendoza-dev/abbia-os.git`
 - Rama principal renombrada de `master` a `main`
 
 ### Eliminado
@@ -475,4 +487,4 @@ Los archivos de la raíz eran versiones v1.0 sin headers markdown, sin Chain of 
 
 ---
 
-*ai-agents library | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*ai-agents library | [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)*

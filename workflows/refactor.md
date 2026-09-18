@@ -37,7 +37,7 @@ flowchart TD
     H -->|Sí| E
     H -->|No| I[Tech Lead: Veredicto final]
     I --> J[🚀 Deploy]
-    J --> K[📝 Actualizar .ai/architecture.md si aplica]
+    J --> K[📝 Actualizar .abbia/architecture.md si aplica]
 ```
 
 ---
@@ -128,9 +128,9 @@ Antes de aprobar cualquier refactor, el Tech Lead debe responder:
 5. **¿Cambia algo visible externamente?** Si sí → no es un refactor puro
 
 **Leer antes de decidir:**
-- `.ai/context.md` — convenciones del proyecto
-- `.ai/architecture.md` — arquitectura actual
-- `.ai/decisions.md` — por qué está diseñado así
+- `.abbia/context.md` — convenciones del proyecto
+- `.abbia/architecture.md` — arquitectura actual
+- `.abbia/decisions.md` — por qué está diseñado así
 
 ---
 
@@ -144,8 +144,8 @@ Solo necesario si el refactor cambia la arquitectura global del sistema.
 ```
 Actúa como el agente Software Architect definido en roles/architect.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
-Arquitectura actual: [contenido de .ai/architecture.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
+Arquitectura actual: [contenido de .abbia/architecture.md]
 
 Necesito diseñar un refactor del siguiente componente:
 [nombre del componente y descripción del problema actual]
@@ -180,7 +180,7 @@ Si el Architect diseñó el refactor, el Tech Lead lo revisa antes de implementa
 ```
 Actúa como el agente Senior Developer definido en roles/developer.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
 Refactor a implementar:
 [descripción del refactor aprobado]
@@ -209,7 +209,7 @@ Componente afectado:
 ```
 Actúa como el agente QA Engineer definido en roles/qa.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
 Estoy validando un refactor del componente: [nombre]
 
@@ -230,8 +230,8 @@ Por favor, verifica que todos los comportamientos existentes siguen funcionando 
 1. **Actualizar CHANGELOG:** Registrar el cambio en `[Unreleased]` bajo `### Changed` directamente en `CHANGELOG.md`.
 2. **Version Bump y Commit:** Una vez aprobado por el Tech Lead, ejecutar `npm run bump:patch -- "refactor(scope): descripción"` para actualizar versión (patch), mover el unreleased a la nueva versión, y crear git tag.
 3. **Deploy** (ver [`workflows/release.md`](release.md))
-4. **Actualizar** `.ai/architecture.md` si el refactor cambió algo en la arquitectura global
-5. **Registrar** en `.ai/decisions.md` si el refactor implicó una decisión técnica importante
+4. **Actualizar** `.abbia/architecture.md` si el refactor cambió algo en la arquitectura global
+5. **Registrar** en `.abbia/decisions.md` si el refactor implicó una decisión técnica importante
 
 ---
 
@@ -264,4 +264,4 @@ Por favor, verifica que todos los comportamientos existentes siguen funcionando 
 
 ---
 
-*Workflow refactor v1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow refactor v1.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

@@ -1,13 +1,14 @@
-# Configuración para Claude Code — ai-agents OS
+# Configuración para Claude Code — Abbia OS
 
-> **Importante:** Este archivo contiene instrucciones específicas para Claude Code CLI.
+> **Importante:** Este archivo contiene instrucciones específicas para Claude Code CLI bajo el framework **Abbia OS**.
 > Para la guía completa de roles, workflows y reglas documentales, consultar `AGENTS.md` en la raíz del proyecto.
+> **Lema de Abbia:** *Layered Context, Structured Memory, Autonomous Delivery.*
 
 ---
 
 ## 🛠️ Comandos del Proyecto
 
-Antes de ejecutar comandos, leer `.ai/context.md` para conocer el stack y configuración exacta. Adaptar los siguientes según el proyecto:
+Antes de ejecutar comandos, leer `.abbia/context.md` para conocer el stack y configuración exacta. Adaptar según el proyecto:
 
 ```bash
 # Desarrollo
@@ -27,19 +28,22 @@ npm run format       # Formatter
 
 ---
 
-## 📋 Comportamiento Esperado
+## 📋 Comportamiento Esperado en Abbia OS
 
-1. **Leer contexto antes de actuar.** Siempre comenzar leyendo `.ai/context.md` para entender el proyecto.
+1. **Leer contexto antes de actuar.** Comenzar leyendo `.abbia/context.md` y `.abbia/memory/context-snapshot.md`.
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
-3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
-4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
-5. **Cierre Mandatorio de Fase y Telemetría (Regla R6).** Al culminar cualquier tarea, entrega de código o documento (`spec`, `ui-design`, `architecture`, `implement`, `qa`, `approval`, `deploy`), **ES OBLIGATORIO ejecutar en la terminal**:
+3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al rol en `.abbia/core/roles/`.
+4. **Respetar la jerarquía documental.** No crear documentos fuera de `.abbia/initiatives/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
+5. **Cierre Mandatorio de Fase y Telemetría (Regla R6).** Al culminar cualquier tarea (`spec`, `ui-design`, `architecture`, `implement`, `qa`, `approval`, `deploy`), **ES OBLIGATORIO ejecutar en la terminal**:
    ```bash
-   bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
+   bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
      --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
      --duration <SEGUNDOS> --source measured
    ```
-   *Nunca des por finalizada tu respuesta ni pases el control sin haber ejecutado este comando con los parámetros de telemetría (medidos o estimados razonablemente).*
+   *O alternativamente vía CLI wrapper:*
+   ```bash
+   ./abbia finish <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> --duration <SEGUNDOS> --source measured
+   ```
 
 ---
 
@@ -56,5 +60,5 @@ npm run format       # Formatter
 - Crear directorios intermedios cuando sea necesario.
 
 ### Memoria de Sesión
-- Si el usuario define memorias con `/memory`, respetar esas instrucciones por encima de las reglas generales de este archivo.
-- Las memorias de sesión no deben contradecir las reglas documentales (R1-R5) definidas en `AGENTS.md`.
+- Si el usuario define memorias con `/memory`, respetar esas instrucciones por encima de las reglas generales.
+- Las memorias de sesión no deben contradecir las reglas documentales (R1-R6) definidas en `AGENTS.md`.

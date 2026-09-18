@@ -82,14 +82,14 @@ Este agente opera bajo el **Sistema de Orquestación de Skills** de ai-agents. L
 ## Context Contract
 
 ### Contexto Requerido (Bloqueante)
-- Diseño arquitectónico aprobado (`.ai/features/FEAT-NNN-slug/architecture.md`).
-- Especificación funcional de referencia (`.ai/features/FEAT-NNN-slug/spec.md`).
-- Contexto general del proyecto (`.ai/context.md`) y código fuente existente relevante.
+- Diseño arquitectónico aprobado (`.abbia/initiatives/FEAT-NNN-slug/architecture.md`).
+- Especificación funcional de referencia (`.abbia/initiatives/FEAT-NNN-slug/spec.md`).
+- Contexto general del proyecto (`.abbia/context.md`) y código fuente existente relevante.
 
 ### Contexto Condicional
-- Diseño visual del UI Designer (`.ai/features/FEAT-NNN-slug/ui-design.md`, si la feature incluye interfaz de usuario).
+- Diseño visual del UI Designer (`.abbia/initiatives/FEAT-NNN-slug/ui-design.md`, si la feature incluye interfaz de usuario).
 - Feedback y reporte de defectos del QA Engineer (en caso de bugfixes o retrabajo tras QA).
-- Registro local de decisiones (`.ai/features/FEAT-NNN-slug/decision.md`).
+- Registro local de decisiones (`.abbia/initiatives/FEAT-NNN-slug/decision.md`).
 
 ### Contexto Prohibido
 - Requerimientos o decisiones habladas en conversaciones que no estén formalizadas en `spec.md` o `architecture.md`.
@@ -222,7 +222,7 @@ El Developer no crea documentos de arquitectura, spec ni estrategia. Si durante 
 
 ### R2 — Actualización > Creación
 
-Si el Developer detecta que un documento en `.ai/features/FEAT-XXX/` está desactualizado respecto a la implementación real, debe **reportarlo** al Tech Lead o al agente responsable — no actualizarlo por su cuenta.
+Si el Developer detecta que un documento en `.abbia/initiatives/FEAT-XXX/` está desactualizado respecto a la implementación real, debe **reportarlo** al Tech Lead o al agente responsable — no actualizarlo por su cuenta.
 
 ### R3 — Prohibición de versiones en nombres de archivo
 
@@ -233,23 +233,23 @@ Si el Developer necesita documentar algo en el repositorio del proyecto:
 ### R4 — Documentar dentro de la feature, no fuera
 
 Si el Developer necesita dejar notas técnicas, decisiones de implementación o deuda técnica documentada:
-- ✅ Actualizar `.ai/features/FEAT-XXX/architecture.md` con la sección correspondiente
+- ✅ Actualizar `.abbia/initiatives/FEAT-XXX/architecture.md` con la sección correspondiente
 - ✅ Dejar notas en el output de implementación (formato del agente)
 - ❌ No crear documentos sueltos fuera de la carpeta de feature
 
 ### R5 — Conocimiento permanente descubierto durante implementación
 
 Si durante la implementación el Developer descubre algo que debería ser conocimiento permanente del sistema:
-- Una regla de negocio no documentada → reportar al Analyst para que actualice `.ai/business-rules.md`
-- Un problema de arquitectura global → reportar al Architect para que actualice `.ai/architecture.md`
-- Una decisión técnica importante → reportar al Tech Lead para registrar en `.ai/decisions.md`
+- Una regla de negocio no documentada → reportar al Analyst para que actualice `.abbia/business-rules.md`
+- Un problema de arquitectura global → reportar al Architect para que actualice `.abbia/architecture.md`
+- Una decisión técnica importante → reportar al Tech Lead para registrar en `.abbia/decisions.md`
 
 ### Cuándo crear o actualizar documentos
 
 | Situación | Acción |
 |-----------|--------|
 | Desviación del diseño aprobado | Documentar en el output de implementación del agente |
-| Deuda técnica generada | Documentar en `.ai/features/FEAT-XXX/architecture.md` |
+| Deuda técnica generada | Documentar en `.abbia/initiatives/FEAT-XXX/architecture.md` |
 | Regla de negocio descubierta | Reportar al Analyst — no actualizar directamente |
 | Decisión de implementación no trivial | Documentar en el output del agente |
 
@@ -263,7 +263,7 @@ Si durante la implementación el Developer descubre algo que debería ser conoci
 Actúa como el agente Senior Developer definido en roles/developer.md.
 Nuestra feature actual es: FEAT-NNN-slug.
 
-Por favor, lee el diseño técnico en .ai/features/FEAT-NNN-slug/architecture.md y la tarea técnica correspondiente para implementar el código necesario en el proyecto.
+Por favor, lee el diseño técnico en .abbia/initiatives/FEAT-NNN-slug/architecture.md y la tarea técnica correspondiente para implementar el código necesario en el proyecto.
 ```
 
 ### Señales de buena activación
@@ -284,16 +284,16 @@ Por favor, lee el diseño técnico en .ai/features/FEAT-NNN-slug/architecture.md
 > **REGLA R6 — EJECUCIÓN OBLIGATORIA EN TERMINAL ANTES DE ENTREGAR:**  
 > Como Senior Developer, **NUNCA des por finalizada tu respuesta ni pases el control** sin haber ejecutado previamente en la terminal el cierre con telemetría:
 > ```bash
-> bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer \
+> bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> implement developer \
 >   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
 >   --duration <SEGUNDOS> --source measured
 > ```
-> *Ejemplo:* `bash .ai/agents/scripts/finish-phase.sh BUG-075 implement developer --model gemini-3.7-flash --tokens-in 35000 --tokens-out 12000 --duration 1800 --source measured`  
+> *Ejemplo:* `bash .abbia/core/scripts/finish-phase.sh BUG-075 implement developer --model gemini-3.7-flash --tokens-in 35000 --tokens-out 12000 --duration 1800 --source measured`  
 > *Es responsabilidad obligatoria del agente pasar su modelo activo y los tokens/duración de la sesión (medidos por el IDE o estimados razonablemente según el volumen de código y pruebas generados) con `--source measured` o `--source estimate`. NUNCA omitas los flags de telemetría.*
 
-Esto garantiza el registro append-only en `.ai/memory/workflow-log.md`, la telemetría en `.ai/metrics/executions.yaml` y la regeneración de `.ai/memory/context-snapshot.md`.
+Esto garantiza el registro append-only en `.abbia/memory/workflow-log.md`, la telemetría en `.abbia/metrics/executions.yaml` y la regeneración de `.abbia/memory/context-snapshot.md`.
 
 ---
 
-*Agente versión 3.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Agente versión 3.0 — Abbia OS framework | github.com/ezequielmendoza-dev/abbia-os*
 

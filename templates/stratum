@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Shim de compatibilidad para templates/abbia
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/abbia" ]; then
+    exec bash "$SCRIPT_DIR/abbia" "$@"
+fi
+if [ -f "$SCRIPT_DIR/templates/abbia" ]; then
+    exec bash "$SCRIPT_DIR/templates/abbia" "$@"
+fi
+# fallback
+exec ./abbia "$@"

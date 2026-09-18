@@ -172,9 +172,9 @@ hotfix:
 
 Antes de cualquier release:
 
-1. Leer `.ai/context.md` para conocer el stack y entornos
-2. Revisar todas las features en `.ai/features/` con QA PASS
-3. Revisar `.ai/decisions.md` por decisiones recientes que impacten el release
+1. Leer `.abbia/context.md` para conocer el stack y entornos
+2. Revisar todas las features en `.abbia/initiatives/` con QA PASS
+3. Revisar `.abbia/decisions.md` por decisiones recientes que impacten el release
 
 ---
 
@@ -227,7 +227,7 @@ Definir explícitamente:
 ```
 Actúa como el agente DevOps Engineer definido en roles/devops.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
 Tarea: Preparar el release vX.Y.Z
 
@@ -297,12 +297,12 @@ Si algo falla → ejecutar el plan de rollback inmediatamente.
    O ajustar `major`/`patch` según el contenido del release.
 2. **Mover features** a `archive/` en `.ai/`:
    ```bash
-   mv .ai/features/FEAT-NNN-slug .ai/archive/FEAT-NNN-slug
+   mv .abbia/initiatives/FEAT-NNN-slug .abbia/archive/FEAT-NNN-slug
    ```
 3. **Actualizar documentos permanentes** si el release cambió algo global:
-   - `.ai/architecture.md`
-   - `.ai/business-rules.md`
-   - `.ai/glossary.md`
+   - `.abbia/architecture.md`
+   - `.abbia/business-rules.md`
+   - `.abbia/glossary.md`
 4. **Crear tag de Git** con la versión del release:
    ```bash
    git tag -a vX.Y.Z -m "Release vX.Y.Z — [descripción breve]"
@@ -332,7 +332,7 @@ flowchart TD
 - Un hotfix es solo para bugs críticos que afectan producción ahora
 - Va directo a Producción sin esperar el ciclo de release normal
 - Debe hacerse merge también a la rama de desarrollo para no perder la corrección
-- Post-mortem documentado en `.ai/decisions.md` para entender y prevenir
+- Post-mortem documentado en `.abbia/decisions.md` para entender y prevenir
 
 ---
 
@@ -343,9 +343,9 @@ Si el deploy a Producción genera un problema que no puede corregirse en minutos
 1. **Notificar** al equipo y al Tech Lead del inicio del rollback
 2. **Revertir** el deploy (según la estrategia: redeploy de la versión anterior, feature flags, etc.)
 3. **Verificar** que el sistema volvió al estado estable anterior
-4. **Documentar** qué ocurrió en `.ai/decisions.md`
+4. **Documentar** qué ocurrió en `.abbia/decisions.md`
 5. **Postmortem** para entender la causa raíz antes de reintentar el release
 
 ---
 
-*Workflow release v1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow release v1.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

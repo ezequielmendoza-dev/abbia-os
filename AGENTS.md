@@ -1,21 +1,23 @@
-# 🤖 ai-agents — Guía para Contribuir al Repositorio
+# 🏛️ Abbia OS — Guía para Contribuir al Framework
 
-> Este `AGENTS.md` es específico para el desarrollo del **propio repositorio `ai-agents`**.
-> No confundir con el template `templates/ide-configs/AGENTS.md`, que es la versión que se instala en los proyectos que consumen esta biblioteca.
+> Este `AGENTS.md` es específico para el desarrollo del **propio repositorio de Abbia OS**.
+> No confundir con el template `templates/ide-configs/AGENTS.md`, que es la versión que se instala en los proyectos que consumen este framework.
 >
-> **ℹ️ Relación entre ambos:** Este archivo (raíz) gobierna el desarrollo **del framework** — reglas documentales R1–R5, estructura interna, convenciones de contribución. El template `templates/ide-configs/AGENTS.md` gobierna los **proyectos que consumen** el framework — cómo trabajan los agentes en un proyecto integrado. Cada vez que se modifique un rol, workflow, checklist o script, debe reflejarse **en ambos** (R4) manteniendo el propósito distinto de cada documento.
+> **ℹ️ Relación entre ambos:** Este archivo (raíz) gobierna el desarrollo **del framework Abbia** — reglas documentales R1–R6, estructura interna, convenciones de contribución. El template `templates/ide-configs/AGENTS.md` gobierna los **proyectos que consumen** el framework bajo `.abbia/`.
 
 ---
 
-## 🎯 ¿Qué es este Repositorio?
+## 🎯 ¿Qué es Abbia OS?
 
-`ai-agents` es una **biblioteca reutilizable** de agentes, plantillas, workflows y checklists para desarrollo de software asistido por IA. No es un proyecto de software convencional — es un sistema operativo de desarrollo.
+**Abbia OS** es un **sistema operativo de ingeniería de software asistida por IA** y framework de orquestación multi-agente basado en *Specification-Driven Development (SDD)*, memoria persistente en 3 capas (*3-Tier Memory*), flujos DAG deterministas y observabilidad técnica.
+
+*Lema:* **Layered Context, Structured Memory, Autonomous Delivery.**
 
 ### Estructura del Repositorio
 
 ```
-ai-agents/
-├── roles/                    # Definiciones de agentes (v3.0)
+abbia-core/
+├── roles/                    # Definiciones de agentes de Abbia OS
 │   ├── analyst.md
 │   ├── ui-designer.md
 │   ├── architect.md
@@ -25,8 +27,8 @@ ai-agents/
 │   ├── devops.md
 │   ├── skill-manager.md
 │   └── prompt-guide.md
-├── skills/                   # Skills metodológicas (Framework Skills)
-│   ├── README.md             # Catálogo de las 15 skills
+├── skills/                   # Abbia Framework Skills (15 skills metodológicas)
+│   ├── README.md             # Catálogo de skills
 │   ├── registry.md           # Reglas de orquestación
 │   ├── analysis/             # requirements-discovery, ux-heuristics
 │   ├── architecture/         # api-design, backend-architecture, database-design, performance-tuning, ai-integration
@@ -34,35 +36,26 @@ ai-agents/
 │   ├── qa/                   # test-strategy, testing-automation, security-audit
 │   └── workflow/             # release-readiness, devops-pipeline
 ├── templates/                # Plantillas reutilizables
-│   ├── ide-configs/          # Configuraciones para IDEs de IA
-│   ├── knowledge-graph.yaml  # Template del grafo de decisiones
-│   ├── metrics-executions.yaml  # Template de métricas por ejecución
+│   ├── ide-configs/          # Configuraciones para IDEs de IA (Cursor, Claude Code, Windsurf, Cline, Copilot)
+│   ├── abbia                 # Wrapper ejecutable CLI para proyectos destino
+│   ├── knowledge-graph.yaml  # Template del grafo de decisiones (Tier 3)
+│   ├── metrics-executions.yaml # Template de telemetría de ejecuciones
 │   ├── dag-manifest.yaml     # Template de DAG para workflows
 │   └── *.md                  # Templates de documentos de proyecto
 ├── checklists/               # Checklists por área técnica
-├── workflows/                # Flujos de trabajo (con DAG declarado)
-├── scripts/                  # Scripts de automatización
+├── workflows/                # Flujos de trabajo con DAG formal
+├── scripts/                  # Suite de automatización CLI
 ├── tests/                    # Suite de pruebas automatizadas (test-runner.sh)
 ├── examples/                 # Proyectos de referencia canónicos (golden-project)
-├── docs/                     # Documentación del repositorio
-│   ├── workflow-memory.md    # Sistema de memoria persistente
-│   ├── workflow-dag.md       # Sistema de DAG de workflows
-│   ├── knowledge-graph.md    # Grafo ligero de decisiones
-│   ├── agent-metrics.md      # Métricas por rol y fase
-│   ├── skill-discovery.md    # Descubrimiento de skills
-│   ├── skill-resolution.md   # Resolución de conflictos
-│   └── ...
-├── AGENTS.md                 # ← Este archivo (contribución al repo)
+├── docs/                     # Documentación técnica y arquitectura
+├── AGENTS.md                 # ← Este archivo (contribución al framework)
 ├── README.md
 └── CHANGELOG.md
 ```
 
 ---
 
-## 📋 Reglas para Contribuir
-
-### Reglas Documentales (R1-R5)
-Estas reglas aplican también al desarrollo de este repositorio:
+## 📋 Reglas para Contribuir (R1-R6)
 
 | Regla | Enunciado |
 | :--- | :--- |
@@ -71,130 +64,46 @@ Estas reglas aplican también al desarrollo de este repositorio:
 | **R3** | No crear versiones del tipo `architect-v2.md`. Modificar el existente |
 | **R4** | Los cambios en roles/workflows deben reflejarse en `CHANGELOG.md` |
 | **R5** | Los documentos representan el **estado actual**, no el histórico |
-| **R6** | **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase o tarea, el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` antes de responder o dar por finalizado su turno. Es responsabilidad directa del agente incluir el modelo activo y los consumos/duración (reales o estimados) para nutrir la telemetría del dashboard. |
-
-### Convenciones
-- **Idioma:** Todo el contenido del repositorio debe estar en **español**.
-- **Archivos:** `kebab-case` (ej: `bug-report.md`, `new-feature.md`).
-- **Nomenclatura de features:** `FEAT-NNN-slug` en el `CHANGELOG.md`.
+| **R6** | **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase o tarea, el agente **DEBE SIEMPRE ejecutar en la terminal** `bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` antes de responder o dar por finalizado su turno. |
 
 ---
 
-## 👥 Roles de los Agentes
+## 👥 Roles de los Agentes en Abbia OS
 
 Los agentes están definidos en `roles/`:
 
 | Agente | Archivo | Responsabilidad |
 | :--- | :--- | :--- |
-| **Skill Manager** | [skill-manager.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/skill-manager.md) | Orquestación, descubrimiento, resolución de skills y recomendación de catálogo externo (skills.sh) |
-| **Product Analyst** | [analyst.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/analyst.md) | Especificaciones funcionales |
-| **UI Designer** | [ui-designer.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/ui-designer.md) | Diseño de interfaz de usuario y UX |
-| **Software Architect** | [architect.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/architect.md) | Diseño técnico y ADRs |
-| **Tech Lead** | [tech-lead.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/tech-lead.md) | Revisión y estándares |
-| **Senior Developer** | [developer.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/developer.md) | Implementación y tests |
-| **QA Engineer** | [qa.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/qa.md) | Validación y reportes |
-| **DevOps Engineer** | [devops.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/devops.md) | CI/CD e infraestructura |
-
----
-
-## 🔄 Workflows
-
-Los flujos de trabajo están en `workflows/`:
-
-| Workflow | Archivo |
-| :--- | :--- |
-| Nueva Feature | [new-feature.md](file:///Volumes/ExternalSSD/Dev/ai-agents/workflows/new-feature.md) |
-| Corrección de Bugs | [bug-fix.md](file:///Volumes/ExternalSSD/Dev/ai-agents/workflows/bug-fix.md) |
-| Refactorización | [refactor.md](file:///Volumes/ExternalSSD/Dev/ai-agents/workflows/refactor.md) |
-| Release | [release.md](file:///Volumes/ExternalSSD/Dev/ai-agents/workflows/release.md) |
-| Cambio Arquitectónico | [architecture-change.md](file:///Volumes/ExternalSSD/Dev/ai-agents/workflows/architecture-change.md) |
-
----
-
-## 🧩 Sistema de Orquestación y Skills
-
-El sistema ha evolucionado de mantener un repositorio gigante de tecnologías a un modelo de **Orquestación y Descubrimiento**. Las piezas clave están documentadas en `docs/`:
-
-| Concepto | Archivo | Descripción |
-| :--- | :--- | :--- |
-| **Skill Discovery** | [skill-discovery.md](file:///Volumes/ExternalSSD/Dev/ai-agents/docs/skill-discovery.md) | Fuentes de descubrimiento (Project, User Installed, Framework) |
-| **Skill Resolution** | [skill-resolution.md](file:///Volumes/ExternalSSD/Dev/ai-agents/docs/skill-resolution.md) | Resolución de alias, dependencias y conflictos (Shadowing) |
-| **External Providers**| [external-skill-providers.md](file:///Volumes/ExternalSSD/Dev/ai-agents/docs/external-skill-providers.md) | Integración con Claude Code, Gemini CLI, MCP Servers |
-| **Skill Context** | [skill-context.md](file:///Volumes/ExternalSSD/Dev/ai-agents/docs/skill-context.md) | Cómo el contexto enriquece el comportamiento del agente |
-| **Registry Rules** | [registry.md](file:///Volumes/ExternalSSD/Dev/ai-agents/skills/registry.md) | Reglas dinámicas de priorización y catalogación |
-
----
-
-## ✅ Checklists de Revisión
-
-Los checklists están en `checklists/` y sirven para validar el cumplimiento de estándares de calidad antes del merge:
-
-| Checklist | Archivo | Propósito |
-| :--- | :--- | :--- |
-| **Frontend Review** | [frontend-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/frontend-review.md) | Revisión de código frontend, semántica HTML y responsividad |
-| **UI/UX Review** | [ui-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/ui-review.md) | Validación de UI/UX, consistencia visual y a11y |
-| **Backend Review** | [backend-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/backend-review.md) | Revisión de código backend, API y manejo de errores |
-| **Database Review** | [database-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/database-review.md) | Revisión de esquemas de BD, queries y migraciones |
-| **Security Review** | [security-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/security-review.md) | Auditoría de autenticación, input validation y secretos |
-| **Performance Review** | [performance-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/performance-review.md) | Verificación de tiempos de respuesta, queries óptimas y leaks |
-| **Release Review** | [release-review.md](file:///Volumes/ExternalSSD/Dev/ai-agents/checklists/release-review.md) | Checklist operacional para lanzamientos y rollbacks |
+| **Skill Manager** | [skill-manager.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/skill-manager.md) | Capability & Context Advisor, resolución de skills y memoria técnica |
+| **Product Analyst** | [analyst.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/analyst.md) | Requerimientos, reglas de negocio y especificaciones funcionales |
+| **UI Designer** | [ui-designer.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/ui-designer.md) | Diseño de interfaz de usuario, tokens visuales y a11y |
+| **Software Architect** | [architect.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/architect.md) | Diseño técnico, esquemas de BD y ADRs |
+| **Tech Lead** | [tech-lead.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/tech-lead.md) | Revisión, estándares y veredicto final |
+| **Senior Developer** | [developer.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/developer.md) | Implementación de código y tests |
+| **QA Engineer** | [qa.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/qa.md) | Validación adversarial y reportes |
+| **DevOps Engineer** | [devops.md](file:///Volumes/ExternalSSD/Dev/ai-agents/roles/devops.md) | CI/CD, infraestructura y despliegue |
 
 ---
 
 ## ⚙️ Scripts de Automatización
 
-Los scripts se encuentran en `scripts/` y automatizan tareas repetitivas de setup y validación:
-
 | Script | Propósito | Uso |
 | :--- | :--- | :--- |
-| [`setup-ide.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/setup-ide.sh) | Inicializa `.ai/`, seeds de memoria/métricas/KG, genera reglas de IDE | `bash .ai/agents/scripts/setup-ide.sh` |
-| [`update-ai-agents.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/update-ai-agents.sh) | Actualiza el framework en un comando (submodule + setup + auto-fix + validación) | `bash .ai/agents/scripts/update-ai-agents.sh [vX.Y.Z]` |
-| [`new-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/new-initiative.sh) | Bootstrap automático de feature, bug, auditoría o refactor | `bash .ai/agents/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
-| [`finish-phase.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/finish-phase.sh) | Cierre de fase: registra memory, metrics (model, provider, env, branch, tokens, duration) y snapshot automáticamente | `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <M> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate> [--archive]` |
-| [`archive-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/archive-initiative.sh) | Archiva una iniciativa a `.ai/archive/` con validación QA y reconciliación KG | `bash .ai/agents/scripts/archive-initiative.sh <INICIATIVA>` |
-| [`sync-initiatives.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/sync-initiatives.sh) | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .ai/agents/scripts/sync-initiatives.sh [--fix] [--archive-approved]` |
-| [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental + sistemas v3.2.0 (WARNs) | `bash .ai/agents/scripts/validate-project.sh` |
-| [`dashboard.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/dashboard.sh) | Genera y abre el visualizador interactivo (Proyecto, Grafo ADR, Telemetría, Memoria) | `bash .ai/agents/scripts/dashboard.sh` |
+| [`setup-ide.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/setup-ide.sh) | Inicializa `.abbia/`, seeds de memoria/métricas/KG y reglas de IDE | `bash .abbia/core/scripts/setup-ide.sh` |
+| [`migrate-to-abbia.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/migrate-to-abbia.sh) | Migra de forma segura proyectos legacy (`.ai/` o `.stratum/` $\rightarrow$ `.abbia/`) | `bash .abbia/core/scripts/migrate-to-abbia.sh` |
+| [`update-abbia.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/update-abbia.sh) | Actualiza el framework en un comando (submódulo + setup + sync + validación) | `bash .abbia/core/scripts/update-abbia.sh [vX.Y.Z]` |
+| [`new-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/new-initiative.sh) | Bootstrap automático de feature, bug, auditoría o refactor | `bash .abbia/core/scripts/new-initiative.sh <TIPO> <ID> <slug>` |
+| [`finish-phase.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/finish-phase.sh) | Cierre de fase: registra memory, metrics (model, provider, env, branch, tokens, duration) y snapshot | `bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <M> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source <measured|estimate>` |
+| [`archive-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/archive-initiative.sh) | Archiva una iniciativa a `.abbia/archive/` tras QA Aprobado | `bash .abbia/core/scripts/archive-initiative.sh <INICIATIVA>` |
+| [`sync-initiatives.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/sync-initiatives.sh) | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .abbia/core/scripts/sync-initiatives.sh [--fix]` |
+| [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental y sistemas de Abbia OS | `bash .abbia/core/scripts/validate-project.sh` |
+| [`dashboard.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/dashboard.sh) | Genera y abre el visualizador interactivo | `bash .abbia/core/scripts/dashboard.sh` o `./abbia dashboard` |
 | [`common.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/common.sh) | Librería compartida de soporte (interno, DRY) | *(Interno)* |
-
----
-
-## 📝 Templates para IDEs de IA
-
-Las plantillas de configuración para IDEs están en `templates/ide-configs/`:
-
-| Archivo | IDE Destino | Propósito |
-| :--- | :--- | :--- |
-| `AGENTS.md` | Todos | Fuente de verdad compartida: roles, workflows, reglas |
-| `CLAUDE.md` | Claude Code CLI | Comandos, reglas de terminal, memoria |
-| `cursorrules` | Cursor IDE | Reglas para Composer, Chat, edición inline |
-| `cursor-rules/` | Cursor IDE | Reglas modulares por contexto (`.cursor/rules/*.mdc`) |
-| `roomodes` | Roo-Code / Cline | Definición de Custom Modes por rol con tool permissions |
-| `windsurfrules` | Windsurf (Cascade) | Reglas para flujos de Cascade |
-| `clinerules` | Cline / Roo-Code | Control de costos, aprobación de acciones |
-| `copilot-instructions.md` | GitHub Copilot | Autocompletado, PR review, workspace agent |
-
-### Cómo Instalar en un Proyecto
-
-```bash
-# Desde la raíz del proyecto destino (que ya tiene el submódulo en .ai/agents/)
-bash .ai/agents/scripts/setup-ide.sh
-```
 
 ---
 
 ## 🌿 Higiene de Git y Prevención de Conflictos en Proyectos
 
-Para evitar conflictos de merge al trabajar con múltiples desarrolladores/ramas:
-1. **Archivos generados y cachés locales:** Deben estar en `.gitignore` (`.ai/sessions/`, `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml`).
-2. **Archivos append-only (Logs y Telemetría):** Deben usar la directiva `merge=union` en `.gitattributes` (`.ai/memory/workflow-log.md`, `.ai/metrics/executions.yaml`).
-3. **Reconciliación post-merge:** Tras un `pull` o `merge`, ejecutar `bash .ai/agents/scripts/sync-initiatives.sh` para reconstruir agregados y snapshots automáticamente.
-
----
-
-## ⚠️ Qué NO Hacer al Modificar este Repositorio
-
-- No duplicar archivos de roles (usar el existente).
-- No crear carpetas `.ai/features/` aquí — este repo no es un proyecto que consume agentes.
-- No modificar `templates/ide-configs/AGENTS.md` sin actualizar también este `AGENTS.md` si los cambios son relevantes.
-- No agregar contenido específico de un proyecto cliente en los templates genéricos.
+1. **Archivos generados y cachés locales:** En `.gitignore` (`.abbia/sessions/`, `.abbia/dashboard.html`, `.abbia/memory/context-snapshot.md`, `.abbia/metrics/aggregates.yaml`).
+2. **Archivos append-only (Logs y Telemetría):** Directiva `merge=union` en `.gitattributes` (`.abbia/memory/workflow-log.md`, `.abbia/metrics/executions.yaml`).
+3. **Reconciliación post-merge:** Tras un `pull` o `merge`, ejecutar `./abbia sync` o `bash .abbia/core/scripts/sync-initiatives.sh`.

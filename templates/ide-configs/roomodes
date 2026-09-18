@@ -2,7 +2,7 @@
   "customModes": [
     {
       "slug": "analyst",
-      "name": "Product Analyst (ai-agents)",
+      "name": "Product Analyst (Abbia OS)",
       "roleDefinition": "Experto en transformar necesidades de negocio e ideas en especificaciones funcionales claras, detalladas y sin ambigüedades (spec.md, discovery.md).",
       "groups": [
         "read",
@@ -10,11 +10,11 @@
         "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/analyst.md. Escribe únicamente especificaciones funcionales y criterios de aceptación Gherkin. Al concluir, ejecuta obligatoriamente: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> analysis analyst --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
+      "customInstructions": "Consulta roles/analyst.md. Escribe únicamente especificaciones funcionales y criterios de aceptación Gherkin. Al concluir, ejecuta obligatoriamente: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> analysis analyst --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "ui-designer",
-      "name": "UI Designer (ai-agents)",
+      "name": "UI Designer (Abbia OS)",
       "roleDefinition": "Especialista en diseño de interfaces, sistemas de diseño, accesibilidad (a11y) y contratos visuales (ui-design.md).",
       "groups": [
         "read",
@@ -22,11 +22,11 @@
         "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/ui-designer.md. Define componentes, tokens de diseño y layouts responsivos. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
+      "customInstructions": "Consulta roles/ui-designer.md. Define componentes, tokens de diseño y layouts responsivos. Al concluir, ejecuta: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> ui-design ui-designer --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "architect",
-      "name": "Software Architect (ai-agents)",
+      "name": "Software Architect (Abbia OS)",
       "roleDefinition": "Responsable del diseño técnico, patrones arquitectónicos, diagramas y decisiones registradas en ADRs (architecture.md, decisions.md).",
       "groups": [
         "read",
@@ -34,22 +34,22 @@
         "command",
         "browser"
       ],
-      "customInstructions": "Consulta roles/architect.md. Diseña contratos de API, esquemas de BD y registra ADRs con ID ARCH-NNN. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> architecture architect --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
+      "customInstructions": "Consulta roles/architect.md. Diseña contratos de API, esquemas de BD y registra ADRs con ID ARCH-NNN. Al concluir, ejecuta: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> architecture architect --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "tech-lead",
-      "name": "Tech Lead (ai-agents)",
+      "name": "Tech Lead (Abbia OS)",
       "roleDefinition": "Supervisor técnico y gatekeeper de calidad. Revisa especificaciones, arquitectura y código para emitir veredictos vinculantes.",
       "groups": [
         "read",
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/tech-lead.md. Revisa estándares y emite aprobación o rechazo. Al aprobar, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]."
+      "customInstructions": "Consulta roles/tech-lead.md. Revisa estándares y emite aprobación o rechazo. Al aprobar, ejecuta: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> approval tech-lead --verdict APROBADO --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]."
     },
     {
       "slug": "developer",
-      "name": "Senior Developer (ai-agents)",
+      "name": "Senior Developer (Abbia OS)",
       "roleDefinition": "Ingeniero de software senior encargado de implementar el código de producción y tests unitarios siguiendo la arquitectura aprobada.",
       "groups": [
         "read",
@@ -58,40 +58,40 @@
         "browser",
         "mcp"
       ],
-      "customInstructions": "Consulta roles/developer.md. Implementa código limpio, pruebas y registra decision.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> implement developer --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
+      "customInstructions": "Consulta roles/developer.md. Implementa código limpio, pruebas y registra decision.md. Al concluir, ejecuta: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> implement developer --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "qa",
-      "name": "QA Engineer (ai-agents)",
+      "name": "QA Engineer (Abbia OS)",
       "roleDefinition": "Ingeniero de calidad enfocado en validación adversarial, ejecución de suites de prueba y reporte objetivo de resultados (qa.md).",
       "groups": [
         "read",
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/qa.md. Ejecuta pruebas reales y emite reporte qa.md. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
+      "customInstructions": "Consulta roles/qa.md. Ejecuta pruebas reales y emite reporte qa.md. Al concluir, ejecuta: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> qa qa --verdict <APROBADO|RECHAZADO> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured."
     },
     {
       "slug": "devops",
-      "name": "DevOps Engineer (ai-agents)",
+      "name": "DevOps Engineer (Abbia OS)",
       "roleDefinition": "Especialista en infraestructura, pipelines de CI/CD, configuración de entornos y estrategias seguras de despliegue y rollback.",
       "groups": [
         "read",
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/devops.md. Automatiza pipelines y valida despliegues. Al concluir, ejecuta: bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]."
+      "customInstructions": "Consulta roles/devops.md. Automatiza pipelines y valida despliegues. Al concluir, ejecuta: bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> deploy devops --verdict PASS --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]."
     },
     {
       "slug": "skill-manager",
-      "name": "Skill Manager (ai-agents)",
-      "roleDefinition": "Orquestador de contexto, descubrimiento de skills, gestión de memoria persistente y DAG de workflows.",
+      "name": "Skill Manager (Abbia OS)",
+      "roleDefinition": "Orquestador de contexto, descubrimiento de skills, gestión de memoria técnica 3-Tier y DAG de workflows.",
       "groups": [
         "read",
         "edit",
         "command"
       ],
-      "customInstructions": "Consulta roles/skill-manager.md. Gestiona la memoria persistente (.ai/memory/) y orquesta la activación de skills del framework."
+      "customInstructions": "Consulta roles/skill-manager.md. Gestiona la memoria persistente (.abbia/memory/) y orquesta la activación de skills del framework."
     }
   ]
 }

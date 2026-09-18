@@ -1,36 +1,38 @@
-# Reglas de Windsurf — ai-agents OS
+# Reglas de Windsurf — Abbia OS
 
-> **Importante:** Este archivo contiene instrucciones específicas para Windsurf IDE (Cascade).
+> **Importante:** Este archivo contiene instrucciones específicas para Windsurf IDE (Cascade) bajo **Abbia OS**.
 > Para la guía completa de roles, workflows y reglas documentales, consultar `AGENTS.md` en la raíz del proyecto.
+> **Lema de Abbia:** *Layered Context, Structured Memory, Autonomous Delivery.*
 
 ---
 
 ## 📋 Comportamiento General
 
-1. **Leer contexto antes de actuar.** Siempre comenzar leyendo `.ai/context.md` para entender el proyecto.
+1. **Leer contexto antes de actuar.** Comenzar leyendo `.abbia/context.md` y `.abbia/memory/context-snapshot.md`.
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
-3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al archivo del rol correspondiente en `.ai/agents/roles/`.
-4. **Respetar la jerarquía documental.** No crear documentos fuera de `.ai/features/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
-5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega de fase o código, **ejecutar en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` para persistir memoria y telemetría.
+3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al rol en `.abbia/core/roles/`.
+4. **Respetar la jerarquía documental.** No crear documentos fuera de `.abbia/initiatives/FEAT-NNN-slug/` salvo actualización de documentos permanentes.
+5. **Cierre Mandatorio de Fase (Regla R6).** Al finalizar cualquier entrega de fase o código, **ejecutar en terminal**: `bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` (o `./abbia finish ...`).
 
 ---
 
 ## ⚙️ Reglas Específicas de Windsurf / Cascade
 
 ### Flujos de Cascade
-- Cuando Cascade proponga un flujo de edición multi-archivo, verificar que la secuencia de cambios respete las dependencias entre módulos (editar primero interfaces/tipos, luego implementaciones).
-- Al completar cualquier flujo o tarea, ejecutar siempre `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured`.
+- Cuando Cascade proponga un flujo de edición multi-archivo, verificar que la secuencia de cambios respete las dependencias entre módulos.
+- Al completar cualquier flujo o tarea, ejecutar siempre `finish-phase.sh` o `./abbia finish`.
 - En flujos largos, confirmar el plan antes de ejecutar si involucra más de 5 archivos.
 - Ante una tarea ambigua, preguntar antes de asumir el alcance.
 
 ### Contexto y @Mentions
 - Cuando el usuario use `@` para mencionar archivos, tratar esos archivos como contexto prioritario.
-- Si se menciona un archivo de `.ai/` (ej: `@.ai/context.md`), leerlo completamente antes de responder.
+- Si se menciona un archivo de `.abbia/` (ej: `@.abbia/context.md`), leerlo completamente antes de responder.
 - Priorizar el contexto en este orden:
-  1. `.ai/context.md`
-  2. `.ai/architecture.md`
-  3. `.ai/business-rules.md`
-  4. El archivo del rol activo (ej: `.ai/agents/roles/developer.md`)
+  1. `.abbia/context.md`
+  2. `.abbia/memory/context-snapshot.md`
+  3. `.abbia/architecture.md`
+  4. `.abbia/business-rules.md`
+  5. El archivo del rol activo (ej: `.abbia/core/roles/developer.md`)
 
 ### Edición de Archivos
 - Preferir ediciones quirúrgicas sobre reescrituras completas de archivos.

@@ -1,32 +1,26 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# archive-initiative.sh — ai-agents Initiative Archiver
+# archive-initiative.sh — Abbia OS Initiative Archiver
 # ==============================================================================
 # Archiva de forma segura y controlada una iniciativa (FEAT/BUG/AUDIT/REF):
-#   1. Valida que exista en .ai/features/ y que QA esté APROBADO (gate de calidad).
-#   2. Mueve la carpeta a .ai/archive/ manteniendo su nombre canónico.
-#   3. Actualiza referencias de archivos en .ai/knowledge-graph.yaml.
-#   4. Registra el evento de archivado en .ai/memory/workflow-log.md.
-#   5. Regenera .ai/memory/context-snapshot.md.
+#   1. Valida que exista en initiatives/ y que QA esté APROBADO (gate de calidad).
+#   2. Mueve la carpeta a archive/ manteniendo su nombre canónico.
+#   3. Actualiza referencias de archivos en knowledge-graph.yaml.
+#   4. Registra el evento de archivado en memory/workflow-log.md.
+#   5. Regenera memory/context-snapshot.md.
 #
 # Uso:
 #   bash archive-initiative.sh <INICIATIVA> [OPCIONES]
 #   Ej:  bash archive-initiative.sh FEAT-113
-#        bash archive-initiative.sh BUG-075-actualizacion-grupos-servicios
+#        bash archive-initiative.sh BUG-075-actualizacion-servicios
 #        bash archive-initiative.sh FEAT-113 --force
-#        bash archive-initiative.sh FEAT-113 --note "Deployado en v3.2.0"
-#
-# Opciones:
-#   --force        Ignora advertencias de QA o artefactos incompletos
-#   --prompt       Solicita confirmación interactiva en terminal antes de archivar
-#   --note "..."   Nota o resumen del pase a producción para el workflow-log
-#   --no-snapshot  No regenerar context-snapshot (útil en procesos por lotes)
+#        bash archive-initiative.sh FEAT-113 --note "Deployado en v4.0.0"
+#        ./abbia archive FEAT-113
 # ==============================================================================
 
 set -euo pipefail
 
-# Determinar directorio del script e importar utilidades comunes
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ -f "$SCRIPT_DIR/common.sh" ]; then
     source "$SCRIPT_DIR/common.sh"
@@ -36,13 +30,13 @@ else
 fi
 
 PROJECT_ROOT="$(detect_project_root)"
+resolve_abbia_paths "$PROJECT_ROOT"
 
-echo -e "${BLUE}====================================================${NC}"
-echo -e "${BLUE}   📦 Archivado de Iniciativa (ai-agents OS)       ${NC}"
-echo -e "${BLUE}====================================================${NC}"
+echo -e "${CYAN}====================================================${NC}"
+echo -e "${CYAN}   📦 Archivado de Iniciativa (Abbia OS v4.0.0)     ${NC}"
+echo -e "${CYAN}====================================================${NC}"
 echo -e "Proyecto: ${YELLOW}$PROJECT_ROOT${NC}"
 
-# ---------- 1. Parsear argumentos ----------
 INITIATIVE="${1:-}"
 FORCE=false
 PROMPT=false
@@ -52,8 +46,6 @@ NO_SNAPSHOT=false
 if [ -z "$INITIATIVE" ] || [[ "$INITIATIVE" == -* ]]; then
     echo -e "${RED}Error: Se requiere el identificador o nombre de la iniciativa.${NC}"
     echo -e "Uso: bash archive-initiative.sh <INICIATIVA> [OPCIONES]"
-    echo -e "  ej: bash archive-initiative.sh FEAT-113"
-    echo -e "      bash archive-initiative.sh BUG-075-actualizacion-grupos-servicios --note \"En producción\""
     exit 1
 fi
 
@@ -69,25 +61,20 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# ---------- 2. Localizar directorio origen en .ai/features/ ----------
-FEATURES_DIR="$PROJECT_ROOT/.ai/features"
-ARCHIVE_DIR="$PROJECT_ROOT/.ai/archive"
-
-if [ ! -d "$FEATURES_DIR" ]; then
-    echo -e "${RED}Error: No existe el directorio .ai/features/ en $PROJECT_ROOT.${NC}"
+if [ ! -d "$ABBIA_INITIATIVES_DIR" ]; then
+    echo -e "${RED}Error: No existe el directorio de iniciativas en $ABBIA_INITIATIVES_DIR.${NC}"
     exit 1
 fi
 
-mkdir -p "$ARCHIVE_DIR"
+mkdir -p "$ABBIA_ARCHIVE_DIR"
 
 SRC_DIR=""
-if [ -d "$FEATURES_DIR/$INITIATIVE" ]; then
-    SRC_DIR="$FEATURES_DIR/$INITIATIVE"
+if [ -d "$ABBIA_INITIATIVES_DIR/$INITIATIVE" ]; then
+    SRC_DIR="$ABBIA_INITIATIVES_DIR/$INITIATIVE"
 else
-    # Buscar por prefijo (ej. FEAT-113 -> FEAT-113-slug)
     shopt -s nullglob
     matches=()
-    for d in "$FEATURES_DIR/$INITIATIVE" "$FEATURES_DIR/$INITIATIVE"-*; do
+    for d in "$ABBIA_INITIATIVES_DIR/$INITIATIVE" "$ABBIA_INITIATIVES_DIR/$INITIATIVE"-*; do
         if [ -d "$d" ]; then
             matches+=("$d")
         fi
@@ -106,12 +93,11 @@ else
 fi
 
 if [ -z "$SRC_DIR" ] || [ ! -d "$SRC_DIR" ]; then
-    # Verificar si ya estaba archivada
-    if [ -d "$ARCHIVE_DIR/$INITIATIVE" ]; then
-        echo -e "${YELLOW}ℹ️  La iniciativa '$INITIATIVE' ya se encuentra archivada en .ai/archive/.${NC}"
+    if [ -d "$ABBIA_ARCHIVE_DIR/$INITIATIVE" ]; then
+        echo -e "${YELLOW}ℹ️  La iniciativa '$INITIATIVE' ya se encuentra archivada en ${ABBIA_ARCHIVE_DIR#$PROJECT_ROOT/}.${NC}"
         exit 0
     fi
-    echo -e "${RED}Error: No se encontró la iniciativa '$INITIATIVE' en .ai/features/.${NC}"
+    echo -e "${RED}Error: No se encontró la iniciativa '$INITIATIVE' en ${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}.${NC}"
     exit 1
 fi
 
@@ -120,7 +106,7 @@ TYPE=$(echo "$FOLDER_NAME" | cut -d'-' -f1)
 NUM=$(echo "$FOLDER_NAME" | cut -d'-' -f2)
 INITIATIVE_ID="$TYPE-$NUM"
 
-# ---------- 3. Validar estado de QA y Gate de Calidad ----------
+# Validar QA
 QA_FILE="$SRC_DIR/qa.md"
 QA_VERDICT="NO_DECLARADO"
 
@@ -129,7 +115,7 @@ if [ -f "$QA_FILE" ]; then
        grep -iqE '###[[:space:]]*Veredicto.*(APROBADO|PASS)' "$QA_FILE"; then
         QA_VERDICT="APROBADO"
     elif grep -iqE '(veredicto|estado|resultado)\*{0,2}[[:space:]]*[:—–-][^A-Za-z0-9]*(RECHAZADO|FAIL)' "$QA_FILE" || \
-         grep -iqE '###[[:space:]]*Veredicto.*(RECHAZADO|FAIL)' "$QA_FILE"; then
+          grep -iqE '###[[:space:]]*Veredicto.*(RECHAZADO|FAIL)' "$QA_FILE"; then
         QA_VERDICT="RECHAZADO"
     fi
 fi
@@ -138,7 +124,7 @@ if [ "$QA_VERDICT" != "APROBADO" ]; then
     if [ "$FORCE" = false ]; then
         echo -e "${RED}❌ Bloqueo de Calidad: La iniciativa '$FOLDER_NAME' no tiene QA APROBADO.${NC}"
         echo -e "   Estado detectado en qa.md: ${YELLOW}$QA_VERDICT${NC}"
-        echo -e "   Para archivarla igualmente bajo tu responsabilidad, usa el flag ${YELLOW}--force${NC}."
+        echo -e "   Para archivarla bajo tu responsabilidad, usa el flag ${YELLOW}--force${NC}."
         exit 1
     else
         echo -e "${YELLOW}⚠️  Advertencia: Forzando archivado con estado de QA '$QA_VERDICT' (--force activado).${NC}"
@@ -147,9 +133,9 @@ else
     echo -e "${GREEN}✓ QA verificado: APROBADO${NC}"
 fi
 
-# ---------- 4. Confirmación Interactiva (si aplica) ----------
+# Confirmación interactiva
 if [ "$PROMPT" = true ]; then
-    echo -e "\n${YELLOW}¿Confirmas archivar '$FOLDER_NAME' y moverla a .ai/archive/? (s/N):${NC} "
+    echo -e "\n${YELLOW}¿Confirmas archivar '$FOLDER_NAME' y moverla a ${ABBIA_ARCHIVE_DIR#$PROJECT_ROOT/}? (s/N):${NC} "
     read -r resp
     if [[ ! "$resp" =~ ^[sSyY]$ ]]; then
         echo -e "Operación cancelada por el usuario."
@@ -157,30 +143,30 @@ if [ "$PROMPT" = true ]; then
     fi
 fi
 
-# ---------- 5. Mover carpeta a .ai/archive/ ----------
-DEST_DIR="$ARCHIVE_DIR/$FOLDER_NAME"
+DEST_DIR="$ABBIA_ARCHIVE_DIR/$FOLDER_NAME"
 if [ -d "$DEST_DIR" ]; then
     echo -e "${YELLOW}⚠️  El destino '$DEST_DIR' ya existía. Sobrescribiendo...${NC}"
     rm -rf "$DEST_DIR"
 fi
 
 mv "$SRC_DIR" "$DEST_DIR"
-echo -e "${GREEN}✓ Carpeta movida:${NC} .ai/features/$FOLDER_NAME ➔ ${YELLOW}.ai/archive/$FOLDER_NAME${NC}"
+echo -e "${GREEN}✓ Carpeta movida:${NC} ${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}/$FOLDER_NAME ➔ ${YELLOW}${ABBIA_ARCHIVE_DIR#$PROJECT_ROOT/}/$FOLDER_NAME${NC}"
 
-# ---------- 6. Actualizar referencias en .ai/knowledge-graph.yaml ----------
-KG_FILE="$PROJECT_ROOT/.ai/knowledge-graph.yaml"
+# Actualizar references en knowledge-graph.yaml
+KG_FILE="$ABBIA_DIR/knowledge-graph.yaml"
 if [ -f "$KG_FILE" ]; then
-    if grep -q "features/$FOLDER_NAME" "$KG_FILE"; then
+    if grep -q "initiatives/$FOLDER_NAME" "$KG_FILE" || grep -q "features/$FOLDER_NAME" "$KG_FILE"; then
+        sed -i.bak "s|initiatives/$FOLDER_NAME|archive/$FOLDER_NAME|g" "$KG_FILE" 2>/dev/null || \
+        sed -i '' "s|initiatives/$FOLDER_NAME|archive/$FOLDER_NAME|g" "$KG_FILE" 2>/dev/null || true
         sed -i.bak "s|features/$FOLDER_NAME|archive/$FOLDER_NAME|g" "$KG_FILE" 2>/dev/null || \
         sed -i '' "s|features/$FOLDER_NAME|archive/$FOLDER_NAME|g" "$KG_FILE" 2>/dev/null || true
         rm -f "$KG_FILE.bak"
-        echo -e "${GREEN}✓ Referencias actualizadas en .ai/knowledge-graph.yaml${NC}"
+        echo -e "${GREEN}✓ Referencias actualizadas en knowledge-graph.yaml${NC}"
     fi
 fi
 
-# ---------- 7. Registrar en .ai/memory/workflow-log.md ----------
-MEM_DIR="$PROJECT_ROOT/.ai/memory"
-LOG_FILE="$MEM_DIR/workflow-log.md"
+# Registrar en workflow-log.md
+LOG_FILE="$ABBIA_MEMORY_DIR/workflow-log.md"
 CURRENT_DATE=$(date -u +"%Y-%m-%d")
 
 if [ -f "$LOG_FILE" ]; then
@@ -196,18 +182,17 @@ if [ -f "$LOG_FILE" ]; then
 - **Rol:** devops
 - **Fecha:** $CURRENT_DATE
 - **Modo:** estandar
-- **Resultado:** APROBADO (Archivada en .ai/archive/)
+- **Resultado:** APROBADO (Archivada en ${ABBIA_ARCHIVE_DIR#$PROJECT_ROOT/})
 - **Nota:** $FINAL_NOTE
 EOF
-    echo -e "${GREEN}✓ Registrado cierre en .ai/memory/workflow-log.md${NC}"
+    echo -e "${GREEN}✓ Registrado cierre en workflow-log.md${NC}"
 fi
 
-# ---------- 8. Regenerar context-snapshot.md ----------
 if [ "$NO_SNAPSHOT" = false ]; then
     regenerate_context_snapshot "$PROJECT_ROOT"
-    echo -e "${GREEN}✓ Regenerado .ai/memory/context-snapshot.md${NC}"
+    echo -e "${GREEN}✓ Regenerado context-snapshot.md${NC}"
 fi
 
 echo -e "${GREEN}====================================================${NC}"
-echo -e "${GREEN}✨ Iniciativa '$FOLDER_NAME' archivada exitosamente.${NC}"
+echo -e "${GREEN}✨ Iniciativa '$FOLDER_NAME' archivada exitosamente en Abbia OS.${NC}"
 echo -e "${GREEN}====================================================${NC}"

@@ -159,7 +159,7 @@ hotfix:
 
 ### Paso 0 — Triaje y Clasificación (QA / Tech Lead)
 
-Al detectar un defecto, se debe abrir un caso de corrección registrando un ID incremental `BUG-NNN` en el registro de IDs de `.ai/context.md` y clasificarlo bajo dos dimensiones:
+Al detectar un defecto, se debe abrir un caso de corrección registrando un ID incremental `BUG-NNN` en el registro de IDs de `.abbia/context.md` y clasificarlo bajo dos dimensiones:
 
 #### A. Severidad
 - 🔴 **Crítico:** Bloqueo completo del sistema, pérdida de integridad de datos o brecha de seguridad. Activa el pipeline de **Hotfix**.
@@ -171,9 +171,9 @@ Al detectar un defecto, se debe abrir un caso de corrección registrando un ID i
 
 | Categoría | Causa Raíz | Pipeline de Agentes | Entregables Modificados |
 | :--- | :--- | :--- | :--- |
-| **1. Negocio o Funcional** | Requerimiento original ambiguo o contradictorio. | Analyst ➡️ Tech Lead ➡️ Developer ➡️ QA | `.ai/features/FEAT-XXX/spec.md` o `.ai/business-rules.md` |
-| **2. Visual o UI/UX** | Problemas de responsive, fallos visuales o estados omitidos. | UI Designer ➡️ Developer ➡️ QA | `.ai/features/FEAT-XXX/ui-design.md` o `ui-review.md` |
-| **3. Arquitectura / Técnico** | Mal diseño de BD, condición de carrera o fallo de integración. | Architect ➡️ Tech Lead ➡️ Developer ➡️ QA | `.ai/features/FEAT-XXX/architecture.md` o `.ai/architecture.md` |
+| **1. Negocio o Funcional** | Requerimiento original ambiguo o contradictorio. | Analyst ➡️ Tech Lead ➡️ Developer ➡️ QA | `.abbia/initiatives/FEAT-XXX/spec.md` o `.abbia/business-rules.md` |
+| **2. Visual o UI/UX** | Problemas de responsive, fallos visuales o estados omitidos. | UI Designer ➡️ Developer ➡️ QA | `.abbia/initiatives/FEAT-XXX/ui-design.md` o `ui-review.md` |
+| **3. Arquitectura / Técnico** | Mal diseño de BD, condición de carrera o fallo de integración. | Architect ➡️ Tech Lead ➡️ Developer ➡️ QA | `.abbia/initiatives/FEAT-XXX/architecture.md` o `.abbia/architecture.md` |
 | **4. Implementación Pura** | Error lógico del Developer; la especificación y el diseño visual/técnico son correctos. | Developer ➡️ QA | Solo archivos de código del proyecto |
 
 ---
@@ -185,10 +185,10 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 ##### 1.A. Ajuste de Especificación Funcional (Product Analyst)
 *Se activa si el bug es funcional o de negocio.*
 - **Entrada:** Reporte de bug.
-- **Acción:** Corregir `.ai/features/FEAT-XXX/spec.md` (o crearla en `.ai/features/BUG-NNN-slug/spec.md` si es general) y actualizar `.ai/business-rules.md` si aplica.
+- **Acción:** Corregir `.abbia/initiatives/FEAT-XXX/spec.md` (o crearla en `.abbia/initiatives/BUG-NNN-slug/spec.md` si es general) y actualizar `.abbia/business-rules.md` si aplica.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN analysis analyst \
+  bash .abbia/core/scripts/finish-phase.sh BUG-NNN analysis analyst \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 - **Aprobación:** El Tech Lead debe validar los cambios funcionales antes de que pasen al Developer.
@@ -199,17 +199,17 @@ Según la clasificación del bug, se activa el agente correspondiente para corre
 - **Acción:** Modificar el diseño en `ui-design.md` para corregir la alineación, adaptabilidad o definir el estado visual omitido.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN ui-design ui-designer \
+  bash .abbia/core/scripts/finish-phase.sh BUG-NNN ui-design ui-designer \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
 #### 1.C. Ajuste de Diseño Técnico (Software Architect)
 *Se activa si el bug es arquitectónico o de lógica técnica compleja.*
 - **Entrada:** Reporte de bug + diseño técnico actual.
-- **Acción:** Actualizar `architecture.md` de la feature o el archivo de arquitectura global `.ai/architecture.md`. Si se toma una decisión de diseño de impacto general, registrar una nueva decisión `ARCH-NNN` en `.ai/decisions.md` y `.ai/knowledge-graph.yaml`.
+- **Acción:** Actualizar `architecture.md` de la feature o el archivo de arquitectura global `.abbia/architecture.md`. Si se toma una decisión de diseño de impacto general, registrar una nueva decisión `ARCH-NNN` en `.abbia/decisions.md` y `.abbia/knowledge-graph.yaml`.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN architecture architect \
+  bash .abbia/core/scripts/finish-phase.sh BUG-NNN architecture architect \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 - **Aprobación:** El Tech Lead debe revisar y aprobar el diseño técnico modificado.
@@ -243,7 +243,7 @@ Especificación de corrección de referencia:
 - Si el fix requiere modificar APIs o esquemas de BD no contemplados en el Paso 1.C, detener la implementación y notificar al Architect.
 - **Cierre Obligatorio (R6):** Al finalizar la implementación y tests, el Developer **debe ejecutar obligatoriamente**:
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN implement developer \
+  bash .abbia/core/scripts/finish-phase.sh BUG-NNN implement developer \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -272,7 +272,7 @@ Cambios realizados: [Lista de commits o descripción de modificaciones de códig
   3. Se repite el ciclo hasta que el veredicto sea `APROBADO` (máximo 3 intentos antes de escalar al Tech Lead).
 - **Cierre Obligatorio (R6):** Al emitir el reporte `qa.md`, ejecutar:
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh BUG-NNN qa qa --verdict <APROBADO|RECHAZADO> \
+  bash .abbia/core/scripts/finish-phase.sh BUG-NNN qa qa --verdict <APROBADO|RECHAZADO> \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -295,7 +295,7 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 > 4. **Release:** Indicar al usuario si procede release según [`workflows/release.md`](release.md).
 > 5. **Cierre Obligatorio (R6):**
 >    ```bash
->    bash .ai/agents/scripts/finish-phase.sh BUG-NNN approval tech-lead --verdict APROBADO \
+>    bash .abbia/core/scripts/finish-phase.sh BUG-NNN approval tech-lead --verdict APROBADO \
 >      --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]
 >    ```
 
@@ -306,12 +306,12 @@ Si todo está conforme, emite el veredicto de `APROBADO` para el deployment.
 1. Desplegar el fix a producción (ver [`workflows/release.md`](release.md)).
 2. Ejecutar el cierre y archivado final:
    ```bash
-   bash .ai/agents/scripts/finish-phase.sh BUG-NNN deploy devops --verdict PASS --archive \
+   bash .abbia/core/scripts/finish-phase.sh BUG-NNN deploy devops --verdict PASS --archive \
      --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
    ```
 3. Consolidar cambios en la memoria del proyecto:
-   - Si se modificó la arquitectura, actualizar `.ai/architecture.md`.
-   - Si se modificó una regla funcional, actualizar `.ai/business-rules.md`.
+   - Si se modificó la arquitectura, actualizar `.abbia/architecture.md`.
+   - Si se modificó una regla funcional, actualizar `.abbia/business-rules.md`.
 4. Actualizar `CHANGELOG.md` documentando el bug resuelto en la sección de "Fixed" (esto ya se hizo automáticamente en el Paso 4 con `npm run bump:patch`).
 
 ---
@@ -326,13 +326,13 @@ Si la severidad es **Crítica** y el sistema o datos están comprometidos, el fl
 4. **Documentación Post-Mortem:** Dentro de las 24 horas posteriores al deploy, el Tech Lead convoca a los agentes (Analyst, Architect, UI Designer, según corresponda) para:
    - Analizar la causa raíz.
    - Actualizar retroactivamente la documentación técnica o funcional (`context.md`, `architecture.md`, `business-rules.md`).
-   - Registrar la lección aprendida en `.ai/decisions.md` para prevenir recurrencia.
+   - Registrar la lección aprendida en `.abbia/decisions.md` para prevenir recurrencia.
 
 ---
 
 ## Checklist de Cierre y Archivado de Bug Fix
 
-- [ ] Identificado e incrementado el ID del bug `BUG-NNN` en `.ai/context.md`.
+- [ ] Identificado e incrementado el ID del bug `BUG-NNN` en `.abbia/context.md`.
 - [ ] Bug clasificado por Severidad y Categoría en el triaje.
 - [ ] **Documentación ajustada:**
   - [ ] `spec.md` modificada por el Analyst (si el bug fue de Negocio).
@@ -343,12 +343,12 @@ Si la severidad es **Crítica** y el sistema o datos están comprometidos, el fl
 - [ ] Veredicto del Tech Lead: `APROBADO`.
 - [ ] Usuario validó en entorno de pruebas / staging.
 - [ ] Despliegue a producción completado con éxito.
-- [ ] Bug archivado automáticamente a `.ai/archive/` (`bash .ai/agents/scripts/archive-initiative.sh BUG-NNN`).
-- [ ] Memoria del proyecto (`.ai/memory/workflow-log.md`, `context-snapshot.md`) y Knowledge Graph actualizados.
+- [ ] Bug archivado automáticamente a `.abbia/archive/` (`bash .abbia/core/scripts/archive-initiative.sh BUG-NNN`).
+- [ ] Memoria del proyecto (`.abbia/memory/workflow-log.md`, `context-snapshot.md`) y Knowledge Graph actualizados.
 - [ ] `CHANGELOG.md` del proyecto actualizado.
 - [ ] Versión bumpeda (`npm run bump:patch`).
 - [ ] Git tag `vX.Y.Z` creado y pusheado.
 
 ---
 
-*Workflow bug-fix v3.4.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow bug-fix v3.4.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

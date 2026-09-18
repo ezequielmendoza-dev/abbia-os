@@ -373,7 +373,7 @@ Cuando trabajes en este proyecto:
 
 ```bash
 # Agregar ai-agents como submodule
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+git submodule add https://github.com/ezequielmendoza-dev/abbia-os.git .ai/agents
 
 # La estructura final del proyecto queda:
 # .ai/
@@ -387,4 +387,4 @@ Ver [`docs/project-integration.md`](project-integration.md) para instrucciones c
 
 ---
 
-*Project AI Structure v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Project AI Structure v2.0 — ai-agents framework | github.com/ezequielmendoza-dev/abbia-os*

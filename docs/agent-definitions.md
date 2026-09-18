@@ -92,4 +92,4 @@ Los agentes tienen versión explícita. Cuando se mejoran, la versión se increm
 
 ---
 
-*Meta-documento versión 2.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Meta-documento versión 2.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

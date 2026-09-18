@@ -1,12 +1,13 @@
 ---
-description: Reglas generales de arquitectura y desarrollo con ai-agents OS (Specification-Driven Development)
+description: Reglas generales de arquitectura y desarrollo con Abbia OS (Specification-Driven Development)
 globs: *
 alwaysApply: true
 ---
 
-# Reglas Generales de ai-agents OS
+# Reglas Generales de Abbia OS
 
-Este proyecto sigue la metodología **Specification-Driven Development (SDD)** gobernada por el framework `ai-agents`.
+Este proyecto sigue la metodología **Specification-Driven Development (SDD)** gobernada por el framework **Abbia OS**.
+*Layered Context, Structured Memory, Autonomous Delivery.*
 
 ## 📜 Principios Clave
 1. **Documentos como fuente de verdad:** Todo cambio comienza con una especificación (`spec.md` o `bug-report.md`) y un diseño arquitectónico aprobado (`architecture.md`).
@@ -16,11 +17,11 @@ Este proyecto sigue la metodología **Specification-Driven Development (SDD)** g
    - **R3:** No crear versiones del tipo `archivo-v2.md`. Modificar el existente.
    - **R4:** Los cambios en roles/workflows deben reflejarse en el changelog correspondiente.
    - **R5:** Los documentos representan el **estado actual**, no el histórico.
-   - **R6:** **Cierre Mandatorio y Telemetría:** Al finalizar cualquier fase de trabajo o entrega, **ejecutar obligatoriamente en terminal**: `bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` para registrar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y regenerar `context-snapshot.md`. Nunca omitir este paso ni los flags de telemetría.
+   - **R6:** **Cierre Mandatorio y Telemetría:** Al finalizar cualquier fase de trabajo o entrega, **ejecutar obligatoriamente en terminal**: `bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured` (o `./abbia finish ...`) para registrar memoria (`workflow-log.md`), telemetría (`executions.yaml`) y regenerar `context-snapshot.md`.
 
 ## 🧭 Estructura de Consulta Obligatoria
 Antes de proponer o implementar código, consulta:
-- `.ai/context.md` (visión global, stack y registro de iniciativas)
-- `.ai/business-rules.md` (reglas de negocio vigentes)
-- `.ai/architecture.md` (decisiones y arquitectura técnica global)
-- `.ai/memory/context-snapshot.md` (estado reciente y lecciones aprendidas)
+- `.abbia/context.md` (visión global, stack y registro de iniciativas)
+- `.abbia/business-rules.md` (reglas de negocio vigentes)
+- `.abbia/architecture.md` (decisiones y arquitectura técnica global)
+- `.abbia/memory/context-snapshot.md` (estado reciente y lecciones aprendidas)

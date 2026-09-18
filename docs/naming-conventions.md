@@ -229,4 +229,4 @@ refactor(auth): extract token validation to separate service
 
 ---
 
-*Convenciones de nomenclatura v1.0 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Convenciones de nomenclatura v1.0 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

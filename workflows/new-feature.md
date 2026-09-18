@@ -17,7 +17,7 @@
 
 ```mermaid
 flowchart TD
-    A[💡 Requerimiento del stakeholder] --> B[Verificar .ai/context.md y business-rules.md]
+    A[💡 Requerimiento del stakeholder] --> B[Verificar .abbia/context.md y business-rules.md]
     B --> C[🔍 Analyst: Discovery]
     C --> D{Ambigüedades críticas?}
     D -->|Sí| E[📝 discovery.md]
@@ -142,31 +142,31 @@ hotfix:
 
 Antes de iniciar cualquier trabajo:
 
-1. Leer `.ai/context.md` para entender el sistema actual
-2. Leer `.ai/business-rules.md` para conocer las restricciones de negocio
-3. Leer `.ai/architecture.md` para entender la arquitectura vigente
-4. Consultar `.ai/decisions.md` para conocer decisiones relevantes anteriores
+1. Leer `.abbia/context.md` para entender el sistema actual
+2. Leer `.abbia/business-rules.md` para conocer las restricciones de negocio
+3. Leer `.abbia/architecture.md` para entender la arquitectura vigente
+4. Consultar `.abbia/decisions.md` para conocer decisiones relevantes anteriores
 5. **Asignar el ID de la feature** consultando el Registro de IDs en `context.md`
-6. Crear la carpeta `.ai/features/FEAT-NNN-slug/`
+6. Crear la carpeta `.abbia/initiatives/FEAT-NNN-slug/`
 
 ```bash
-mkdir -p .ai/features/FEAT-NNN-slug
-touch .ai/features/FEAT-NNN-slug/discovery.md # Opcional, solo si hay ambigüedades
-touch .ai/features/FEAT-NNN-slug/spec.md
-touch .ai/features/FEAT-NNN-slug/ui-design.md
-touch .ai/features/FEAT-NNN-slug/architecture.md
-touch .ai/features/FEAT-NNN-slug/qa.md
-touch .ai/features/FEAT-NNN-slug/decision.md
+mkdir -p .abbia/initiatives/FEAT-NNN-slug
+touch .abbia/initiatives/FEAT-NNN-slug/discovery.md # Opcional, solo si hay ambigüedades
+touch .abbia/initiatives/FEAT-NNN-slug/spec.md
+touch .abbia/initiatives/FEAT-NNN-slug/ui-design.md
+touch .abbia/initiatives/FEAT-NNN-slug/architecture.md
+touch .abbia/initiatives/FEAT-NNN-slug/qa.md
+touch .abbia/initiatives/FEAT-NNN-slug/decision.md
 ```
 
-7. Actualizar el Registro de IDs en `.ai/context.md`
+7. Actualizar el Registro de IDs en `.abbia/context.md`
 
 ---
 
 ### Paso 0.5 — Discovery (Analyst - Opcional)
 
 **Agente:** Product Analyst  
-**Output:** `.ai/features/FEAT-NNN-slug/discovery.md`  
+**Output:** `.abbia/initiatives/FEAT-NNN-slug/discovery.md`  
 **Template:** [`templates/discovery.md`](../templates/discovery.md)
 
 **Activación:** Ocurre automáticamente en la evaluación del Analyst. Si detecta ambigüedades críticas, interrumpe el flujo normal y produce este documento en lugar de la spec.
@@ -178,7 +178,7 @@ touch .ai/features/FEAT-NNN-slug/decision.md
 ### Paso 1 — Especificación Funcional (Analyst)
 
 **Agente:** Product Analyst  
-**Output:** `.ai/features/FEAT-NNN-slug/spec.md`  
+**Output:** `.abbia/initiatives/FEAT-NNN-slug/spec.md`  
 **Template:** [`templates/feature-spec.md`](../templates/feature-spec.md)
 
 **Activación:**
@@ -186,8 +186,8 @@ touch .ai/features/FEAT-NNN-slug/decision.md
 ```
 Actúa como el agente Product Analyst definido en roles/analyst.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
-Reglas de negocio: [contenido de .ai/business-rules.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
+Reglas de negocio: [contenido de .abbia/business-rules.md]
 
 Feature a especificar: FEAT-NNN — [nombre]
 
@@ -198,7 +198,7 @@ Requerimiento:
 **Criterio de salida:** `spec.md` completa, sin preguntas abiertas bloqueantes, lista para revisión del Tech Lead.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug analysis analyst \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug analysis analyst \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -217,14 +217,14 @@ Si es **APROBADO** → continuar al Paso 3.
 ```
 Actúa como el agente Tech Lead definido en roles/tech-lead.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
-Estoy presentando para revisión: feature-spec en .ai/features/FEAT-NNN-slug/spec.md
+Estoy presentando para revisión: feature-spec en .abbia/initiatives/FEAT-NNN-slug/spec.md
 ```
 
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-1 tech-lead --verdict <APROBADO|RECHAZADO> \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug tech-review-1 tech-lead --verdict <APROBADO|RECHAZADO> \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -233,7 +233,7 @@ Estoy presentando para revisión: feature-spec en .ai/features/FEAT-NNN-slug/spe
 ### Paso 3 — Diseño de Interfaz (UI Designer)
 
 **Agente:** UI Designer  
-**Output:** `.ai/features/FEAT-NNN-slug/ui-design.md`  
+**Output:** `.abbia/initiatives/FEAT-NNN-slug/ui-design.md`  
 **Template:** [`templates/ui-design-spec.md`](../templates/ui-design-spec.md)
 
 **Activación:**
@@ -241,16 +241,16 @@ Estoy presentando para revisión: feature-spec en .ai/features/FEAT-NNN-slug/spe
 ```
 Actúa como el agente UI Designer definido en roles/ui-designer.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
 Especificación funcional de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/spec.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/spec.md]
 ```
 
 **Criterio de salida:** `ui-design.md` completa, con la arquitectura de información, layouts y componentes diseñados para todos los viewports, lista para el desarrollo.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug ui-design ui-designer \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug ui-design ui-designer \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -259,29 +259,29 @@ Especificación funcional de referencia:
 ### Paso 4 — Diseño Técnico (Architect)
 
 **Agente:** Software Architect  
-**Output:** `.ai/features/FEAT-NNN-slug/architecture.md`  
+**Output:** `.abbia/initiatives/FEAT-NNN-slug/architecture.md`  
 **Template:** [`templates/architecture-spec.md`](../templates/architecture-spec.md)
 
-Si el diseño requiere cambios en la arquitectura global, actualizar `.ai/architecture.md` y `.ai/knowledge-graph.yaml` en este paso.
+Si el diseño requiere cambios en la arquitectura global, actualizar `.abbia/architecture.md` y `.abbia/knowledge-graph.yaml` en este paso.
 
 **Activación:**
 
 ```
 Actúa como el agente Software Architect definido en roles/architect.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
-Arquitectura actual: [contenido de .ai/architecture.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
+Arquitectura actual: [contenido de .abbia/architecture.md]
 
 Especificación funcional a diseñar:
-[contenido de .ai/features/FEAT-NNN-slug/spec.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/spec.md]
 
 Diseño visual de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/ui-design.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/ui-design.md]
 ```
 
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug architecture architect \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug architecture architect \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -293,12 +293,12 @@ Diseño visual de referencia:
 **Veredictos posibles:** APROBADO / APROBADO CON OBSERVACIONES / RECHAZADO
 
 Si es **RECHAZADO** (por diseño técnico o visual) → volver al Paso 3 o 4 con el feedback del Tech Lead.  
-Si hay decisiones de arquitectura importantes → registrar en `.ai/decisions.md` y `.ai/knowledge-graph.yaml`.  
+Si hay decisiones de arquitectura importantes → registrar en `.abbia/decisions.md` y `.abbia/knowledge-graph.yaml`.  
 Si es **APROBADO** → continuar al Paso 6.
 
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug tech-review-2 tech-lead --verdict <APROBADO|RECHAZADO> \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug tech-review-2 tech-lead --verdict <APROBADO|RECHAZADO> \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -320,25 +320,25 @@ Antes de escribir código o editar archivos, el Developer debe:
 ```
 Actúa como el agente Senior Developer definido en roles/developer.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
 Tarea a implementar:
 [descripción de la tarea técnica]
 
 Especificación de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/spec.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/spec.md]
 
 Diseño visual de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/ui-design.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/ui-design.md]
 
 Diseño técnico de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/architecture.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/architecture.md]
 ```
 
 **Criterio de salida:** Implementación completa, funcional, con tests unitarios pasando y fiel a la UI y la arquitectura, lista para QA.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug implement developer \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug implement developer \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -347,7 +347,7 @@ Diseño técnico de referencia:
 ### Paso 7 — Validación de Calidad (QA) y Self-Healing Loop
 
 **Agente:** QA Engineer  
-**Output:** `.ai/features/FEAT-NNN-slug/qa.md`  
+**Output:** `.abbia/initiatives/FEAT-NNN-slug/qa.md`  
 **Template:** [`templates/qa-report.md`](../templates/qa-report.md)
 
 **Activación:**
@@ -355,16 +355,16 @@ Diseño técnico de referencia:
 ```
 Actúa como el agente QA Engineer definido en roles/qa.md.
 
-Contexto del proyecto: [contenido de .ai/context.md]
+Contexto del proyecto: [contenido de .abbia/context.md]
 
 Feature spec de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/spec.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/spec.md]
 
 Diseño visual de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/ui-design.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/ui-design.md]
 
 Diseño técnico de referencia:
-[contenido de .ai/features/FEAT-NNN-slug/architecture.md]
+[contenido de .abbia/initiatives/FEAT-NNN-slug/architecture.md]
 
 Implementación a revisar:
 [descripción de los cambios implementados]
@@ -381,7 +381,7 @@ Si el resultado es **RECHAZADO / FAIL**:
 4. Si el resultado es **APROBADO / PASS** → continuar al Paso 8.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug qa qa --verdict <APROBADO|RECHAZADO> \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug qa qa --verdict <APROBADO|RECHAZADO> \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -401,7 +401,7 @@ Si el resultado es **RECHAZADO / FAIL**:
 > 4. **Release:** Indicar al usuario si debe proceder con release según [`workflows/release.md`](release.md).
 > 5. **Cierre Obligatorio (R6):**
 >    ```bash
->    bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO \
+>    bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO \
 >      --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured [--archive]
 >    ```
 
@@ -413,7 +413,7 @@ Si el resultado es **RECHAZADO / FAIL**:
 **Workflow:** Ver [`workflows/release.md`](release.md) para el proceso de deployment.
 - **Cierre Obligatorio (R6):**
   ```bash
-  bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug deploy devops --verdict PASS --archive \
+  bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug deploy devops --verdict PASS --archive \
     --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
   ```
 
@@ -428,18 +428,18 @@ Cuando la feature está validada por QA y lista para producción:
 2. **Archivado Automático al Pasar a Producción:**  
    Al confirmar el pase a producción, se ejecuta el archivado seguro:
    ```bash
-   bash .ai/agents/scripts/archive-initiative.sh FEAT-NNN-slug
+   bash .abbia/core/scripts/archive-initiative.sh FEAT-NNN-slug
    # o en un solo paso durante el cierre de fase:
-   bash .ai/agents/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO --archive \
+   bash .abbia/core/scripts/finish-phase.sh FEAT-NNN-slug approval tech-lead --verdict APROBADO --archive \
      --model <MODELO> --tokens-in <IN> --tokens-out <OUT> --duration <S> --source measured
    ```
-   *Esto valida QA, mueve la carpeta a `.ai/archive/`, actualiza `knowledge-graph.yaml`, registra en `workflow-log.md` y regenera `context-snapshot.md`.*
+   *Esto valida QA, mueve la carpeta a `.abbia/archive/`, actualiza `knowledge-graph.yaml`, registra en `workflow-log.md` y regenera `context-snapshot.md`.*
 
 3. **Actualizar documentos permanentes si aplica:**
-   - `.ai/architecture.md` si cambió la arquitectura del sistema
-   - `.ai/business-rules.md` si se incorporaron nuevas reglas permanentes
-   - `.ai/glossary.md` si aparecieron nuevos términos del dominio
-   - `.ai/decisions.md` si hay decisiones que aplican globalmente
+   - `.abbia/architecture.md` si cambió la arquitectura del sistema
+   - `.abbia/business-rules.md` si se incorporaron nuevas reglas permanentes
+   - `.abbia/glossary.md` si aparecieron nuevos términos del dominio
+   - `.abbia/decisions.md` si hay decisiones que aplican globalmente
 
 4. **Actualizar** el `CHANGELOG.md` del proyecto con la feature completada.
 
@@ -455,11 +455,11 @@ Cuando la feature está validada por QA y lista para producción:
 - [ ] Usuario validó en entorno de pruebas / staging
 - [ ] Código en rama principal / producción
 - [ ] Documentos permanentes actualizados si fue necesario
-- [ ] Feature archivada automáticamente a `.ai/archive/` (`archive-initiative.sh`)
+- [ ] Feature archivada automáticamente a `.abbia/archive/` (`archive-initiative.sh`)
 - [ ] `CHANGELOG.md` actualizado
 - [ ] Versión bumpeda (`npm run bump:minor`)
 - [ ] Git tag `vX.Y.Z` creado y pusheado
 
 ---
 
-*Workflow Nueva Feature v3.4.0 — ai-agents framework | github.com/ezequielmendoza-dev/ai-agents*
+*Workflow Nueva Feature v3.4.0 — Abbia OS framework | github.com/ezequielmendoza-dev/abbia-os*

@@ -16,7 +16,7 @@ La diferencia entre un output genérico e inútil y uno preciso y accionable est
 
 ## Anatomía de un Prompt Efectivo
 
-En entornos de desarrollo asistidos por IA (como Cursor, Windsurf, Claude Code, Cline, etc.), la IA tiene acceso de lectura al workspace y, por defecto, lee el archivo de contexto del proyecto (`.ai/context.md`) al inicializarse. Por lo tanto, **no necesitas pegar el contexto del proyecto ni indicarlo en cada prompt**.
+En entornos de desarrollo asistidos por IA (como Cursor, Windsurf, Claude Code, Cline, etc.), la IA tiene acceso de lectura al workspace y, por defecto, lee el archivo de contexto del proyecto (`.abbia/context.md`) al inicializarse. Por lo tanto, **no necesitas pegar el contexto del proyecto ni indicarlo en cada prompt**.
 
 Un prompt moderno y limpio solo requiere:
 
@@ -52,7 +52,7 @@ La calificación es con estrellas del 1 al 5 y un comentario opcional."
 
 #### Prompt de Bootstrap / Auto-Contextualización de un Proyecto
 ```
-Actúa como el agente Product Analyst definido en roles/analyst.md y genera el archivo `.ai/context.md` de este proyecto basándote en la plantilla `.ai/agents/templates/project-context.md` tras escanear la estructura y archivos de configuración.
+Actúa como el agente Product Analyst definido en roles/analyst.md y genera el archivo `.abbia/context.md` de este proyecto basándote en la plantilla `.ai/agents/templates/project-context.md` tras escanear la estructura y archivos de configuración.
 ```
 
 #### Prompt con contexto de archivo
@@ -73,7 +73,7 @@ Restricciones conocidas:
 Actúa como el agente Product Analyst definido en roles/analyst.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-El Tech Lead rechazó la especificación en .ai/features/FEAT-012-calificacion-viajes/spec.md con el siguiente feedback:
+El Tech Lead rechazó la especificación en .abbia/initiatives/FEAT-012-calificacion-viajes/spec.md con el siguiente feedback:
 [Escribir o referenciar el feedback recibido]
 
 Por favor, revisa el archivo de especificación original y corrige los puntos señalados.
@@ -88,7 +88,7 @@ Por favor, revisa el archivo de especificación original y corrige los puntos se
 Actúa como el agente Software Architect definido en roles/architect.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Lee la especificación funcional aprobada en .ai/features/FEAT-012-calificacion-viajes/spec.md.
+Lee la especificación funcional aprobada en .abbia/initiatives/FEAT-012-calificacion-viajes/spec.md.
 
 Restricciones técnicas adicionales:
 - Debe funcionar con la base de datos PostgreSQL existente (sin cambiar el motor)
@@ -100,7 +100,7 @@ Restricciones técnicas adicionales:
 Actúa como el agente Software Architect definido en roles/architect.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Lee la arquitectura actual en .ai/architecture.md y la especificación funcional en .ai/features/FEAT-012-calificacion-viajes/spec.md. Diseña la solución técnica para esta feature.
+Lee la arquitectura actual en .abbia/architecture.md y la especificación funcional en .abbia/initiatives/FEAT-012-calificacion-viajes/spec.md. Diseña la solución técnica para esta feature.
 ```
 
 ---
@@ -112,7 +112,7 @@ Lee la arquitectura actual en .ai/architecture.md y la especificación funcional
 Actúa como el agente Tech Lead definido en roles/tech-lead.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Por favor, lee y revisa la especificación funcional en .ai/features/FEAT-012-calificacion-viajes/spec.md. Evalúa completitud, consistencia y riesgos.
+Por favor, lee y revisa la especificación funcional en .abbia/initiatives/FEAT-012-calificacion-viajes/spec.md. Evalúa completitud, consistencia y riesgos.
 ```
 
 #### Prompt de revisión de diseño técnico
@@ -120,7 +120,7 @@ Por favor, lee y revisa la especificación funcional en .ai/features/FEAT-012-ca
 Actúa como el agente Tech Lead definido en roles/tech-lead.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Por favor, revisa el diseño técnico en .ai/features/FEAT-012-calificacion-viajes/architecture.md comparándolo con la especificación funcional en .ai/features/FEAT-012-calificacion-viajes/spec.md. Evalúa solidez, coherencia con la arquitectura existente y riesgos técnicos.
+Por favor, revisa el diseño técnico en .abbia/initiatives/FEAT-012-calificacion-viajes/architecture.md comparándolo con la especificación funcional en .abbia/initiatives/FEAT-012-calificacion-viajes/spec.md. Evalúa solidez, coherencia con la arquitectura existente y riesgos técnicos.
 ```
 
 #### Prompt de decisión ante conflicto
@@ -128,7 +128,7 @@ Por favor, revisa el diseño técnico en .ai/features/FEAT-012-calificacion-viaj
 Actúa como el agente Tech Lead definido en roles/tech-lead.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Hay un conflicto entre la especificación (.ai/features/FEAT-012-calificacion-viajes/spec.md) y la arquitectura (.ai/features/FEAT-012-calificacion-viajes/architecture.md):
+Hay un conflicto entre la especificación (.abbia/initiatives/FEAT-012-calificacion-viajes/spec.md) y la arquitectura (.abbia/initiatives/FEAT-012-calificacion-viajes/architecture.md):
 - El Analyst especifica que [X]
 - El Architect propone implementarlo como [Y]
 - El Developer señala que [Y] es técnicamente complejo y propone [Z]
@@ -145,7 +145,7 @@ Por favor, lee los documentos e indica cuál es el camino correcto y qué agente
 Actúa como el agente Senior Developer definido en roles/developer.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Por favor, lee la tarea técnica en .ai/features/FEAT-012-calificacion-viajes/task.md y el diseño técnico en .ai/features/FEAT-012-calificacion-viajes/architecture.md, e impleméntala manteniendo la consistencia con el resto del proyecto.
+Por favor, lee la tarea técnica en .abbia/initiatives/FEAT-012-calificacion-viajes/task.md y el diseño técnico en .abbia/initiatives/FEAT-012-calificacion-viajes/architecture.md, e impleméntala manteniendo la consistencia con el resto del proyecto.
 ```
 
 #### Prompt de corrección de bug
@@ -153,7 +153,7 @@ Por favor, lee la tarea técnica en .ai/features/FEAT-012-calificacion-viajes/ta
 Actúa como el agente Senior Developer definido en roles/developer.md.
 Nuestra feature actual es: BUG-005-calificacion-incompleta.
 
-Por favor, lee el reporte de bug en .ai/features/BUG-005-calificacion-incompleta/bug-report.md e implementa la corrección en el código correspondiente.
+Por favor, lee el reporte de bug en .abbia/initiatives/BUG-005-calificacion-incompleta/bug-report.md e implementa la corrección en el código correspondiente.
 ```
 
 ---
@@ -165,7 +165,7 @@ Por favor, lee el reporte de bug en .ai/features/BUG-005-calificacion-incompleta
 Actúa como el agente QA Engineer definido en roles/qa.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-Lee la especificación funcional en .ai/features/FEAT-012-calificacion-viajes/spec.md. El Developer ha completado la implementación. Por favor, valida los cambios y genera el reporte de QA en .ai/features/FEAT-012-calificacion-viajes/qa.md, haciendo foco especial en la validación de la seguridad.
+Lee la especificación funcional en .abbia/initiatives/FEAT-012-calificacion-viajes/spec.md. El Developer ha completado la implementación. Por favor, valida los cambios y genera el reporte de QA en .abbia/initiatives/FEAT-012-calificacion-viajes/qa.md, haciendo foco especial en la validación de la seguridad.
 ```
 
 #### Prompt de re-verificación post bug-fix
@@ -173,7 +173,7 @@ Lee la especificación funcional en .ai/features/FEAT-012-calificacion-viajes/sp
 Actúa como el agente QA Engineer definido en roles/qa.md.
 Nuestra feature actual es: FEAT-012-calificacion-viajes.
 
-El Developer indica que corrigió los bugs reportados en .ai/features/FEAT-012-calificacion-viajes/qa.md. Por favor, lee ese reporte anterior y verifica:
+El Developer indica que corrigió los bugs reportados en .abbia/initiatives/FEAT-012-calificacion-viajes/qa.md. Por favor, lee ese reporte anterior y verifica:
 1. Que los bugs fueron efectivamente corregidos en el código.
 2. Que la corrección no introdujo regresiones.
 ```
@@ -182,14 +182,14 @@ El Developer indica que corrigió los bugs reportados en .ai/features/FEAT-012-c
 
 ## Errores Comunes y Cómo Evitarlos
 
-### ❌ Error 1: Tener un archivo `.ai/context.md` desactualizado o vacío
-Dado que los agentes leen automáticamente `.ai/context.md` del workspace para entender el stack, las convenciones y la estructura, no tener este archivo o mantenerlo desactualizado provocará que el agente responda con información genérica.
+### ❌ Error 1: Tener un archivo `.abbia/context.md` desactualizado o vacío
+Dado que los agentes leen automáticamente `.abbia/context.md` del workspace para entender el stack, las convenciones y la estructura, no tener este archivo o mantenerlo desactualizado provocará que el agente responda con información genérica.
 
 ❌ Mal:
-Iniciar un prompt sin haber completado o actualizado `.ai/context.md` primero.
+Iniciar un prompt sin haber completado o actualizado `.abbia/context.md` primero.
 
 ✅ Bien:
-Mantener `.ai/context.md` como la fuente de verdad actualizada en el repositorio. Al invocar al agente, este lo leerá de forma implícita e inmediata sin necesidad de pasarlo en el prompt.
+Mantener `.abbia/context.md` como la fuente de verdad actualizada en el repositorio. Al invocar al agente, este lo leerá de forma implícita e inmediata sin necesidad de pasarlo en el prompt.
 
 ### ❌ Error 2: Activar el agente incorrecto
 ```
@@ -240,7 +240,7 @@ Puedes activar múltiples agentes en secuencia en la misma conversación:
 En algunos IDEs (Cursor, Windsurf) puedes hacer `@roles/analyst.md` para incluir el agente completo automáticamente.
 
 ### Tip 3: Mantener la memoria del proyecto actualizada
-La diferencia más grande en la calidad del output viene de tener `.ai/context.md` bien documentado y actualizado. La IA lo lee de forma transparente al inicializarse gracias a las reglas del IDE (`.cursorrules`, `CLAUDE.md`, etc.), por lo que no es necesario copiarlo ni pegarlo en el chat.
+La diferencia más grande en la calidad del output viene de tener `.abbia/context.md` bien documentado y actualizado. La IA lo lee de forma transparente al inicializarse gracias a las reglas del IDE (`.cursorrules`, `CLAUDE.md`, etc.), por lo que no es necesario copiarlo ni pegarlo en el chat.
 
 ### Tip 4: Los agentes preguntan antes de asumir (por diseño)
 Todos los agentes tienen un **Protocolo de Clarificación Proactiva** integrado en su proceso de pensamiento. Antes de producir su output, evalúan si existen ambigüedades de negocio o alcance funcional y, si las encuentran, se detienen y te formulan preguntas concisas. No necesitas indicárselo en el prompt — lo hacen de forma autónoma.
@@ -255,7 +255,7 @@ Las decisiones técnicas dentro de su área de expertise las toman sin consultar
 ### Tip 5: Cierre Mandatorio de Fase con Telemetría (Regla R6)
 Cada vez que un agente concluye su fase de trabajo, **debe ejecutarse en terminal el cierre con sus flags de telemetría**:
 ```bash
-bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
+bash .abbia/core/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
   --model <MODELO> --tokens-in <TOKENS_IN> --tokens-out <TOKENS_OUT> \
   --duration <SEGUNDOS> --source measured [opciones]
 ```
@@ -285,18 +285,18 @@ bash .ai/agents/scripts/finish-phase.sh <INICIATIVA> <FASE> <ROL> \
 
 **Ejemplo completo:**
 ```bash
-bash .ai/agents/scripts/finish-phase.sh FEAT-113 architecture architect \
+bash .abbia/core/scripts/finish-phase.sh FEAT-113 architecture architect \
   --model "deepseek/deepseek-r1" --provider "opencode" --env "local" \
   --tokens-in 22000 --tokens-out 6500 \
   --duration 900 --source measured
 ```
 
 Esto garantiza automáticamente:
-1. **Memoria de Workflow:** Registro append-only en `.ai/memory/workflow-log.md`.
-2. **Telemetría Veraz:** Registro exacto de ejecución en `.ai/metrics/executions.yaml` (con modelo, entorno, rama y tokens).
-3. **Aggregates:** Regeneración de `.ai/metrics/aggregates.yaml` con estadísticas por fase, rol, modelo, entorno e iniciativa.
-4. **Snapshot Actualizado:** Regeneración inmediata de `.ai/memory/context-snapshot.md` con resumen de métricas.
+1. **Memoria de Workflow:** Registro append-only en `.abbia/memory/workflow-log.md`.
+2. **Telemetría Veraz:** Registro exacto de ejecución en `.abbia/metrics/executions.yaml` (con modelo, entorno, rama y tokens).
+3. **Aggregates:** Regeneración de `.abbia/metrics/aggregates.yaml` con estadísticas por fase, rol, modelo, entorno e iniciativa.
+4. **Snapshot Actualizado:** Regeneración inmediata de `.abbia/memory/context-snapshot.md` con resumen de métricas.
 
 ---
 
-*Guía versión 3.5.1 — ai-agents library | github.com/ezequielmendoza-dev/ai-agents*
+*Guía versión 3.5.1 — ai-agents library | github.com/ezequielmendoza-dev/abbia-os*

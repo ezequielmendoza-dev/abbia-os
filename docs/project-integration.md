@@ -1,7 +1,7 @@
 # Integración de ai-agents en Proyectos
 
 > **Audiencia:** Desarrolladores que quieren usar esta biblioteca en sus proyectos  
-> **Prerequisito:** Tener acceso a [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)
+> **Prerequisito:** Tener acceso a [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)
 
 ---
 
@@ -97,7 +97,7 @@ Para evitar conflictos de merge al trabajar con múltiples desarrolladores y ram
 ```bash
 # Desde la raíz del proyecto
 mkdir -p .ai
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+git submodule add https://github.com/ezequielmendoza-dev/abbia-os.git .ai/agents
 git commit -m "chore: add ai-agents as submodule in .ai/agents"
 ```
 
@@ -109,7 +109,7 @@ Esto crea:
 # .gitmodules (generado automáticamente)
 [submodule ".ai/agents"]
     path = .ai/agents
-    url = https://github.com/ezequielmendoza-dev/ai-agents.git
+    url = https://github.com/ezequielmendoza-dev/abbia-os.git
 ```
 
 ---
@@ -520,7 +520,7 @@ ai-agents/
 ```bash
 # Setup inicial
 mkdir -p .ai
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+git submodule add https://github.com/ezequielmendoza-dev/abbia-os.git .ai/agents
 cp .ai/agents/templates/project-context.md .ai/context.md
 
 # Estructura final
@@ -550,7 +550,7 @@ mi-app-movil/
 ```bash
 # Para proyectos simples, el submodule puede ser más ligero
 # Usar sparse checkout para traer solo lo necesario (VERSIÓN v3.x)
-git submodule add https://github.com/ezequielmendoza-dev/ai-agents.git .ai/agents
+git submodule add https://github.com/ezequielmendoza-dev/abbia-os.git .ai/agents
 cd .ai/agents
 git sparse-checkout init --cone
 git sparse-checkout set roles templates workflows checklists scripts docs
@@ -606,4 +606,4 @@ git submodule update --init
 
 ---
 
-*Documentación versión 1.0 — ai-agents library | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*Documentación versión 1.0 — ai-agents library | [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)*

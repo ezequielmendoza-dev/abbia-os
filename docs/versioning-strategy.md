@@ -204,4 +204,4 @@ refactor(templates): improve feature-spec acceptance criteria section
 
 ---
 
-*Documentación versión 1.0 — ai-agents library | [github.com/ezequielmendoza-dev/ai-agents](https://github.com/ezequielmendoza-dev/ai-agents)*
+*Documentación versión 1.0 — ai-agents library | [github.com/ezequielmendoza-dev/abbia-os](https://github.com/ezequielmendoza-dev/abbia-os)*
