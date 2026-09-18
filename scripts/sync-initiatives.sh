@@ -225,7 +225,7 @@ EOF
 
 ## [$INITIATIVE_ID] S1 — Pipeline Sync ($CURRENT_TS)
 
-- **Insumos consumidos:** Documentos de iniciativa en `${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}/$folder_name`.
+- **Insumos consumidos:** Documentos de iniciativa en \`${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}/$folder_name\`.
 - **Decisión:** Implementación y cierre de iniciativa '$TITLE'.
 - **Razón:** Sincronización histórica y auto-reconciliación del pipeline.
 - **Outputs producidos:** [$folder_name](../${ABBIA_INITIATIVES_DIR#$ABBIA_DIR/}/$folder_name)
