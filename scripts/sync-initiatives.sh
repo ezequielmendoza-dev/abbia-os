@@ -56,7 +56,6 @@ fi
 KG_FILE="$PROJECT_ROOT/.ai/knowledge-graph.yaml"
 MEM_DIR="$PROJECT_ROOT/.ai/memory"
 LOG_FILE="$MEM_DIR/workflow-log.md"
-CATALOG_FILE="$MEM_DIR/decisions-catalog.md"
 METRICS_FILE="$PROJECT_ROOT/.ai/metrics/executions.yaml"
 
 mkdir -p "$MEM_DIR"
@@ -69,15 +68,6 @@ if [ ! -f "$LOG_FILE" ]; then
 
 Registro cronológico de las ejecuciones del pipeline.
 
-EOF
-fi
-
-if [ ! -f "$CATALOG_FILE" ]; then
-    cat << 'EOF' > "$CATALOG_FILE"
-# Catálogo de Decisiones — Memoria Semántica
-
-| ID | Decisión | Estado | Referencia | Última revisión |
-|:---|:---|:---|:---|:---|
 EOF
 fi
 
@@ -151,27 +141,6 @@ EOF
                 dir_healed=true
             fi
 
-            if [ ! -f "$dir/architecture.md" ]; then
-                cat > "$dir/architecture.md" << EOF
-# Diseño Técnico — $folder_name
-
-> Documento autogenerado en migración a ai-agents OS v3.x.
-
-## 1. Resumen de Arquitectura
-Diseño técnico migrado desde versión previa de la suite.
-EOF
-                dir_healed=true
-            fi
-
-            if [ ! -f "$dir/ui-design.md" ]; then
-                cat > "$dir/ui-design.md" << EOF
-# Especificación de UI/UX — $folder_name
-
-> N/A — Esta iniciativa no define componentes visuales de interfaz (backend / infraestructura / lógica interna).
-EOF
-                dir_healed=true
-            fi
-
             if [ ! -f "$dir/decision.md" ]; then
                 cat > "$dir/decision.md" << EOF
 # Decisión Arquitectónica — ARCH-$NUM
@@ -185,15 +154,30 @@ EOF
                 dir_healed=true
             fi
 
-            if [ ! -f "$dir/qa.md" ]; then
-                cat > "$dir/qa.md" << EOF
+            # Si se solicita auto-archivado, asegurar que existan los archivos de cierre
+            if [ "$ARCHIVE_APPROVED" = true ]; then
+                if [ ! -f "$dir/architecture.md" ]; then
+                    cat > "$dir/architecture.md" << EOF
+# Diseño Técnico — $folder_name
+
+> Documento autogenerado en migración a ai-agents OS v3.x.
+
+## 1. Resumen de Arquitectura
+Diseño técnico migrado desde versión previa de la suite.
+EOF
+                    dir_healed=true
+                fi
+
+                if [ ! -f "$dir/qa.md" ]; then
+                    cat > "$dir/qa.md" << EOF
 # Reporte de QA — $folder_name
 
 > **Veredicto:** APROBADO (Migración Legacy)
 
 Validación histórica consolidada.
 EOF
-                dir_healed=true
+                    dir_healed=true
+                fi
             fi
 
         elif [ "$TYPE" = "BUG" ]; then
@@ -282,11 +266,6 @@ EOF
                     { print }
                     ' "$KG_FILE" > "$KG_FILE.tmp" && mv "$KG_FILE.tmp" "$KG_FILE"
                 fi
-            fi
-
-            if ! grep -q "$ARCH_ID" "$CATALOG_FILE" 2>/dev/null; then
-                ARCH_LOWER=$(echo "$ARCH_ID" | tr '[:upper:]' '[:lower:]')
-                echo "| $ARCH_ID | $TITLE | ⚖️ Vigente | [decisions.md](../../decisions.md#$ARCH_LOWER) | $CURRENT_DATE |" >> "$CATALOG_FILE"
             fi
         fi
 

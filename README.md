@@ -3,10 +3,10 @@
 # 🤖 ai-agents OS
 ### *Framework de Specification-Driven Development (SDD) para Ingeniería Asistida por IA*
 
-[![Version](https://img.shields.io/badge/version-v3.6.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.7.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-stable-success.svg?style=for-the-badge)](README.md)
 [![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-purple.svg?style=for-the-badge)](docs/sdd-philosophy.md)
-[![Memory](https://img.shields.io/badge/memory-4--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
+[![Memory](https://img.shields.io/badge/memory-3--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
 
 **Transforma tu IDE en un equipo de ingeniería de software autónomo y coordinado.**  
 *Documentos como fuente de verdad · Agentes especializados · Workflows con DAG · Memoria persistente · Grafo de decisiones · Dashboard visual*
@@ -20,14 +20,15 @@
 1. [✨ ¿Qué es ai-agents OS?](#-qué-es-ai-agents-os)
 2. [⚡ Quick Start (3 Minutos)](#-quick-start-3-minutos)
 3. [🏛️ Arquitectura del Sistema](#️-arquitectura-del-sistema)
-   - [👥 8 Agentes Especializados](#-8-agentes-especializados)
+   - [👥 8 Agentes Especializados & Context Contracts](#-8-agentes-especializados--context-contracts)
    - [🧩 15 Framework Skills](#-15-framework-skills)
    - [🔄 5 Workflows con DAG](#-5-workflows-con-dag)
-   - [🧠 Memoria Persistente (4-Tier Memory)](#-memoria-persistente-4-tier-memory)
+   - [🧠 Memoria Persistente (3-Tier Persistent Memory)](#-memoria-persistente-3-tier-persistent-memory)
    - [🕸️ Knowledge Graph de Decisiones (ADR)](#️-knowledge-graph-de-decisiones-adr)
    - [📦 Sistema de Archivado Automático e Interactivo](#-sistema-de-archivado-automático-e-interactivo)
    - [📊 Visualizador Interactivo (Dashboard Web)](#-visualizador-interactivo-dashboard-web)
-4. [🛠️ Suite de Automatización CLI](#️-suite-de-automatización-cli)
+   - [🏆 Proyecto de Referencia Canónico (Golden Project)](#-proyecto-de-referencia-canónico-golden-project)
+4. [🛠️ Suite de Automatización CLI & Tests](#️-suite-de-automatización-cli--tests)
 5. [📂 Estructura Documental y Convenciones](#-estructura-documental-y-convenciones)
 6. [💡 Filosofía y Principios SDD](#-filosofía-y-principios-sdd)
 7. [📚 Documentación del Repositorio](#-documentación-del-repositorio)
@@ -81,13 +82,13 @@ bash .ai/agents/scripts/dashboard.sh
 
 ## 🏛️ Arquitectura del Sistema
 
-### 👥 8 Agentes Especializados
+### 👥 8 Agentes Especializados & Context Contracts
 
-Cada agente opera bajo un rol estricto, consumiendo los artefactos de la fase previa y generando contratos verificables:
+Cada agente opera bajo un rol estricto con un **Context Contract** formal (Contexto Requerido, Condicional y Prohibido), consumiendo los artefactos de la fase previa y generando contratos verificables:
 
 | Rol | Archivo | Responsabilidad Principal | Artefacto de Salida |
 | :--- | :--- | :--- | :--- |
-| 🧙‍♂️ **Skill Manager** | [`roles/skill-manager.md`](roles/skill-manager.md) | Orquestador de contexto, catálogo de skills y memoria | `context-snapshot.md` |
+| 🧙‍♂️ **Skill Manager** | [`roles/skill-manager.md`](roles/skill-manager.md) | Capability & Context Advisor, resolución de skills y memoria | `context-snapshot.md` |
 | 📋 **Product Analyst** | [`roles/analyst.md`](roles/analyst.md) | Requerimientos, reglas de negocio y discovery | `spec.md`, `discovery.md` |
 | 🎨 **UI Designer** | [`roles/ui-designer.md`](roles/ui-designer.md) | Tokens de diseño, maquetas UI, estados y a11y | `ui-design.md` |
 | 🏗️ **Software Architect** | [`roles/architect.md`](roles/architect.md) | Diseño técnico, esquemas de BD y ADRs | `architecture.md`, `decision.md` |
@@ -134,17 +135,18 @@ Flujos estructurados con dependencias formales, gates de calidad y bucles de aut
 
 ---
 
-### 🧠 Memoria Persistente (4-Tier Memory)
+### 🧠 Memoria Persistente (3-Tier Persistent Memory)
 
-Evita que los agentes olviden decisiones o re-expliquen conceptos entre sesiones:
+Evita que los agentes olviden decisiones o re-expliquen conceptos entre sesiones con una arquitectura limpia de 3 archivos:
 
 ```
 .ai/memory/
 ├── workflow-log.md         ← Memoria Episódica: Log append-only cronológico de ejecuciones
-├── decisions-catalog.md    ← Memoria Semántica: Índice de decisiones y ADRs vigentes
 ├── patterns-learned.md     ← Memoria Procedimental: Lecciones aprendidas y buenas prácticas
-└── context-snapshot.md     ← Memoria Compactada: Resumen ejecutivo (~30 líneas) para inicio de sesión
+└── context-snapshot.md     ← Memoria Compactada: Resumen ejecutivo generado automáticamente
 ```
+
+> **Decisiones Arquitectónicas Consolidadas:** Las decisiones ya no se duplican en catálogos manuales intermedios; residen directamente en `.ai/knowledge-graph.yaml` (grafo estructurado de relaciones) y `.ai/decisions.md` (registro ADR en prosa técnica), sincronizándose automáticamente hacia `context-snapshot.md`.
 
 ---
 
@@ -175,7 +177,7 @@ nodes:
 Garantiza la higiene del contexto y una mesa de trabajo limpia, moviendo iniciativas completadas desde `.ai/features/` a `.ai/archive/`:
 
 * 🛡️ **Gate de Calidad Inquebrantable:** Verifica que `qa.md` tenga veredicto `APROBADO`.
-* 🔗 **Reconciliación de Rutas en el Grafo:** Actualiza automáticamente `ref: features/...` $ightarrow$ `ref: archive/...` en `knowledge-graph.yaml`.
+* 🔗 **Reconciliación de Rutas en el Grafo:** Actualiza automáticamente `ref: features/...` $\rightarrow$ `ref: archive/...` en `knowledge-graph.yaml`.
 * 📝 **Registro de Memoria:** Agrega el cierre a `workflow-log.md` y regenera `context-snapshot.md`.
 * 🧪 **Protocolo Staging Interactivo:** El Tech Lead / QA consulta al usuario para validar en el entorno de pruebas antes de autorizar el archivado definitivo.
 
@@ -213,9 +215,20 @@ bash .ai/agents/scripts/dashboard.sh
 
 ---
 
-## 🛠️ Suite de Automatización CLI
+### 🏆 Proyecto de Referencia Canónico (Golden Project)
 
-Todos los scripts residen en `.ai/agents/scripts/` y estandarizan el ciclo de vida del proyecto:
+El repositorio incluye un proyecto de ejemplo completamente funcional y normativo en [`examples/golden-project/`](examples/golden-project/):
+* Estructura `.ai/` 100% canónica y validada.
+* Iniciativa archivada de referencia (`.ai/archive/FEAT-001-user-auth/`) con todos sus artefactos SDD (`spec.md`, `ui-design.md`, `architecture.md`, `decision.md`, `qa.md`).
+* Iniciativa activa en curso (`.ai/features/FEAT-002-order-checkout/`) ilustrando el ciclo de vida real.
+* Configuración estricta de `.gitignore` y `.gitattributes` (`merge=union`).
+* Sirve como fixture permanente de pruebas automatizadas y modelo de integración para nuevos proyectos.
+
+---
+
+## 🛠️ Suite de Automatización CLI & Tests
+
+Todos los scripts residen en `.ai/agents/scripts/` (y la suite de pruebas en `tests/`) para estandarizar y validar el ciclo de vida del proyecto:
 
 | Comando | Propósito | Ejemplo de Uso |
 | :--- | :--- | :--- |
@@ -227,6 +240,7 @@ Todos los scripts residen en `.ai/agents/scripts/` y estandarizan el ciclo de vi
 | **`sync-initiatives.sh`** | Reconcilia, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .ai/agents/scripts/sync-initiatives.sh --fix --archive-approved` |
 | **`validate-project.sh`** | Auditoría documental y chequeo de conformidad del framework | `bash .ai/agents/scripts/validate-project.sh` |
 | **`dashboard.sh`** | Genera y abre el visualizador interactivo (`dashboard.html`) | `bash .ai/agents/scripts/dashboard.sh` |
+| **`test-runner.sh`** | Suite integral de 26+ pruebas automatizadas para el framework | `bash tests/test-runner.sh` |
 
 ---
 
@@ -244,7 +258,6 @@ mi-proyecto/
 │   ├── glossary.md              ← Glosario y términos del dominio
 │   ├── memory/                  ← Memoria persistente del pipeline
 │   │   ├── workflow-log.md      ← Log episódico de sesiones
-│   │   ├── decisions-catalog.md ← Catálogo semántico de decisiones
 │   │   ├── patterns-learned.md  ← Lecciones y patrones aprendidos
 │   │   └── context-snapshot.md  ← Snapshot compactado de contexto
 │   ├── metrics/                 ← Métricas y telemetría de tokens
@@ -256,13 +269,16 @@ mi-proyecto/
 └── .cursorrules / CLAUDE.md     ← Reglas de configuración según tu IDE
 ```
 
-### 📋 Las 5 Reglas Documentales (R1-R5)
+> 💡 **¿Buscas un ejemplo completo?** Revisa [`examples/golden-project/`](examples/golden-project/) para ver un proyecto real completamente documentado y validado.
+
+### 📋 Las 6 Reglas Documentales (R1-R6)
 
 1. **R1:** Antes de crear un documento, verificar si existe uno equivalente para actualizar.
 2. **R2:** Priorizar la **actualización** sobre la creación.
 3. **R3:** Nunca crear versiones paralelas (`spec-v2.md`). Modificar el documento canónico.
 4. **R4:** Los cambios estructurales deben reflejarse en `CHANGELOG.md` y documentos globales.
 5. **R5:** Los documentos representan el **estado actual**, no el histórico.
+6. **R6:** **Cierre Mandatorio y Telemetría:** Al culminar cualquier fase, el agente debe ejecutar siempre `bash .ai/agents/scripts/finish-phase.sh` con sus métricas de telemetría antes de finalizar su turno.
 
 ### 🌿 Higiene de Git y Trabajo Concurrente Multi-Rama
 

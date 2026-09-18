@@ -1,0 +1,7 @@
+# ==============================================================================
+# ai-agents OS — Archivos temporales, sesiones y cachés generados
+# ==============================================================================
+.ai/sessions/
+.ai/dashboard.html
+.ai/memory/context-snapshot.md
+.ai/metrics/aggregates.yaml

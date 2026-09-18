@@ -192,12 +192,8 @@ fi
 TEMPLATES_DIR="$AI_AGENTS_ROOT/templates"
 
 if [ "$TYPE" = "FEAT" ]; then
-    # Copiar especificaciones para Features
-    [ -f "$TEMPLATES_DIR/discovery.md" ] && cp "$TEMPLATES_DIR/discovery.md" "$TARGET_DIR/discovery.md"
+    # Copiar especificación inicial para Features
     [ -f "$TEMPLATES_DIR/feature-spec.md" ] && cp "$TEMPLATES_DIR/feature-spec.md" "$TARGET_DIR/spec.md"
-    [ -f "$TEMPLATES_DIR/ui-design-spec.md" ] && cp "$TEMPLATES_DIR/ui-design-spec.md" "$TARGET_DIR/ui-design.md"
-    [ -f "$TEMPLATES_DIR/architecture-spec.md" ] && cp "$TEMPLATES_DIR/architecture-spec.md" "$TARGET_DIR/architecture.md"
-    [ -f "$TEMPLATES_DIR/qa-report.md" ] && cp "$TEMPLATES_DIR/qa-report.md" "$TARGET_DIR/qa.md"
     
     # Crear decision.md inicial
     cat << EOF > "$TARGET_DIR/decision.md"
@@ -211,27 +207,28 @@ Si una decisión aplica globalmente al sistema, debe ser promovida a .ai/decisio
 EOF
 
     # Reemplazar placeholders en los archivos copiados
-    for f in "$TARGET_DIR"/discovery.md "$TARGET_DIR"/spec.md "$TARGET_DIR"/ui-design.md "$TARGET_DIR"/architecture.md "$TARGET_DIR"/qa.md; do
+    for f in "$TARGET_DIR"/spec.md; do
         if [ -f "$f" ]; then
             "${SED_INPLACE[@]}" "s/FEAT-XXX/$TYPE-$ID/g" "$f"
             "${SED_INPLACE[@]}" "s/\[nombre\]/$SLUG/g" "$f"
         fi
     done
-    echo -e "${GREEN}✓ Creados archivos de feature: discovery.md, spec.md, ui-design.md, architecture.md, qa.md, decision.md${NC}"
+    echo -e "${GREEN}✓ Creados archivos iniciales de feature: spec.md, decision.md${NC}"
+    echo -e "${YELLOW}  (ui-design.md, architecture.md y qa.md serán creados por sus agentes respectivos en cada fase)${NC}"
 
 elif [ "$TYPE" = "BUG" ]; then
-    # Copiar especificaciones para Bugs
+    # Copiar reporte de bug inicial
     [ -f "$TEMPLATES_DIR/bug-report.md" ] && cp "$TEMPLATES_DIR/bug-report.md" "$TARGET_DIR/bug-report.md"
-    [ -f "$TEMPLATES_DIR/qa-report.md" ] && cp "$TEMPLATES_DIR/qa-report.md" "$TARGET_DIR/qa.md"
     
     # Reemplazar placeholders
-    for f in "$TARGET_DIR"/bug-report.md "$TARGET_DIR"/qa.md; do
+    for f in "$TARGET_DIR"/bug-report.md; do
         if [ -f "$f" ]; then
             "${SED_INPLACE[@]}" "s/BUG-XXX/$TYPE-$ID/g" "$f"
             "${SED_INPLACE[@]}" "s/\[nombre\]/$SLUG/g" "$f"
         fi
     done
-    echo -e "${GREEN}✓ Creados archivos de bug: bug-report.md, qa.md${NC}"
+    echo -e "${GREEN}✓ Creado archivo inicial de bug: bug-report.md${NC}"
+    echo -e "${YELLOW}  (qa.md será generado por el QA Engineer al verificar la solución)${NC}"
 
 else
     # AUDIT y REF: estructura libre (README de inicio, sin template fijo)

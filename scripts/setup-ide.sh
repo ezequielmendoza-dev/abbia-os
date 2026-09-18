@@ -219,29 +219,7 @@ EOF
         echo -e "  - .ai/memory/workflow-log.md ya existe. Omitido."
     fi
 
-    # decisions-catalog.md — memoria semántica (índice de decisiones vigentes)
-    if [ ! -f "$PROJECT_ROOT/.ai/memory/decisions-catalog.md" ]; then
-        cat << 'EOF' > "$PROJECT_ROOT/.ai/memory/decisions-catalog.md"
-# Catálogo de Decisiones — Memoria Semántica
 
-Índice de decisiones **vigentes** con referencia al detalle en `decisions.md`
-(que sigue siendo la fuente de verdad). El Architect mantiene este índice; el
-Tech Lead o el Developer lo consultan antes de cada gate.
-
-| ID | Decisión | Estado | Referencia | Última revisión |
-|:---|:---|:---|:---|:---|
-| DEC-001 | [Decisión] | ⚖️ Vigente / 🔄 En evaluación / ✖️ Descartada | [decisions.md](../../decisions.md#dec-001) | YYYY-MM-DD |
-
-Reglas:
-1. No duplica decisiones: cada fila referencia `decisions.md`.
-2. Cambio de estado: `🔄 En evaluación` cuando hay propuesta, `⚖️ Vigente`/`✖️ Descartada` al resolver.
-
-Referencia: docs/workflow-memory.md (framework ai-agents).
-EOF
-        echo -e "${GREEN}✓ Creado .ai/memory/decisions-catalog.md (memoria semántica).${NC}"
-    else
-        echo -e "  - .ai/memory/decisions-catalog.md ya existe. Omitido."
-    fi
 
     # patterns-learned.md — memoria procedimental
     if [ ! -f "$PROJECT_ROOT/.ai/memory/patterns-learned.md" ]; then
@@ -477,7 +455,7 @@ echo -e "Siguientes pasos recomendados:"
 echo -e "1. Abre y edita ${YELLOW}.ai/context.md${NC} con la información técnica de tu proyecto."
 echo -e "2. Completa los sistemas v3.2.0 recién creados:"
 echo -e "   • ${YELLOW}.ai/knowledge-graph.yaml${NC} — indexa los ADRs ya vigentes en decisions.md"
-echo -e "   • ${YELLOW}.ai/memory/workflow-log.md${NC} y ${YELLOW}.ai/memory/decisions-catalog.md${NC} — primer uso del pipeline"
+echo -e "   • ${YELLOW}.ai/memory/workflow-log.md${NC} — memoria episódica del pipeline"
 echo -e "   • ${YELLOW}.ai/metrics/executions.yaml${NC} — se registra automáticamente en cada ejecución"
 echo -e "3. Abre tu IDE de IA y comienza a trabajar siguiendo los agentes en ${YELLOW}AGENTS.md${NC}."
 echo -e "4. Para proyectos que actualizan desde una versión previa: ver la guía de"

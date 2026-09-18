@@ -1,0 +1,5 @@
+# ==============================================================================
+# ai-agents OS — Reglas de Merge para Git (.gitattributes)
+# ==============================================================================
+.ai/memory/workflow-log.md merge=union
+.ai/metrics/executions.yaml merge=union

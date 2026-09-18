@@ -24,7 +24,7 @@ Estos archivos representan el **estado actual** del proyecto y deben consultarse
 | `.ai/decisions.md` | Log histórico de decisiones técnicas (ADRs: `ARCH-NNN`) |
 | `.ai/glossary.md` | Términos de negocio acordados con definiciones |
 | `.ai/knowledge-graph.yaml` | Grafo de relaciones entre decisiones (depends_on, supersedes, conflicts_with) |
-| `.ai/memory/*` | Memoria persistente del pipeline (workflow-log, decisions-catalog, patterns-learned, context-snapshot) |
+| `.ai/memory/*` | Memoria persistente del pipeline (workflow-log, patterns-learned, context-snapshot) |
 | `.ai/metrics/*` | Métricas por ejecución de agente (tokens, duración, fase, veredicto) |
 
 ### 2. Trabajo Activo (`.ai/features/`)

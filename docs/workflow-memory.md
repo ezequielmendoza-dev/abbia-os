@@ -39,10 +39,12 @@ El sistema de memoria vive en `.ai/memory/` (a la par de los documentos permanen
 .ai/memory/
 ├── README.md               ← Contrato de uso (este sistema, copiado al proyecto)
 ├── workflow-log.md         ← Memoria episódica: log append-only de todas las sesiones
-├── decisions-catalog.md    ← Memoria semántica: decisiones indexadas y vigentes
 ├── patterns-learned.md     ← Memoria procedimental: patrones y lecciones aplicables
 └── context-snapshot.md     ← Memoria compactada: resumen ejecutivo para arrancar una sesión
 ```
+
+> **Nota sobre Memoria Semántica (Decisiones):**  
+> Las decisiones arquitectónicas no se duplican en tablas Markdown manuales. Residen en `.ai/decisions.md` (detalle narrativo de ADRs) y se indexan estructuradamente en `.ai/knowledge-graph.yaml` (relaciones y dependencias). `context-snapshot.md` extrae automáticamente las decisiones vigentes desde el Knowledge Graph.
 
 ### 3.1 `workflow-log.md` — Memoria Episódica (append-only)
 
@@ -66,23 +68,7 @@ Reglas de escritura:
 3. **Decisiones ≠ opiniones** — se registra la decisión, la razón y las alternativas (nunca "me parecía mejor Google Cloud" sin el criterio detrás).
 4. **Appendix-only** — el Tech Lead puede marcar una entrada como `⚖️ OBSOLETA` apuntando a su reemplazo, pero no borrarla.
 
-### 3.2 `decisions-catalog.md` — Memoria Semántica (estado vigente)
-
-Es un **índice de decisiones** vigentes. Tiene formato de tabla con referencia al detalle en `decisions.md` (que sigue siendo la fuente de verdad de decisiones).
-
-```markdown
-| ID | Decisión | Estado | Referencia | Última revisión |
-|:---|:---|:---|:---|:---|
-| DEC-013 | PostgreSQL como único motor de persistencia | ⚖️ Vigente | [decisions.md](../../decisions.md#dec-013) | 2026-09-11 |
-| DEC-014 | Feature flags para lanzamiento gradual | 🔄 En evaluación | [decisions.md](../../decisions.md#dec-014) | 2026-09-12 |
-```
-
-Reglas:
-
-1. **No duplica decisiones** — cada fila referencia `decisions.md`; el catálogo es un índice para búsqueda rápida, no un segundo lugar de verdad.
-2. **Cambio de estado** — mover una decisión a `🔄 En evaluación` cuando haya propuesta de cambio, y a `⚖️ Vigente`/`✖️ Descartada` al resolver.
-
-### 3.3 `patterns-learned.md` — Memoria Procedimental (lecciones aplicables)
+### 3.2 `patterns-learned.md` — Memoria Procedimental (lecciones aplicables)
 
 Patrones y lecciones que aceleran el trabajo futuro.
 

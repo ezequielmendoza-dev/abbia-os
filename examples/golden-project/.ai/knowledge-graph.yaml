@@ -1,0 +1,26 @@
+version: 1
+updated: 2026-09-15
+maintained_by: architect
+
+nodes:
+  - id: ARCH-001
+    title: "PostgreSQL como Base de Datos Principal"
+    status: ACTIVE
+    root: true
+    supersedes: []
+    depends_on: []
+    related: []
+    conflicts_with: []
+    ref: "decisions.md#arch-001"
+
+  - id: ARCH-002
+    title: "Autenticación Basada en JWT y Refresh Tokens"
+    status: ACTIVE
+    root: false
+    supersedes: []
+    depends_on: [ARCH-001]
+    related: []
+    conflicts_with: []
+    ref: "decisions.md#arch-002"
+
+edges: []

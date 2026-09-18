@@ -1,0 +1,109 @@
+# ==============================================================================
+# executions.yaml — Registro de Métricas por Ejecución de Agente
+# ==============================================================================
+executions:
+  - ts: 2026-09-02T10:00:00Z
+    initiative: FEAT-001
+    role: analyst
+    phase: spec
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: local
+    git_branch: feat/001-user-auth
+    tokens_in: 3200
+    tokens_out: 1100
+    duration_s: 15
+    attempts: 1
+    verdict: null
+    source: measured
+  - ts: 2026-09-02T14:30:00Z
+    initiative: FEAT-001
+    role: ui-designer
+    phase: ui-design
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: local
+    git_branch: feat/001-user-auth
+    tokens_in: 2800
+    tokens_out: 1400
+    duration_s: 18
+    attempts: 1
+    verdict: null
+    source: measured
+  - ts: 2026-09-03T11:00:00Z
+    initiative: FEAT-001
+    role: architect
+    phase: architecture
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: local
+    git_branch: feat/001-user-auth
+    tokens_in: 4100
+    tokens_out: 1900
+    duration_s: 22
+    attempts: 1
+    verdict: null
+    source: measured
+  - ts: 2026-09-04T16:00:00Z
+    initiative: FEAT-001
+    role: developer
+    phase: implement
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: local
+    git_branch: feat/001-user-auth
+    tokens_in: 5500
+    tokens_out: 2200
+    duration_s: 45
+    attempts: 1
+    verdict: null
+    source: measured
+  - ts: 2026-09-05T09:30:00Z
+    initiative: FEAT-001
+    role: qa
+    phase: qa
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: staging
+    git_branch: feat/001-user-auth
+    tokens_in: 3900
+    tokens_out: 850
+    duration_s: 12
+    attempts: 1
+    verdict: PASS
+    source: measured
+  - ts: 2026-09-05T12:00:00Z
+    initiative: FEAT-001
+    role: devops
+    phase: deploy
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: production
+    git_branch: main
+    tokens_in: 1800
+    tokens_out: 400
+    duration_s: 8
+    attempts: 1
+    verdict: PASS
+    source: measured
+  - ts: 2026-09-10T14:00:00Z
+    initiative: FEAT-002
+    role: analyst
+    phase: spec
+    mode: estandar
+    model: claude-3-7-sonnet
+    provider: claude-code
+    target_env: local
+    git_branch: feat/002-order-checkout
+    tokens_in: 3100
+    tokens_out: 1250
+    duration_s: 16
+    attempts: 1
+    verdict: null
+    source: measured

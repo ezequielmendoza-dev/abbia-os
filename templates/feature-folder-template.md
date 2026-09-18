@@ -20,18 +20,12 @@
 
 ## Cómo crear una nueva carpeta de feature
 
+Se recomienda usar el script oficial de inicialización:
 ```bash
-# Reemplazar NNN con el número siguiente al último FEAT registrado en .ai/context.md
-# Reemplazar "slug-descriptivo" con un nombre en kebab-case
-
-mkdir -p .ai/features/FEAT-001-nombre-feature
-touch .ai/features/FEAT-001-nombre-feature/discovery.md  # Solo si hay ambigüedades críticas
-touch .ai/features/FEAT-001-nombre-feature/spec.md
-touch .ai/features/FEAT-001-nombre-feature/ui-design.md
-touch .ai/features/FEAT-001-nombre-feature/architecture.md
-touch .ai/features/FEAT-001-nombre-feature/qa.md
-touch .ai/features/FEAT-001-nombre-feature/decision.md
+bash .ai/agents/scripts/new-initiative.sh FEAT <ID> <slug>
+# Ejemplo: bash .ai/agents/scripts/new-initiative.sh FEAT 001 user-login
 ```
+*El script crea la carpeta e inicializa `spec.md` y `decision.md`. Los artefactos subsiguientes (`ui-design.md`, `architecture.md`, `qa.md`) son generados por cada agente a partir de sus templates en `templates/` a medida que avanza cada fase del pipeline.*
 
 Actualizar el registro de IDs en `.ai/context.md`:
 ```markdown

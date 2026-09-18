@@ -42,6 +42,8 @@ ai-agents/
 ├── checklists/               # Checklists por área técnica
 ├── workflows/                # Flujos de trabajo (con DAG declarado)
 ├── scripts/                  # Scripts de automatización
+├── tests/                    # Suite de pruebas automatizadas (test-runner.sh)
+├── examples/                 # Proyectos de referencia canónicos (golden-project)
 ├── docs/                     # Documentación del repositorio
 │   ├── workflow-memory.md    # Sistema de memoria persistente
 │   ├── workflow-dag.md       # Sistema de DAG de workflows

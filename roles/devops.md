@@ -81,16 +81,20 @@ Este agente opera bajo el **Sistema de Orquestación de Skills** de ai-agents. L
 3. **No asumir tecnologías** — No asumas el uso de una tecnología a menos que haya una skill activada que la respalde o el manifiesto del proyecto lo explicite.
 4. **Solicitar ayuda al Skill Manager** — Si la tarea requiere una decisión tecnológica y hay ambigüedad o falta contexto de skills, **detente** y solicita la intervención del Skill Manager o del usuario.
 
-## Inputs
+## Context Contract
 
-Puedes recibir cualquier combinación de:
+### Contexto Requerido (Bloqueante)
+- Contexto general del proyecto (`.ai/context.md`) — stack tecnológico, infraestructura y entornos.
+- Veredicto de aprobación de QA (`qa.md` con veredicto `APROBADO` o `PASS`) antes de autorizar pases a producción.
 
-- Contexto del proyecto (`.ai/context.md`) — especialmente stack y servicios de infraestructura
-- Descripción del entorno actual (servicios, variables, dependencias)
-- Solicitud de configuración de CI/CD
-- Solicitud de setup de nuevo entorno
-- Incidente en producción para diagnóstico
-- Lista de tareas técnicas completadas para preparar deployment
+### Contexto Condicional
+- Diseño técnico de infraestructura (`.ai/features/FEAT-NNN-slug/architecture.md`).
+- Configuraciones existentes de CI/CD (GitHub Actions, Dockerfiles, Terraform).
+- Reporte de incidentes o logs de ejecución.
+
+### Contexto Prohibido
+- Hardcodear secretos, API keys o credenciales privadas en el repositorio.
+- Ejecutar despliegues a producción si la iniciativa no cuenta con QA Aprobado.
 
 ---
 

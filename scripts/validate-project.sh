@@ -100,7 +100,7 @@ fi
 
 MEMORY_DIR="$PROJECT_ROOT/.ai/memory"
 if [ -d "$MEMORY_DIR" ]; then
-    MEM_FILES=("workflow-log.md" "decisions-catalog.md" "patterns-learned.md" "context-snapshot.md")
+    MEM_FILES=("workflow-log.md" "patterns-learned.md" "context-snapshot.md")
     MEM_OK=true
     for mf in "${MEM_FILES[@]}"; do
         if [ ! -f "$MEMORY_DIR/$mf" ]; then
@@ -116,7 +116,7 @@ if [ -d "$MEMORY_DIR" ]; then
             warning_found ".ai/memory/ existe pero workflow-log.md no tiene entradas de sesión (solo el template). Registrar cada fase con finish-phase.sh."
         fi
     else
-        warning_found "La carpeta .ai/memory/ existe pero le faltan archivos seed (workflow-log.md, decisions-catalog.md, patterns-learned.md, context-snapshot.md)."
+        warning_found "La carpeta .ai/memory/ existe pero le faltan archivos seed (workflow-log.md, patterns-learned.md, context-snapshot.md)."
     fi
 else
     warning_found "No existe la carpeta .ai/memory/. La memoria persistente está inactiva (opcional v3.2.0)."
@@ -189,6 +189,20 @@ if [ -d "$FEATURES_DIR" ]; then
                     warning_found "Feature '$folder_name' contiene placeholders de plantilla (FEAT-XXX / [nombre]) en spec.md."
                 fi
             fi
+
+            ARCH_FILE="$dir/architecture.md"
+            if [ -f "$ARCH_FILE" ]; then
+                if grep -q "FEAT-XXX" "$ARCH_FILE" || grep -q "\[nombre\]" "$ARCH_FILE"; then
+                    warning_found "Feature '$folder_name' contiene placeholders de plantilla en architecture.md."
+                fi
+            fi
+
+            UI_FILE="$dir/ui-design.md"
+            if [ -f "$UI_FILE" ]; then
+                if grep -q "FEAT-XXX" "$UI_FILE" || grep -q "\[nombre\]" "$UI_FILE"; then
+                    warning_found "Feature '$folder_name' contiene placeholders de plantilla en ui-design.md."
+                fi
+            fi
         fi
 
         # Validación semántica de qa.md (FEAT y BUG)
@@ -236,6 +250,18 @@ if [ -d "$ARCHIVE_DIR" ]; then
         READABLE_TYPES="$(initiative_types_readable)"
         if [[ ! "$folder_name" =~ $INITIATIVE_PATTERN ]]; then
             error_found "Archivo: El nombre de la carpeta archivada '$folder_name' no sigue el patrón '<$READABLE_TYPES>-<ID>-<slug>'."
+            continue
+        fi
+
+        # Determinar tipo y validar artefactos de cierre en iniciativas archivadas
+        ARCH_TYPE=$(echo "$folder_name" | cut -d'-' -f1)
+        ARCH_REQ_FILES="$(required_archived_files_for "$ARCH_TYPE")"
+        if [ -n "$ARCH_REQ_FILES" ]; then
+            for req in $ARCH_REQ_FILES; do
+                if [ ! -f "$dir/$req" ]; then
+                    warning_found "Iniciativa archivada '$folder_name' no contiene el archivo de cierre '$req'."
+                fi
+            done
         fi
     done
     fi

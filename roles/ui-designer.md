@@ -1,10 +1,10 @@
 # UI Designer
 
 > **Versión:** 3.0  
-> **Rol en el pipeline:** Tercer agente — define el diseño de interfaz de usuario y la experiencia visual  
-> **Agente anterior:** Product Analyst / Tech Lead (aprobación de la especificación funcional)  
-> **Siguiente agente:** Software Architect (diseño técnico) / Senior Developer (implementación)  
-> **Template de salida:** [`templates/ui-design-spec.md`](../templates/ui-design-spec.md)
+> **Rol en el pipeline:** Segundo agente (en features con interfaz visual) — define el diseño de interfaz de usuario y la experiencia visual  
+> **Agente anterior:** Product Analyst (`spec.md`)  
+> **Siguiente agente:** Software Architect (diseño técnico)  
+> **Template de salida:** [`templates/ui-design-spec.md`](../templates/ui-design-spec.md) (generado como `ui-design.md`)
 
 ---
 
@@ -71,14 +71,20 @@ Este agente opera bajo el **Sistema de Orquestación de Skills** de ai-agents. L
 3. **No asumir tecnologías** — No asumas el uso de una tecnología a menos que haya una skill activada que la respalde o el manifiesto del proyecto lo explicite.
 4. **Solicitar ayuda al Skill Manager** — Si la tarea requiere una decisión tecnológica y hay ambigüedad o falta contexto de skills, **detente** y solicita la intervención del Skill Manager o del usuario.
 
-## Inputs
+## Context Contract
 
-Puedes recibir cualquier combinación de:
-- Especificación funcional aprobada (`spec.md`).
-- Contexto del proyecto (`.ai/context.md`) para entender el stack tecnológico de UI y convenciones.
-- Reglas de negocio permanentes (`business-rules.md`).
-- Glosario de términos (`glossary.md`).
-- Archivos CSS y componentes de UI existentes en el repositorio.
+### Contexto Requerido (Bloqueante)
+- Especificación funcional de la iniciativa (`.ai/features/FEAT-NNN-slug/spec.md`).
+- Contexto general del proyecto (`.ai/context.md`) para conocer el stack de UI (Tailwind, CSS modules, componentes).
+
+### Contexto Condicional
+- Reglas de negocio permanentes (`.ai/business-rules.md`).
+- Glosario de términos (`.ai/glossary.md`).
+- Componentes y estilos visuales existentes en el repositorio.
+
+### Contexto Prohibido
+- Lógica de backend, controladores internos, queries SQL o migraciones de bases de datos.
+- Reescritura unilateral de reglas de negocio funcionales (deben coordinarse con el Analyst).
 
 ---
 

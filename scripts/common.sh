@@ -39,13 +39,23 @@ initiative_name_pattern() {
     printf '^(%s)-[0-9]{3}-[a-z0-9-]+$' "$(echo "$INITIATIVE_TYPES" | tr ' ' '|')"
 }
 
-# Devuelve los archivos obligatorios para un tipo (vacío = estructura libre).
+# Devuelve los archivos obligatorios de inicio para un tipo (activos en .ai/features/).
 # Uso: required_files_for <FEAT|BUG|AUDIT|REF>
 required_files_for() {
     case "$1" in
-        FEAT) echo "spec.md ui-design.md architecture.md qa.md decision.md" ;;
-        BUG)  echo "bug-report.md qa.md" ;;
+        FEAT) echo "spec.md decision.md" ;;
+        BUG)  echo "bug-report.md" ;;
         *)    echo "" ;;   # AUDIT y REF: estructura libre
+    esac
+}
+
+# Devuelve los archivos obligatorios que deben existir al completar/archivar una iniciativa.
+# Uso: required_archived_files_for <FEAT|BUG|AUDIT|REF>
+required_archived_files_for() {
+    case "$1" in
+        FEAT) echo "spec.md architecture.md qa.md decision.md" ;;
+        BUG)  echo "bug-report.md qa.md" ;;
+        *)    echo "" ;;
     esac
 }
 
@@ -62,13 +72,14 @@ initiative_id_pattern() {
 # Roles del pipeline que cierran fases y registran ejecuciones en metrics
 AGENT_ROLES="analyst ui-designer architect developer qa tech-lead devops"
 
-# Re-genera .ai/memory/context-snapshot.md compactando workflow-log + catalog + patterns.
+# Re-genera .ai/memory/context-snapshot.md compactando workflow-log + knowledge-graph/decisions + patterns.
 # Uso: regenerate_context_snapshot <PROJECT_ROOT>  (destructivo: reescribe el snapshot)
 regenerate_context_snapshot() {
     local project_root="${1:-$CWD}"
     local mem_dir="$project_root/.ai/memory"
     local log="$mem_dir/workflow-log.md"
-    local catalog="$mem_dir/decisions-catalog.md"
+    local kg_file="$project_root/.ai/knowledge-graph.yaml"
+    local dec_file="$project_root/.ai/decisions.md"
     local patterns="$mem_dir/patterns-learned.md"
     local out="$mem_dir/context-snapshot.md"
 
@@ -81,13 +92,30 @@ regenerate_context_snapshot() {
         recent="(sin entradas aún en workflow-log.md)"
     fi
 
-    # --- Decisiones vigentes del catálogo (filas reales, sin la fila de ejemplo DEC-001) ---
+    # --- Decisiones vigentes (desde knowledge-graph.yaml o fallback decisions.md) ---
     local decisions=""
-    if [ -f "$catalog" ]; then
-        decisions=$(grep -E '^\| (ARCH|RN|DEC)-[0-9]{3} ' "$catalog" | grep -v '^| DEC-001 ' | tail -8 || true)
+    if [ -f "$kg_file" ]; then
+        decisions=$(awk '
+            /^[[:space:]]*- id:[[:space:]]*(ARCH-[0-9]{3})/ {
+                match($0, /ARCH-[0-9]{3}/); id=substr($0, RSTART, RLENGTH); title=""
+            }
+            /^[[:space:]]*title:[[:space:]]*/ {
+                gsub(/^[[:space:]]*title:[[:space:]]*["\047]?|["\047]?[[:space:]]*$/, "");
+                title=$0
+                if (id != "" && title != "" && title != "Nombre corto de la decisión") {
+                    print "- **" id "**: " title
+                    id=""; title=""
+                }
+            }
+        ' "$kg_file" | tail -8 || true)
     fi
+
+    if [ -z "$decisions" ] && [ -f "$dec_file" ]; then
+        decisions=$(grep -E '^## \[(ARCH|DEC)-[0-9]{3}\]' "$dec_file" | grep -v 'ARCH-001\] Decisión de Arquitectura Inicial' | sed 's/^## /- /' | tail -8 || true)
+    fi
+
     if [ -z "$decisions" ]; then
-        decisions="(sin decisiones registradas en decisions-catalog.md)"
+        decisions="(sin decisiones registradas en knowledge-graph.yaml o decisions.md)"
     fi
 
     # --- Patrones aprendidos (encabezados ##, sin el template Problema:) ---
@@ -102,8 +130,8 @@ regenerate_context_snapshot() {
     cat > "$out" << EOF
 # Context Snapshot — Memoria Compactada
 
-> Generado automáticamente por el Skill Manager / finish-phase.sh al cerrar una fase.
-> Compacta \`workflow-log.md\` + \`decisions-catalog.md\` + \`patterns-learned.md\` —
+> Generado automáticamente por finish-phase.sh al cerrar una fase.
+> Compacta \`workflow-log.md\` + \`knowledge-graph.yaml\` + \`patterns-learned.md\` —
 > **no se edita a mano**. Máximo ~30-50 líneas.
 
 ## Estado del proyecto

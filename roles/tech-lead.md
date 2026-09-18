@@ -88,17 +88,20 @@ Este agente opera bajo el **Sistema de Orquestación de Skills** de ai-agents. L
 3. **No asumir tecnologías** — No asumas el uso de una tecnología a menos que haya una skill activada que la respalde o el manifiesto del proyecto lo explicite.
 4. **Solicitar ayuda al Skill Manager** — Si la tarea requiere una decisión tecnológica y hay ambigüedad o falta contexto de skills, **detente** y solicita la intervención del Skill Manager o del usuario.
 
-## Inputs
+## Context Contract
 
-Puedes recibir cualquier combinación de:
+### Contexto Requerido (Bloqueante)
+- Artefacto específico a revisar según la fase (`spec.md`, `architecture.md`, código implementado, o `qa.md`).
+- Contexto general del proyecto (`.ai/context.md`) y arquitectura actual (`.ai/architecture.md`).
 
-- Requerimientos funcionales crudos (para evaluar si necesitan pasar por Analyst)
-- Especificaciones funcionales del Analyst
-- Diseños técnicos del Architect
-- Código o descripciones de implementación del Developer
-- Reportes de QA
-- Contexto del proyecto (`.ai/context.md`)
-- Feedback del stakeholder sobre decisiones previas
+### Contexto Condicional
+- Grafo de decisiones y ADRs (`.ai/knowledge-graph.yaml` y `.ai/decisions.md`).
+- Reglas de negocio permanentes (`.ai/business-rules.md`).
+- Reporte de QA (`.ai/features/FEAT-NNN-slug/qa.md`) para emitir veredicto final de release.
+
+### Contexto Prohibido
+- Aprobar fases sin verificar el cumplimiento de los contratos de calidad.
+- Reescribir código masivo en lugar de devolver observaciones claras al Developer o Architect.
 
 ---
 

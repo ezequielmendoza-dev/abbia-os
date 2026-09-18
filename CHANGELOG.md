@@ -4,6 +4,20 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.7.0] — 2026-09-18
+
+### Agregado
+- **Suite de Pruebas Automatizadas (`tests/test-runner.sh`)** — Suite integral de 26 pruebas automáticas que valida en un entorno temporal aislado el ciclo de vida completo: `setup-ide.sh`, `new-initiative.sh`, `finish-phase.sh`, `validate-project.sh`, `archive-initiative.sh`, `sync-initiatives.sh` y la conformidad del fixture de referencia.
+- **Proyecto de Referencia Canónico (`examples/golden-project/`)** — Repositorio modelo 100% canónico y autocontenido con `.ai/context.md`, `business-rules.md`, `architecture.md`, `decisions.md`, `glossary.md`, `knowledge-graph.yaml`, memoria, telemetría, iniciativa archivada (`FEAT-001-user-auth/`) e iniciativa activa (`FEAT-002-order-checkout/`).
+- **Context Contracts en Todos los Roles (`roles/*.md`)** — Cada rol (`analyst`, `ui-designer`, `architect`, `tech-lead`, `developer`, `qa`, `devops`, `skill-manager`) define ahora explícitamente su contrato de contexto de entrada: **Contexto Requerido**, **Contexto Condicional** y **Contexto Prohibido**, evitando consumo innecesario de tokens y desvíos de responsabilidad.
+
+### Modificado
+- **Consolidación del Sistema de Decisiones Arquitectónicas** — Se eliminó el archivo redundante `.ai/memory/decisions-catalog.md`. Las decisiones se gestionan como fuentes duales directas en `.ai/knowledge-graph.yaml` (grafo estructurado) y `.ai/decisions.md` (ADR en prosa), sincronizándose automáticamente hacia `.ai/memory/context-snapshot.md` mediante `scripts/common.sh`.
+- **Refactorización de Skill Manager (`roles/skill-manager.md`)** — Redefinido como **Capability & Context Advisor**, asesorando en el descubrimiento de skills, reglas de precedencia, catálogo externo (skills.sh) y mantenimiento del snapshot de memoria sin ficciones de orquestación de DAG en runtime.
+- **Desacoplamiento del Ciclo de Vida Documental SDD** — `scripts/new-initiative.sh` crea únicamente los artefactos de arranque correspondientes a la fase inicial (`spec.md` y `decision.md` para features; `bug-report.md` para bugs), dejando que cada rol (`ui-designer`, `architect`, `qa`) genere sus artefactos cuando el flujo lo demanda.
+- **Validación Progresiva del Ciclo de Vida** — `scripts/validate-project.sh`, `scripts/sync-initiatives.sh` y `scripts/common.sh` ahora evalúan la coherencia documental según el estado real y las fases completadas en cada iniciativa.
+- **Nombres Canónicos de Roles y Artefactos Homogeneizados** — Alineación en `roles/analyst.md`, `roles/ui-designer.md`, `roles/architect.md`, `roles/developer.md`, `roles/qa.md`, `templates/feature-folder-template.md` y `templates/ide-configs/AGENTS.md`.
+
 ## [3.6.0] — 2026-09-18
 
 ### Agregado
