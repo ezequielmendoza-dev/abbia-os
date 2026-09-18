@@ -399,7 +399,26 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
     <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       <!-- Project Info Brand -->
       <div class="flex items-center gap-3 min-w-0">
-        <span class="text-2xl flex-shrink-0">🏛️</span>
+        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+          <svg class="w-8 h-8" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="120" y1="36" x2="35" y2="195" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+            <line x1="120" y1="54" x2="48" y2="195" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
+            <line x1="120" y1="36" x2="205" y2="195" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+            <line x1="120" y1="54" x2="192" y2="195" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
+            <polygon points="120,22 112,35 128,35" fill="#38bdf8"/>
+            <line x1="78" y1="120" x2="108" y2="120" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+            <line x1="78" y1="128" x2="108" y2="128" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+            <line x1="132" y1="120" x2="162" y2="120" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+            <line x1="132" y1="128" x2="162" y2="128" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="78" cy="124" r="10" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+            <circle cx="162" cy="124" r="10" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+            <polygon points="120,111 133,124 120,137 107,124" fill="#a855f7" stroke="#e9d5ff" stroke-width="2"/>
+            <line x1="35" y1="191" x2="205" y2="191" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
+            <line x1="35" y1="199" x2="205" y2="199" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="35" cy="195" r="12" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+            <circle cx="205" cy="195" r="12" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+          </svg>
+        </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <h1 id="nav-project-name" class="text-base sm:text-lg font-black bg-gradient-to-r from-sky-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent truncate">Abbia OS</h1>
@@ -1263,8 +1282,25 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       <!-- Modal Header -->
       <div class="p-5 sm:p-6 border-b border-slate-800/80 bg-slate-900/95 flex items-start justify-between gap-4">
         <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/20 to-teal-500/20 border border-sky-500/30 flex items-center justify-center text-2xl shadow-inner flex-shrink-0">
-            🏛️
+          <div class="w-12 h-12 rounded-2xl bg-slate-950/80 border border-sky-500/30 flex items-center justify-center shadow-inner flex-shrink-0 p-1.5">
+            <svg class="w-full h-full" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="120" y1="36" x2="35" y2="195" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+              <line x1="120" y1="54" x2="48" y2="195" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
+              <line x1="120" y1="36" x2="205" y2="195" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+              <line x1="120" y1="54" x2="192" y2="195" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
+              <polygon points="120,22 112,35 128,35" fill="#38bdf8"/>
+              <line x1="78" y1="120" x2="108" y2="120" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+              <line x1="78" y1="128" x2="108" y2="128" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+              <line x1="132" y1="120" x2="162" y2="120" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+              <line x1="132" y1="128" x2="162" y2="128" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="78" cy="124" r="10" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+              <circle cx="162" cy="124" r="10" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+              <polygon points="120,111 133,124 120,137 107,124" fill="#a855f7" stroke="#e9d5ff" stroke-width="2"/>
+              <line x1="35" y1="191" x2="205" y2="191" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
+              <line x1="35" y1="199" x2="205" y2="199" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="35" cy="195" r="12" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+              <circle cx="205" cy="195" r="12" fill="#34d399" stroke="#065f46" stroke-width="3"/>
+            </svg>
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
