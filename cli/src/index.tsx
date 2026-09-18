@@ -260,7 +260,13 @@ function runCli() {
     case '--help':
     case '-h':
       console.log(`
-🏛️  Abbia OS CLI v4.0.0
+         ▲
+        ╱ ╲       ABBIA OS
+       ╱   ╲      AI Software Engineering Operating System — v4.0.0
+      ●──◆──●     Layered Context · Structured Memory · Autonomous Delivery
+     ╱       ╲
+    ●─────────●
+
 Uso:
   ./abbia                        Abre el dashboard interactivo (TUI)
   ./abbia new <tipo> <id> <slug> Crea una nueva iniciativa

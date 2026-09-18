@@ -77,10 +77,13 @@ show_header() {
     clear 2>/dev/null || echo ""
     get_project_summary
     
-    echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║  🎛️  Abbia OS — Terminal Control Center & CLI Dashboard (v4.0.0)      ║${NC}"
-    echo -e "${CYAN}${BOLD}║  ${DIM}Layered Context · Structured Memory · Autonomous Delivery           ${CYAN}${BOLD}║${NC}"
-    echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}${BOLD}       ▲${NC}"
+    echo -e "${CYAN}${BOLD}      ╱ ╲       ${BOLD}ABBIA OS${NC} ${CYAN}${BOLD}│ v4.0.0${NC}"
+    echo -e "${CYAN}${BOLD}     ╱   ╲      ${DIM}AI Software Engineering Operating System${NC}"
+    echo -e "${GREEN}${BOLD}    ●──${MAGENTA}◆${GREEN}──●     ${DIM}\"Layered Context · Structured Memory · Autonomous Delivery\"${NC}"
+    echo -e "${CYAN}${BOLD}   ╱       ╲${NC}"
+    echo -e "${GREEN}${BOLD}  ●─────────●${NC}"
+    echo ""
     echo -e "${BOLD}📁 Proyecto:${NC} ${YELLOW}$PROJECT_ROOT${NC}"
     echo -e "${BOLD}📊 Estado:${NC}   ${GREEN}$ACTIVE_COUNT Activas${NC} │ ${BLUE}$ARCHIVED_COUNT Archivadas${NC} │ ${MAGENTA}$ADR_COUNT ADRs${NC} │ ${CYAN}$LOG_ENTRIES Logs de Sesión${NC}"
     print_line

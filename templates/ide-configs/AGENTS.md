@@ -1,4 +1,13 @@
-# 🏛️ Abbia OS — Guía de Desarrollo Asistido por IA
+```text
+         ▲
+        ╱ ╲       ABBIA OS
+       ╱   ╲      AI Software Engineering Operating System — v4.0.0
+      ●──◆──●     Layered Context · Structured Memory · Autonomous Delivery
+     ╱       ╲
+    ●─────────●
+```
+
+# Abbia OS — Guía de Desarrollo Asistido por IA
 
 > Este documento es la **fuente de verdad** sobre cómo opera el sistema de ingeniería asistida por IA (**Abbia OS**) en este proyecto.
 > Debe ser leído por cualquier asistente o agente de IA (Cursor, Claude Code, Windsurf, Cline, Copilot, Antigravity) antes de realizar cualquier tarea.

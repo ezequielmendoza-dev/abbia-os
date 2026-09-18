@@ -17,7 +17,7 @@ export const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
     <Box flexDirection="column" borderStyle="round" borderColor={colors.primary} padding={1}>
       <Box marginBottom={1} flexDirection="row" justifyContent="space-between">
         <Text color={colors.primary} bold>
-          🏛️  Abbia OS v4.0.0 — Guía Rápida & SDD Framework
+          Abbia OS v4.0.0 — Guía Rápida & SDD Framework
         </Text>
         <Text color={colors.textDim}>[ Enter / Esc / q para volver ]</Text>
       </Box>

@@ -1,19 +1,28 @@
 <div align="center">
 
-# 🎛️ Abbia OS
+```text
+         ▲
+        ╱ ╲       ABBIA OS
+       ╱   ╲      AI Software Engineering Operating System
+      ●──◆──●     v4.0.0
+     ╱       ╲
+    ●─────────●   Layered Context · Structured Memory · Autonomous Delivery
+```
+
+# Abbia OS
 ### *De la improvisación en el chat a la precisión de un estudio de ingeniería.*
 **Framework de Specification-Driven Development (SDD) & Orquestación Multi-Agente Asistida por IA**
 
-[![Version](https://img.shields.io/badge/version-v4.0.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
-[![Status](https://img.shields.io/badge/status-stable-success.svg?style=for-the-badge)](README.md)
-[![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-purple.svg?style=for-the-badge)](docs/sdd-philosophy.md)
-[![Memory](https://img.shields.io/badge/memory-3--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
+[![Version](https://img.shields.io/badge/version-v4.0.0-38bdf8.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-stable-34d399.svg?style=for-the-badge)](README.md)
+[![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-a855f7.svg?style=for-the-badge)](docs/sdd-philosophy.md)
+[![Memory](https://img.shields.io/badge/memory-3--Tier%20Persistent-10b981.svg?style=for-the-badge)](docs/workflow-memory.md)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg?style=for-the-badge)](LICENSE)
 
 <br/>
 
 **Transforma tu IDE en un estudio de ingeniería de software autónomo, estructurado y auditable.**  
-*Layered Context · Structured Memory · Autonomous Delivery · Artefactos como verdad · Workflows con DAG · Visualizador web*
+*Layered Context · Structured Memory · Autonomous Delivery · Artefactos como verdad · Workflows con DAG · TUI & Visualizador web*
 
 ---
 

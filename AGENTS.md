@@ -1,4 +1,13 @@
-# 🏛️ Abbia OS — Guía para Contribuir al Framework
+```text
+         ▲
+        ╱ ╲       ABBIA OS
+       ╱   ╲      AI Software Engineering Operating System — v4.0.0
+      ●──◆──●     Layered Context · Structured Memory · Autonomous Delivery
+     ╱       ╲
+    ●─────────●
+```
+
+# Abbia OS — Guía para Contribuir al Framework
 
 > Este `AGENTS.md` es específico para el desarrollo del **propio repositorio de Abbia OS**.
 > No confundir con el template `templates/ide-configs/AGENTS.md`, que es la versión que se instala en los proyectos que consumen este framework.

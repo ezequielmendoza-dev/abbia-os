@@ -23,25 +23,41 @@ export const Header: React.FC<HeaderProps> = ({ projectInfo, currentScreen }) =>
         flexDirection="row"
         justifyContent="space-between"
       >
-        <Box flexDirection="column">
-          <Box flexDirection="row" alignItems="center">
-            <Text color={colors.primary} bold>
-              🏛️  ABBIA OS
+        <Box flexDirection="row" alignItems="center">
+          {/* Prisma Delta Logo */}
+          <Box flexDirection="column" marginRight={2}>
+            <Text color={colors.primary}>     ▲</Text>
+            <Text color={colors.primary}>    ╱ ╲</Text>
+            <Text color={colors.primary}>   ╱   ╲</Text>
+            <Text>
+              <Text color={colors.secondary}>  ●</Text>
+              <Text color={colors.secondary}>──</Text>
+              <Text color={colors.accent}>◆</Text>
+              <Text color={colors.secondary}>──</Text>
+              <Text color={colors.secondary}>●</Text>
             </Text>
-            <Text color={colors.textDim}> │ </Text>
-            <Text color={colors.secondary} bold>
-              v4.0.0
-            </Text>
-            <Text color={colors.textDim}> — AI Software Engineering Operating System</Text>
+            <Text color={colors.primary}> ╱       ╲</Text>
+            <Text color={colors.secondary}>●─────────●</Text>
           </Box>
-          <Box flexDirection="row" marginTop={0}>
+
+          <Box flexDirection="column" justifyContent="center">
+            <Box flexDirection="row" alignItems="center">
+              <Text color={colors.primary} bold>
+                ABBIA OS
+              </Text>
+              <Text color={colors.textDim}> │ </Text>
+              <Text color={colors.secondary} bold>
+                v4.0.0
+              </Text>
+            </Box>
+            <Text color={colors.textDim}>AI Software Engineering Operating System</Text>
             <Text color={colors.textMuted} italic>
               "Layered Context, Structured Memory, Autonomous Delivery"
             </Text>
           </Box>
         </Box>
 
-        <Box flexDirection="column" alignItems="flex-end">
+        <Box flexDirection="column" alignItems="flex-end" justifyContent="center">
           <Box flexDirection="row">
             <Text color={colors.textDim}>Project: </Text>
             <Text color={colors.text} bold>
