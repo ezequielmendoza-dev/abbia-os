@@ -62,12 +62,31 @@ mi-proyecto/
 | `context.md` | Completado manualmente | Memoria del proyecto — se actualiza con el tiempo |
 | `sessions/` | Generado localmente | Conversaciones o notas de sesiones de trabajo (no se commitea) |
 
-### Agregar `.ai/sessions/` al `.gitignore` del proyecto
+### Configuración de `.gitignore` y `.gitattributes` del proyecto
 
+Para evitar conflictos de merge al trabajar con múltiples desarrolladores y ramas en paralelo:
+
+**1. En `.gitignore` del proyecto:**
 ```gitignore
-# AI sessions — trabajo local, no compartir en el repo del proyecto
+# ==============================================================================
+# ai-agents OS — Archivos temporales, sesiones y cachés generados
+# ==============================================================================
 .ai/sessions/
+.ai/dashboard.html
+.ai/memory/context-snapshot.md
+.ai/metrics/aggregates.yaml
 ```
+
+**2. En `.gitattributes` del proyecto:**
+```gitattributes
+# ==============================================================================
+# ai-agents OS — Reglas de Merge para Git (.gitattributes)
+# ==============================================================================
+.ai/memory/workflow-log.md merge=union
+.ai/metrics/executions.yaml merge=union
+```
+
+*(Ambos archivos pueden configurarse automáticamente ejecutando `bash .ai/agents/scripts/setup-ide.sh`)*.
 
 ---
 

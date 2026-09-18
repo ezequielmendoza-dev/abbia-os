@@ -243,7 +243,54 @@ else
     warning_found "No existe el directorio .ai/archive/. Se recomienda crearlo para almacenar el historial de features cerradas."
 fi
 
-# 6. Reporte Final
+# 6. Validar Higiene de Git (.gitignore y .gitattributes)
+if [ -d "$PROJECT_ROOT/.git" ] || git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree &>/dev/null; then
+    echo -e "\n${BLUE}Verificando higiene de Git (.gitignore y .gitattributes)...${NC}"
+    
+    # 6.1 Verificar si archivos derivados/caché están siendo rastreados por Git
+    TRACKED_DERIVED=0
+    for f in ".ai/dashboard.html" ".ai/memory/context-snapshot.md" ".ai/metrics/aggregates.yaml"; do
+        if git -C "$PROJECT_ROOT" ls-files --error-unmatch "$f" &>/dev/null; then
+            warning_found "El archivo generado/caché '$f' está siendo rastreado por Git. Debe ignorarse para evitar conflictos: git rm --cached $f"
+            TRACKED_DERIVED=$((TRACKED_DERIVED + 1))
+        fi
+    done
+    if [ $TRACKED_DERIVED -eq 0 ]; then
+        echo -e "  [${GREEN}OK${NC}]    No hay archivos generados/caché rastreados por Git."
+    fi
+
+    # 6.2 Verificar .gitignore
+    GITIGNORE_FILE="$PROJECT_ROOT/.gitignore"
+    if [ -f "$GITIGNORE_FILE" ]; then
+        MISSING_GI=0
+        for entry in ".ai/sessions/" ".ai/dashboard.html" ".ai/memory/context-snapshot.md" ".ai/metrics/aggregates.yaml"; do
+            if ! grep -qF "$entry" "$GITIGNORE_FILE"; then
+                MISSING_GI=$((MISSING_GI + 1))
+            fi
+        done
+        if [ $MISSING_GI -gt 0 ]; then
+            warning_found ".gitignore no contiene todas las exclusiones recomendadas de ai-agents. Ejecutar 'setup-ide.sh' para completarlo."
+        else
+            echo -e "  [${GREEN}OK${NC}]    .gitignore verificado con exclusiones de ai-agents."
+        fi
+    else
+        warning_found "No se encontró .gitignore en la raíz del proyecto."
+    fi
+
+    # 6.3 Verificar .gitattributes (merge=union)
+    GITATTR_FILE="$PROJECT_ROOT/.gitattributes"
+    if [ -f "$GITATTR_FILE" ]; then
+        if grep -qF ".ai/memory/workflow-log.md merge=union" "$GITATTR_FILE" && grep -qF ".ai/metrics/executions.yaml merge=union" "$GITATTR_FILE"; then
+            echo -e "  [${GREEN}OK${NC}]    .gitattributes verificado con directivas merge=union."
+        else
+            warning_found ".gitattributes no tiene configurado 'merge=union' para workflow-log.md y executions.yaml. Ejecutar 'setup-ide.sh' para configurarlo."
+        fi
+    else
+        warning_found "No se encontró .gitattributes en el proyecto. Recomendado para prevenir conflictos en logs append-only."
+    fi
+fi
+
+# 7. Reporte Final
 echo -e "\n${BLUE}====================================================${NC}"
 echo -e "${BLUE}   📊 Resumen de Validación                         ${NC}"
 echo -e "${BLUE}====================================================${NC}"

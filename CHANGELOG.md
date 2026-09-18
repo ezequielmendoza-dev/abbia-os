@@ -4,6 +4,18 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [3.6.0] — 2026-09-18
+
+### Agregado
+- **Plantilla Estándar `.gitattributes` con `merge=union`** — Nueva plantilla `templates/ide-configs/gitattributes` que define la estrategia nativa de merge `union` para archivos append-only de telemetría y memoria (`.ai/memory/workflow-log.md` y `.ai/metrics/executions.yaml`), resolviendo automáticamente adiciones concurrentes entre ramas.
+- **Validación de Higiene de Git en `validate-project.sh`** — Nuevo paso de verificación que detecta si archivos derivados/caché (`dashboard.html`, `context-snapshot.md`, `aggregates.yaml`) están siendo rastreados por Git indebidamente y valida la presencia de `.gitignore` y `.gitattributes` con `merge=union`.
+- **Soporte CLI para `auto`/`next` en `new-initiative.sh`** — Permite invocar `bash .ai/agents/scripts/new-initiative.sh FEAT auto mi-slug` para autodescubrir y asignar el siguiente ID sin intervención manual.
+
+### Modificado
+- **Detección Dinámica de IDs en `new-initiative.sh`** — El cálculo del siguiente ID numérico disponible ahora escanea dinámicamente las carpetas existentes en `.ai/features/` y `.ai/archive/`, eliminando la competencia y conflictos por la línea de contador en `.ai/context.md`.
+- **Instalador `setup-ide.sh` Mejorado para Git** — El paso de configuración de Git ahora inicializa tanto las exclusiones en `.gitignore` (`.ai/sessions/`, `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml`) como las directivas `merge=union` en `.gitattributes`.
+- **Documentación de Buenas Prácticas de Merge** — Actualizados `README.md`, `AGENTS.md`, `templates/ide-configs/AGENTS.md` y `docs/project-integration.md` con guías claras para trabajo colaborativo multi-desarrollador y hooks `post-merge`.
+
 ## [3.5.1] — 2026-09-16
 
 ### Modificado

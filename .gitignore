@@ -73,3 +73,7 @@ yarn-error.log*
 # ==============================================================================
 .ai/
 
+.ai/sessions/
+.ai/dashboard.html
+.ai/memory/context-snapshot.md
+.ai/metrics/aggregates.yaml

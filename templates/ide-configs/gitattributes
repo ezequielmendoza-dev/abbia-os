@@ -1,0 +1,10 @@
+# ==============================================================================
+# ai-agents OS — Reglas de Merge para Git (.gitattributes)
+# ==============================================================================
+# Estrategia de merge automático para archivos append-only de telemetría y memoria.
+# Esto previene conflictos cuando múltiples desarrolladores/agentes trabajan en
+# ramas concurrentes y agregan entradas cronológicas.
+# ==============================================================================
+
+.ai/memory/workflow-log.md merge=union
+.ai/metrics/executions.yaml merge=union

@@ -3,7 +3,7 @@
 # 🤖 ai-agents OS
 ### *Framework de Specification-Driven Development (SDD) para Ingeniería Asistida por IA*
 
-[![Version](https://img.shields.io/badge/version-v3.5.1-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.6.0-blue.svg?style=for-the-badge&logo=git)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-stable-success.svg?style=for-the-badge)](README.md)
 [![Philosophy](https://img.shields.io/badge/architecture-SDD%20%7C%20DAG%20%7C%20ADR-purple.svg?style=for-the-badge)](docs/sdd-philosophy.md)
 [![Memory](https://img.shields.io/badge/memory-4--Tier%20Persistent-emerald.svg?style=for-the-badge)](docs/workflow-memory.md)
@@ -263,6 +263,13 @@ mi-proyecto/
 3. **R3:** Nunca crear versiones paralelas (`spec-v2.md`). Modificar el documento canónico.
 4. **R4:** Los cambios estructurales deben reflejarse en `CHANGELOG.md` y documentos globales.
 5. **R5:** Los documentos representan el **estado actual**, no el histórico.
+
+### 🌿 Higiene de Git y Trabajo Concurrente Multi-Rama
+
+Para equipos con múltiples desarrolladores trabajando en ramas paralelas:
+* **Archivos Derivados y Caché Local en `.gitignore`:** `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml` y `.ai/sessions/` se generan automáticamente bajo demanda y no deben commitearse.
+* **Logs Append-Only con `merge=union` en `.gitattributes`:** Los archivos `.ai/memory/workflow-log.md` y `.ai/metrics/executions.yaml` se fusionan automáticamente sin generar conflictos.
+* **Reconciliación Post-Merge:** Tras fusionar ramas (`merge` o `pull`), ejecutar `bash .ai/agents/scripts/sync-initiatives.sh` para reconstruir agregados y snapshots al instante.
 
 ---
 

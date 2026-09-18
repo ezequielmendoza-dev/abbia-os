@@ -160,6 +160,18 @@ El proyecto cuenta con herramientas en `.ai/agents/scripts/` para simplificar fl
 
 ---
 
+## 🌿 Higiene de Git y Prevención de Conflictos
+
+Para proyectos con múltiples ramas o desarrolladores trabajando simultáneamente:
+1. **Exclusiones en `.gitignore`:** Los archivos de sesión y cachés locales (`.ai/sessions/`, `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml`) deben mantenerse ignorados.
+2. **Estrategia `merge=union` en `.gitattributes`:** Los logs cronológicos (`.ai/memory/workflow-log.md`, `.ai/metrics/executions.yaml`) deben configurarse con `merge=union` para resolver automáticamente inserciones simultáneas.
+3. **Reconciliación Post-Merge:** Tras realizar `git pull` o `git merge`, ejecutar:
+   ```bash
+   bash .ai/agents/scripts/sync-initiatives.sh
+   ```
+
+---
+
 ## 💡 Cómo Instanciar un Agente (Prompts)
 
 Para activar un agente de IA en su rol respectivo, utilizar una de las siguientes plantillas:

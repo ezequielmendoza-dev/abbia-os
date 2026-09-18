@@ -181,6 +181,15 @@ bash .ai/agents/scripts/setup-ide.sh
 
 ---
 
+## 🌿 Higiene de Git y Prevención de Conflictos en Proyectos
+
+Para evitar conflictos de merge al trabajar con múltiples desarrolladores/ramas:
+1. **Archivos generados y cachés locales:** Deben estar en `.gitignore` (`.ai/sessions/`, `.ai/dashboard.html`, `.ai/memory/context-snapshot.md`, `.ai/metrics/aggregates.yaml`).
+2. **Archivos append-only (Logs y Telemetría):** Deben usar la directiva `merge=union` en `.gitattributes` (`.ai/memory/workflow-log.md`, `.ai/metrics/executions.yaml`).
+3. **Reconciliación post-merge:** Tras un `pull` o `merge`, ejecutar `bash .ai/agents/scripts/sync-initiatives.sh` para reconstruir agregados y snapshots automáticamente.
+
+---
+
 ## ⚠️ Qué NO Hacer al Modificar este Repositorio
 
 - No duplicar archivos de roles (usar el existente).

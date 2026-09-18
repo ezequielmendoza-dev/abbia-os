@@ -67,30 +67,80 @@ else
             ;;
     esac
     
-    # Intentar sugerir el siguiente ID analizando context.md
-    SUGGESTED_ID=""
+    # Determinar siguiente ID disponible escaneando filesystem (.ai/features y .ai/archive) y context.md
+    MAX_FS_NUM=0
+    for search_dir in "$PROJECT_ROOT/.ai/features" "$PROJECT_ROOT/.ai/archive"; do
+        if [ -d "$search_dir" ]; then
+            for folder in "$search_dir"/$TYPE-[0-9][0-9][0-9]*; do
+                if [ -d "$folder" ]; then
+                    bname=$(basename "$folder")
+                    num_part=$(echo "$bname" | grep -oE "^$TYPE-[0-9]{3}" | cut -d'-' -f2 || true)
+                    if [ -n "$num_part" ]; then
+                        num_val=$((10#$num_part))
+                        if [ $num_val -gt $MAX_FS_NUM ]; then
+                            MAX_FS_NUM=$num_val
+                        fi
+                    fi
+                fi
+            done
+        fi
+    done
+
+    MAX_CTX_NUM=0
     CONTEXT_FILE="$PROJECT_ROOT/.ai/context.md"
     if [ -f "$CONTEXT_FILE" ]; then
-        # Buscar la línea correspondiente (e.g. - Último FEAT asignado: FEAT-012)
         LAST_ASSIGNED=$(grep -i "Último $TYPE asignado:" "$CONTEXT_FILE" | grep -oE "$TYPE-[0-9]+" | cut -d'-' -f2 || true)
         if [ -n "$LAST_ASSIGNED" ]; then
-            # Eliminar ceros a la izquierda para sumar 1
-            NUM=$((10#$LAST_ASSIGNED + 1))
-            SUGGESTED_ID=$(printf "%03d" "$NUM")
-            echo -e "${GREEN}✓ Detectado último ID en context.md. ID sugerido: $SUGGESTED_ID${NC}"
+            MAX_CTX_NUM=$((10#$LAST_ASSIGNED))
         fi
     fi
-    
+
+    MAX_NUM=$(( MAX_FS_NUM > MAX_CTX_NUM ? MAX_FS_NUM : MAX_CTX_NUM ))
+    NEXT_NUM=$(( MAX_NUM + 1 ))
+    SUGGESTED_ID=$(printf "%03d" "$NEXT_NUM")
+    echo -e "${GREEN}✓ Siguiente ID detectado dinámicamente: $SUGGESTED_ID${NC}"
+
     # Solicitar ID
-    if [ -n "$SUGGESTED_ID" ]; then
-        read -p "Ingresa el ID numérico de 3 dígitos [Presiona Enter para usar $SUGGESTED_ID]: " input_id
-        ID=${input_id:-$SUGGESTED_ID}
-    else
-        read -p "Ingresa el ID numérico de 3 dígitos (ej: 001): " ID
-    fi
+    read -p "Ingresa el ID numérico de 3 dígitos [Presiona Enter para usar $SUGGESTED_ID]: " input_id
+    ID=${input_id:-$SUGGESTED_ID}
     
     # Solicitar slug
     read -p "Ingresa el slug descriptivo en kebab-case (ej: login-seguro): " SLUG
+fi
+
+# Soporte para 'auto' o 'next' como segundo argumento en modo CLI
+if [ "$ID" = "auto" ] || [ "$ID" = "next" ] || [ "$ID" = "AUTO" ] || [ "$ID" = "NEXT" ]; then
+    MAX_FS_NUM=0
+    for search_dir in "$PROJECT_ROOT/.ai/features" "$PROJECT_ROOT/.ai/archive"; do
+        if [ -d "$search_dir" ]; then
+            for folder in "$search_dir"/$TYPE-[0-9][0-9][0-9]*; do
+                if [ -d "$folder" ]; then
+                    bname=$(basename "$folder")
+                    num_part=$(echo "$bname" | grep -oE "^$TYPE-[0-9]{3}" | cut -d'-' -f2 || true)
+                    if [ -n "$num_part" ]; then
+                        num_val=$((10#$num_part))
+                        if [ $num_val -gt $MAX_FS_NUM ]; then
+                            MAX_FS_NUM=$num_val
+                        fi
+                    fi
+                fi
+            done
+        fi
+    done
+
+    MAX_CTX_NUM=0
+    CONTEXT_FILE="$PROJECT_ROOT/.ai/context.md"
+    if [ -f "$CONTEXT_FILE" ]; then
+        LAST_ASSIGNED=$(grep -i "Último $TYPE asignado:" "$CONTEXT_FILE" | grep -oE "$TYPE-[0-9]+" | cut -d'-' -f2 || true)
+        if [ -n "$LAST_ASSIGNED" ]; then
+            MAX_CTX_NUM=$((10#$LAST_ASSIGNED))
+        fi
+    fi
+
+    MAX_NUM=$(( MAX_FS_NUM > MAX_CTX_NUM ? MAX_FS_NUM : MAX_CTX_NUM ))
+    NEXT_NUM=$(( MAX_NUM + 1 ))
+    ID=$(printf "%03d" "$NEXT_NUM")
+    echo -e "${GREEN}✓ ID asignado automáticamente: $ID${NC}"
 fi
 
 # 2. Validar formatos
@@ -221,9 +271,14 @@ EOF
         echo -e "${YELLOW}! Sección '## Registro de IDs' agregada al final de context.md${NC}"
     fi
     
-    # Reemplazar el último asignado del tipo seleccionado
-    "${SED_INPLACE[@]}" "s/- Último $TYPE asignado:.*/- Último $TYPE asignado: $TYPE-$ID/g" "$CONTEXT_FILE"
-    echo -e "${GREEN}✓ Registrado $TYPE-$ID como el último asignado en context.md.${NC}"
+    # Verificar valor previo para no degradar el ID si otra rama ya registró uno superior
+    CURRENT_REG=$(grep -i "Último $TYPE asignado:" "$CONTEXT_FILE" | grep -oE "$TYPE-[0-9]+" | cut -d'-' -f2 || echo "000")
+    if [ $((10#$ID)) -ge $((10#$CURRENT_REG)) ]; then
+        "${SED_INPLACE[@]}" "s/- Último $TYPE asignado:.*/- Último $TYPE asignado: $TYPE-$ID/g" "$CONTEXT_FILE"
+        echo -e "${GREEN}✓ Registrado $TYPE-$ID como el último asignado en context.md.${NC}"
+    else
+        echo -e "${YELLOW}! context.md ya tiene registrado un ID superior ($TYPE-$CURRENT_REG). No se modifica.${NC}"
+    fi
 else
     echo -e "${YELLOW}Advertencia: No se encontró el archivo .ai/context.md. No se pudo actualizar el registro de IDs.${NC}"
 fi

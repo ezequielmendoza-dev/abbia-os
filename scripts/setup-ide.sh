@@ -32,7 +32,7 @@ fi
 
 echo -e "${BLUE}====================================================${NC}"
 echo -e "${BLUE}   🤖 Instalador de Configuración de IDEs de IA      ${NC}"
-echo -e "${BLUE}            ai-agents OS v3.3.0                     ${NC}"
+echo -e "${BLUE}            ai-agents OS v3.6.0                     ${NC}"
 echo -e "${BLUE}====================================================${NC}"
 
 # 1. Determinar rutas y directorios
@@ -410,13 +410,13 @@ case $ide_choice in
         ;;
 esac
 
-echo -e "\n${BLUE}--- Paso 3: Configuración de .gitignore ---${NC}"
-# Preguntar si desea configurar el .gitignore
+echo -e "\n${BLUE}--- Paso 3: Configuración de .gitignore y .gitattributes ---${NC}"
+# Preguntar si desea configurar el .gitignore y .gitattributes
 if [ "$AUTO_MODE" = true ]; then
     configure_git="s"
-    echo -e "${YELLOW}! Modo automático: configurando .gitignore (.ai/sessions/).${NC}"
+    echo -e "${YELLOW}! Modo automático: configurando .gitignore y .gitattributes para ai-agents.${NC}"
 else
-    read -p "¿Deseas agregar las carpetas de sesiones locales de IA y temporales al .gitignore del proyecto? (s/n): " configure_git
+    read -p "¿Deseas configurar .gitignore y .gitattributes para evitar conflictos en Git? (s/n): " configure_git
 fi
 
 if [[ "$configure_git" =~ ^[sS]$ ]]; then
@@ -426,21 +426,48 @@ if [[ "$configure_git" =~ ^[sS]$ ]]; then
         touch "$GITIGNORE_PATH"
     fi
 
-    # Verificar si ya está configurado
-    if grep -q "\.ai/sessions/" "$GITIGNORE_PATH"; then
-        echo -e "  - Las sesiones locales de IA ya están ignoradas en el .gitignore."
-    else
-        cat << 'EOF' >> "$GITIGNORE_PATH"
+    # Configurar entradas en .gitignore
+    ENTRIES_ADDED=0
+    for entry in ".ai/sessions/" ".ai/dashboard.html" ".ai/memory/context-snapshot.md" ".ai/metrics/aggregates.yaml"; do
+        if ! grep -qF "$entry" "$GITIGNORE_PATH"; then
+            if [ $ENTRIES_ADDED -eq 0 ] && ! grep -q "ai-agents OS" "$GITIGNORE_PATH"; then
+                echo -e "\n# ==============================================================================\n# ai-agents OS — Archivos temporales, sesiones y cachés generados\n# ==============================================================================" >> "$GITIGNORE_PATH"
+            fi
+            echo "$entry" >> "$GITIGNORE_PATH"
+            ENTRIES_ADDED=$((ENTRIES_ADDED + 1))
+        fi
+    done
 
-# ==============================================================================
-# ai-agents OS — Ignorar carpetas temporales y de sesión local de IA
-# ==============================================================================
-.ai/sessions/
-EOF
-        echo -e "${GREEN}✓ Agregado .ai/sessions/ al .gitignore del proyecto.${NC}"
+    if [ $ENTRIES_ADDED -gt 0 ]; then
+        echo -e "${GREEN}✓ Agregadas reglas de ai-agents a .gitignore ($ENTRIES_ADDED nuevas entradas).${NC}"
+    else
+        echo -e "  - Reglas de .gitignore ya configuradas."
+    fi
+
+    # Configurar .gitattributes (merge=union para append-only logs)
+    GITATTRIBUTES_PATH="$PROJECT_ROOT/.gitattributes"
+    if [ ! -f "$GITATTRIBUTES_PATH" ]; then
+        touch "$GITATTRIBUTES_PATH"
+    fi
+
+    ATTR_ADDED=0
+    for attr in ".ai/memory/workflow-log.md merge=union" ".ai/metrics/executions.yaml merge=union"; do
+        if ! grep -qF "$attr" "$GITATTRIBUTES_PATH"; then
+            if [ $ATTR_ADDED -eq 0 ] && ! grep -q "ai-agents OS" "$GITATTRIBUTES_PATH"; then
+                echo -e "\n# ==============================================================================\n# ai-agents OS — Reglas de Merge para Git (.gitattributes)\n# ==============================================================================" >> "$GITATTRIBUTES_PATH"
+            fi
+            echo "$attr" >> "$GITATTRIBUTES_PATH"
+            ATTR_ADDED=$((ATTR_ADDED + 1))
+        fi
+    done
+
+    if [ $ATTR_ADDED -gt 0 ]; then
+        echo -e "${GREEN}✓ Agregadas reglas de merge=union a .gitattributes para logs append-only.${NC}"
+    else
+        echo -e "  - Reglas de .gitattributes ya configuradas."
     fi
 else
-    echo -e "Omitiendo configuración de .gitignore."
+    echo -e "Omitiendo configuración de .gitignore y .gitattributes."
 fi
 
 echo -e "\n${GREEN}====================================================${NC}"
