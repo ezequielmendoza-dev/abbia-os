@@ -49,16 +49,23 @@ El pipeline de `ai-agents` produce artefactos (specs, diseños, QA) y ahora memo
 
 ---
 
-## 3. Ubicación y Formato
-
-Las métricas viven en `.ai/metrics/`, separadas de la memoria cualitativa (`.ai/memory/`):
+## 3. Ubicación, Formato y Visualización
+ 
+Las métricas viven en `.abbia/metrics/`, separadas de la memoria cualitativa (`.abbia/memory/`):
 
 ```
-.ai/metrics/
+.abbia/metrics/
 ├── README.md               ← Contrato de uso (este sistema, copiado al proyecto)
 ├── executions.yaml         ← Registro append-only por ejecución de agente
 └── aggregates.yaml         ← Agregados multidimensionales (regenerado automáticamente)
 ```
+
+### Visualización con el Dashboard & Live Server
+Las métricas se pueden visualizar de forma interactiva ejecutando:
+- `./abbia dashboard` — Genera y abre `.abbia/dashboard.html` en el navegador (se auto-regenera silenciosamente tras cada cierre de fase).
+- `./abbia serve [PORT]` — Inicia un servidor web local con **Live Reload** en tiempo real (recarga automática al guardar cambios).
+- `./abbia watch` — Vigila cambios en segundo plano y auto-regenera el HTML.
+
 
 ### `executions.yaml` — registro bruto (append-only)
 

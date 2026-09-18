@@ -420,6 +420,9 @@ elif [ "$ASK_ARCHIVE" = true ]; then
     bash "$SCRIPT_DIR/archive-initiative.sh" "$INITIATIVE" --prompt ${NOTE:+--note "$NOTE"}
 fi
 
+# 6. Auto-actualizar dashboard si existe
+auto_refresh_dashboard_if_exists "$PROJECT_ROOT"
+
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}   🎉 Fase '$PHASE' cerrada para $INITIATIVE ($ROLE)${NC}"
 echo -e "${GREEN}====================================================${NC}"

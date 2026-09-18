@@ -102,6 +102,8 @@ Puedes usar el CLI `./abbia` desde la raíz o ejecutar los scripts en `.abbia/co
 | `./abbia sync [--fix]` | `sync-initiatives.sh` | Sincronizar, reconciliar memoria y auto-reparar |
 | `./abbia validate` | `validate-project.sh` | Validar conformidad del proyecto con estándares Abbia |
 | `./abbia dashboard` | `dashboard.sh` | Generar y abrir el visualizador interactivo en el navegador |
+| `./abbia serve` | `dashboard.sh --serve` | Iniciar servidor local en vivo con Live Reload automático |
+| `./abbia watch` | `dashboard.sh --watch` | Vigilar cambios en `.abbia/` y auto-regenerar `dashboard.html` |
 | `./abbia update [VERSION]` | `update-abbia.sh` | Actualizar el framework Abbia OS a la última versión |
 
 ---

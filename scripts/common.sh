@@ -281,3 +281,23 @@ Referencia: docs/agent-metrics.md (Abbia OS $ABBIA_VERSION).
 EOF
     fi
 }
+
+# Re-genera .abbia/dashboard.html silenciosamente si ya existe en el proyecto destino
+auto_refresh_dashboard_if_exists() {
+    local project_root="${1:-$(detect_project_root)}"
+    resolve_abbia_paths "$project_root"
+    local dash_file="$ABBIA_DIR/dashboard.html"
+    local dash_script=""
+
+    if [ -f "$ABBIA_CORE/scripts/dashboard.sh" ]; then
+        dash_script="$ABBIA_CORE/scripts/dashboard.sh"
+    elif [ -f "$SCRIPT_DIR/dashboard.sh" ]; then
+        dash_script="$SCRIPT_DIR/dashboard.sh"
+    fi
+
+    if [ -f "$dash_file" ] && [ -n "$dash_script" ]; then
+        bash "$dash_script" --no-open >/dev/null 2>&1 || true
+        echo -e "${GREEN}✓ Dashboard interactivo actualizado automáticamente (${dash_file#$PROJECT_ROOT/}).${NC}"
+    fi
+}
+

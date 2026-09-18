@@ -24,23 +24,47 @@ else
 fi
 
 PROJECT_ROOT="$(detect_project_root)"
+resolve_abbia_paths "$PROJECT_ROOT"
 
 NO_OPEN=0
-for arg in "$@"; do
-    case "$arg" in
+WATCH_MODE=0
+SERVE_MODE=0
+PORT=4242
+
+while [ $# -gt 0 ]; do
+    case "$1" in
         --no-open)
             NO_OPEN=1
+            shift
+            ;;
+        --watch|-w)
+            WATCH_MODE=1
+            shift
+            ;;
+        --serve|-s|--server)
+            SERVE_MODE=1
+            shift
+            ;;
+        --port|-p)
+            PORT="${2:-4242}"
+            shift 2
             ;;
         -h|--help)
-            echo "Uso: bash dashboard.sh [--no-open] o ./abbia dashboard"
-            echo "Genera y abre el dashboard visual interactivo (.abbia/dashboard.html)"
+            echo "Uso: bash dashboard.sh [OPCIONES] o ./abbia dashboard [OPCIONES]"
+            echo ""
+            echo "Opciones:"
+            echo "  --no-open             Genera el dashboard sin abrir el navegador"
+            echo "  --watch, -w           Vigila cambios en .abbia/ y regenera automáticamente"
+            echo "  --serve, -s           Inicia un servidor local en http://localhost:PORT con Live Reload"
+            echo "  --port, -p <PORT>     Puerto para el servidor local (default: 4242)"
+            echo "  -h, --help            Muestra esta ayuda"
             exit 0
+            ;;
+        *)
+            shift
             ;;
     esac
 done
-
-PROJECT_ROOT="$(detect_project_root)"
-resolve_abbia_paths "$PROJECT_ROOT"
 
 echo -e "${CYAN}====================================================${NC}"
 echo -e "${CYAN}   📊 Visualizador Interactivo (Abbia OS v4.0.0)    ${NC}"
@@ -52,6 +76,7 @@ if [ ! -d "$AI_DIR" ]; then
     echo -e "${RED}Error: No se encontró la carpeta ($AI_DIR) en $PROJECT_ROOT${NC}"
     exit 1
 fi
+
 
 KG_FILE="$ABBIA_DIR/knowledge-graph.yaml"
 METRICS_FILE="$ABBIA_METRICS_DIR/executions.yaml"
@@ -444,6 +469,10 @@ cat << 'HTML_HEADER' > "$OUTPUT_HTML"
           <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">🧠 Memoria</button>
           <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">📊 Telemetría</button>
         </nav>
+        <button onclick="location.reload()" id="btn-live-reload" class="px-2.5 py-1.5 text-xs font-medium rounded-xl text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 border border-slate-700/70 shadow-sm flex items-center gap-1.5 transition" title="Recargar Dashboard (F5)">
+          <span id="live-indicator-dot" class="inline-block w-2 h-2 rounded-full bg-slate-500"></span>
+          <span id="live-indicator-text" class="hidden sm:inline text-[11px] font-semibold">Recargar</span>
+        </button>
         <button onclick="openAboutModal()" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 border border-slate-700/70 shadow-sm flex items-center gap-1.5 transition" title="Acerca de Abbia OS">
           <span>ℹ️</span> <span class="hidden md:inline text-[11px] font-bold bg-gradient-to-r from-sky-400 to-indigo-300 bg-clip-text text-transparent">About</span>
         </button>
@@ -3141,6 +3170,33 @@ cat << 'HTML_BODY' >> "$OUTPUT_HTML"
       // El grafo se inicializa diferido (lazy) en switchTab('graph') para garantizar dimensiones válidas del canvas
       initDocsAndMemory();
       initMetrics();
+
+      // Live Reload / Live Server detection
+      if (window.location.protocol.startsWith('http')) {
+        const dot = document.getElementById('live-indicator-dot');
+        const text = document.getElementById('live-indicator-text');
+        if (dot) {
+          dot.className = 'inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        }
+        if (text) {
+          text.textContent = 'Live';
+          text.className = 'hidden sm:inline text-[11px] font-bold text-emerald-400';
+        }
+        let currentVer = null;
+        setInterval(async () => {
+          try {
+            const res = await fetch('/__version__?t=' + Date.now(), { cache: 'no-store' });
+            if (res.ok) {
+              const ver = await res.text();
+              if (currentVer !== null && ver && ver !== currentVer) {
+                console.log('[Abbia Live] Actualización detectada, recargando página...');
+                window.location.reload();
+              }
+              currentVer = ver;
+            }
+          } catch (e) {}
+        }, 1000);
+      }
     });
   </script>
 </body>
@@ -3149,16 +3205,166 @@ HTML_BODY
 
 echo -e "${GREEN}✓ Dashboard interactivo generado en:${NC} $OUTPUT_HTML"
 
-# Abrir en el navegador por defecto según sistema operativo si no se pasó --no-open
-if [ "$NO_OPEN" -eq 0 ]; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "$OUTPUT_HTML"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        if command -v xdg-open > /dev/null; then
-            xdg-open "$OUTPUT_HTML"
-        fi
+# Iniciar Watcher o Servidor Local si se especificó
+if [ "$SERVE_MODE" -eq 1 ] || [ "$WATCH_MODE" -eq 1 ]; then
+    MODE_STR="serve"
+    [ "$WATCH_MODE" -eq 1 ] && [ "$SERVE_MODE" -eq 0 ] && MODE_STR="watch"
+
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$AI_DIR" "$PROJECT_ROOT" "$PORT" "$MODE_STR" "$SCRIPT_DIR/dashboard.sh" "$NO_OPEN" << 'PYEOF'
+import sys, os, time, threading, subprocess, socketserver, http.server
+
+abbia_dir = sys.argv[1]
+project_root = sys.argv[2]
+port = int(sys.argv[3])
+mode = sys.argv[4] # "serve" or "watch"
+script_path = sys.argv[5]
+no_open = (sys.argv[6] == "1")
+
+IGNORED_DIRS = {'.git', 'sessions', '__pycache__', 'node_modules'}
+IGNORED_FILES = {'dashboard.html', 'aggregates.yaml'}
+
+def get_latest_mtime():
+    max_mtime = 0
+    for root, dirs, files in os.walk(abbia_dir):
+        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
+        for f in files:
+            if f in IGNORED_FILES or f.endswith('.tmp') or f.endswith('.bak'):
+                continue
+            try:
+                p = os.path.join(root, f)
+                mt = os.path.getmtime(p)
+                if mt > max_mtime:
+                    max_mtime = mt
+            except Exception:
+                pass
+    return max_mtime
+
+version_state = {"version": str(int(time.time() * 1000))}
+lock = threading.Lock()
+
+def regenerate():
+    try:
+        subprocess.run(["bash", script_path, "--no-open"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        with lock:
+            version_state["version"] = str(int(time.time() * 1000))
+        now_str = time.strftime("%H:%M:%S")
+        print(f"\033[0;32m[{now_str}] 🔄 Cambios detectados en .abbia/ -> dashboard.html regenerado.\033[0m", flush=True)
+    except Exception:
+        pass
+
+def watcher_loop():
+    last_m = get_latest_mtime()
+    while True:
+        time.sleep(1.0)
+        try:
+            cur_m = get_latest_mtime()
+            if cur_m > last_m:
+                last_m = cur_m
+                regenerate()
+        except Exception:
+            pass
+
+w_thread = threading.Thread(target=watcher_loop, daemon=True)
+w_thread.start()
+
+if mode == "watch":
+    print("\033[0;36m====================================================\033[0m")
+    print("\033[0;36m   👁️  Abbia Dashboard Watcher Activo (.abbia/)     \033[0m")
+    print("\033[0;36m====================================================\033[0m")
+    print(f"Vigilando cambios en: \033[1;33m{abbia_dir}\033[0m")
+    print("Presiona \033[1;33mCtrl+C\033[0m para detener el watcher.\n")
+    if not no_open:
+        dash_html = os.path.join(abbia_dir, "dashboard.html")
+        if sys.platform == "darwin":
+            subprocess.run(["open", dash_html])
+        elif sys.platform.startswith("linux"):
+            subprocess.run(["xdg-open", dash_html])
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n\033[0;33mWatcher detenido.\033[0m")
+        sys.exit(0)
+
+elif mode == "serve":
+    class AbbiaHandler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=abbia_dir, **kwargs)
+
+        def do_GET(self):
+            if self.path.startswith("/__version__"):
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                with lock:
+                    ver_bytes = version_state["version"].encode("utf-8")
+                self.wfile.write(ver_bytes)
+                return
+            if self.path == "/" or self.path == "":
+                self.path = "/dashboard.html"
+            return super().do_GET()
+
+        def log_message(self, format, *args):
+            if args and len(args) > 0 and "/__version__" in str(args[0]):
+                return
+
+    target_port = port
+    server = None
+    for p in range(target_port, target_port + 20):
+        try:
+            socketserver.TCPServer.allow_reuse_address = True
+            server = socketserver.TCPServer(("", p), AbbiaHandler)
+            target_port = p
+            break
+        except OSError:
+            continue
+
+    if not server:
+        print(f"\033[0;31mError: No se pudo abrir el servidor en los puertos {port}-{port+20}\033[0m")
+        sys.exit(1)
+
+    url = f"http://localhost:{target_port}/dashboard.html"
+    print("\033[0;36m====================================================\033[0m")
+    print(f"\033[0;36m   ⚡ Abbia Live Dashboard Server (Abbia OS v4.0.0) \033[0m")
+    print("\033[0;36m====================================================\033[0m")
+    print(f"🚀 Dashboard disponible en: \033[1;32m{url}\033[0m")
+    print(f"👁️  Live Reload:            \033[1;33mActivo (auto-recarga al guardar)\033[0m")
+    print(f"📁 Directorio observado:     \033[0;34m{abbia_dir}\033[0m")
+    print("\nPresiona \033[1;33mCtrl+C\033[0m para detener el servidor.\n")
+
+    if not no_open:
+        if sys.platform == "darwin":
+            subprocess.run(["open", url])
+        elif sys.platform.startswith("linux"):
+            subprocess.run(["xdg-open", url])
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n\033[0;33mServidor detenido.\033[0m")
+        server.server_close()
+        sys.exit(0)
+PYEOF
+    else
+        echo -e "${RED}Error: Se requiere python3 para usar --watch o --serve.${NC}"
+        exit 1
     fi
-    echo -e "${GREEN}🚀 Dashboard abierto en tu navegador.${NC}"
 else
-    echo -e "${BLUE}ℹ️  Modo --no-open activado: El dashboard no se abrió automáticamente.${NC}"
+    # Abrir en el navegador por defecto según sistema operativo si no se pasó --no-open
+    if [ "$NO_OPEN" -eq 0 ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            open "$OUTPUT_HTML"
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if command -v xdg-open > /dev/null; then
+                xdg-open "$OUTPUT_HTML"
+            fi
+        fi
+        echo -e "${GREEN}🚀 Dashboard abierto en tu navegador.${NC}"
+    else
+        echo -e "${BLUE}ℹ️  Modo --no-open activado: El dashboard no se abrió automáticamente.${NC}"
+    fi
 fi
+

@@ -140,8 +140,14 @@ Abbia OS incluye un CLI wrapper listo para usar en tu terminal:
 # Validar conformidad documental del proyecto
 ./abbia validate
 
-# Lanzar el visualizador web interactivo
+# Lanzar el visualizador web interactivo (abre .abbia/dashboard.html)
 ./abbia dashboard
+
+# Iniciar servidor local en vivo con Live Reload (auto-recarga en tiempo real)
+./abbia serve [PORT]
+
+# Vigilar cambios en .abbia/ y auto-regenerar dashboard.html en segundo plano
+./abbia watch
 
 # Actualizar el framework a la última versión
 ./abbia update
@@ -152,13 +158,14 @@ Abbia OS incluye un CLI wrapper listo para usar en tu terminal:
 
 ---
 
-### 📊 Dashboard Interactivo (Visualizador Web)
+### 📊 Dashboard Interactivo & Live Visualizer
 
-Con un simple `./abbia dashboard`, abre una aplicación visual en tu navegador para auditar tu proyecto:
-* 📈 **Telemetría & FinOps:** Gráficos 2x2 de consumo de tokens, costos en USD estimados (OpenRouter API) y duración por fase/modelo.
+Con `./abbia dashboard` o `./abbia serve`, accede a una aplicación visual completa para auditar y monitorear tu proyecto:
+* ⚡ **Live Reload & Auto-Regeneración:** Los scripts de ciclo de vida (`finish`, `new`, `archive`, `sync`) actualizan automáticamente `dashboard.html`. Con `./abbia serve`, el navegador se **recarga solo en tiempo real** al guardar cualquier archivo.
+* 📈 **Telemetría & FinOps:** Gráficos 2x2 de consumo de tokens, costos en USD estimados en vivo (OpenRouter API) y duración por fase/modelo.
 * 🕸️ **Grafo 2D Interactivo:** Visualización física de decisiones de arquitectura y sus dependencias (Vis.js).
 * 📋 **Matriz de Iniciativas:** Estado en vivo de especificaciones, diseños y veredictos de QA.
-* 📜 **Reglas de Negocio:** Consulta centralizada de invariantes del sistema.
+* 📜 **Reglas de Negocio & Memoria:** Consulta centralizada de invariantes del sistema, lecciones y bitácora de sesiones.
 
 ---
 

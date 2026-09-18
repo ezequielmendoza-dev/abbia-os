@@ -193,6 +193,10 @@ if [ "$NO_SNAPSHOT" = false ]; then
     echo -e "${GREEN}✓ Regenerado context-snapshot.md${NC}"
 fi
 
+# Auto-actualizar dashboard si existe
+auto_refresh_dashboard_if_exists "$PROJECT_ROOT"
+
 echo -e "${GREEN}====================================================${NC}"
 echo -e "${GREEN}✨ Iniciativa '$FOLDER_NAME' archivada exitosamente en Abbia OS.${NC}"
 echo -e "${GREEN}====================================================${NC}"
+

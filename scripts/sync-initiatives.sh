@@ -278,6 +278,9 @@ fi
 
 regenerate_context_snapshot "$PROJECT_ROOT"
 
+# Auto-actualizar dashboard si existe
+auto_refresh_dashboard_if_exists "$PROJECT_ROOT"
+
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}   ✅ Sincronización Finalizada en Abbia OS         ${NC}"
 echo -e "${GREEN}====================================================${NC}"
@@ -289,3 +292,4 @@ if [ "$ARCHIVE_APPROVED" = true ]; then
     echo -e "Iniciativas archivadas:    ${YELLOW}$ARCHIVED_COUNT${NC}"
 fi
 echo -e "Memoria, Telemetría, Grafo y Snapshot actualizados con éxito."
+

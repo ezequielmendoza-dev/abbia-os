@@ -253,9 +253,13 @@ else
     echo -e "${YELLOW}Advertencia: No se encontró el archivo ${ABBIA_DIR#$PROJECT_ROOT/}/context.md.${NC}"
 fi
 
+# Auto-actualizar dashboard si existe
+auto_refresh_dashboard_if_exists "$PROJECT_ROOT"
+
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}     🎉 ¡Iniciativa $INITIATIVE_NAME inicializada!    ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo -e "Carpeta: ${YELLOW}${ABBIA_INITIATIVES_DIR#$PROJECT_ROOT/}/$INITIATIVE_NAME/${NC}"
 echo -e "Comienza tu flujo de trabajo ejecutando los agentes de Abbia OS."
 echo -e "===================================================="
+

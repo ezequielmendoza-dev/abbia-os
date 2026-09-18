@@ -107,7 +107,7 @@ Los agentes están definidos en `roles/`:
 | [`archive-initiative.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/archive-initiative.sh) | Archiva una iniciativa a `.abbia/archive/` tras QA Aprobado | `bash .abbia/core/scripts/archive-initiative.sh <INICIATIVA>` |
 | [`sync-initiatives.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/sync-initiatives.sh) | Sincroniza, auto-repara (`--fix`) y auto-archiva (`--archive-approved`) | `bash .abbia/core/scripts/sync-initiatives.sh [--fix]` |
 | [`validate-project.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/validate-project.sh) | Valida estructura documental y sistemas de Abbia OS | `bash .abbia/core/scripts/validate-project.sh` |
-| [`dashboard.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/dashboard.sh) | Genera y abre el visualizador interactivo | `bash .abbia/core/scripts/dashboard.sh` o `./abbia dashboard` |
+| [`dashboard.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/dashboard.sh) | Genera y abre el visualizador interactivo (`--watch` para observar, `--serve` para Live Server) | `bash .abbia/core/scripts/dashboard.sh [--watch\|--serve]` o `./abbia dashboard` / `./abbia serve` |
 | [`common.sh`](file:///Volumes/ExternalSSD/Dev/ai-agents/scripts/common.sh) | Librería compartida de soporte (interno, DRY) | *(Interno)* |
 
 ---

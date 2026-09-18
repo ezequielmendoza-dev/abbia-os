@@ -263,6 +263,31 @@ assert_success "validate-project.sh pasa al 100% en golden-project" \
     bash -c "cd '$REPO_ROOT/examples/golden-project' && bash '$SCRIPTS_DIR/validate-project.sh'"
 
 # ------------------------------------------------------------------------------
+# 9. Test dashboard.sh (--no-open y auto-refresh)
+# ------------------------------------------------------------------------------
+echo -e "\n${BLUE}--- 9. Testing dashboard.sh & Auto-Refresh ---${NC}"
+
+cd "$TMP_TEST_DIR"
+assert_success "dashboard.sh --no-open genera .abbia/dashboard.html" \
+    bash "$SCRIPTS_DIR/dashboard.sh" --no-open
+
+assert_success ".abbia/dashboard.html fue generado y no está vacío" \
+    test -s "$TMP_TEST_DIR/.abbia/dashboard.html"
+
+assert_success "dashboard.html contiene soporte para Live Reload" \
+    grep -q "/__version__" "$TMP_TEST_DIR/.abbia/dashboard.html"
+
+# Modificar un archivo y cerrar fase para validar auto-refresh silencioso
+sleep 1
+DASH_MTIME_BEFORE=$(stat -f %m "$TMP_TEST_DIR/.abbia/dashboard.html" 2>/dev/null || stat -c %Y "$TMP_TEST_DIR/.abbia/dashboard.html" 2>/dev/null || echo "0")
+bash "$SCRIPTS_DIR/new-initiative.sh" FEAT 002 auto-refresh-test >/dev/null 2>&1
+DASH_MTIME_AFTER=$(stat -f %m "$TMP_TEST_DIR/.abbia/dashboard.html" 2>/dev/null || stat -c %Y "$TMP_TEST_DIR/.abbia/dashboard.html" 2>/dev/null || echo "1")
+
+assert_success "new-initiative.sh actualizó automáticamente dashboard.html" \
+    test "$DASH_MTIME_AFTER" -gt "$DASH_MTIME_BEFORE"
+
+
+# ------------------------------------------------------------------------------
 # Resumen Final
 # ------------------------------------------------------------------------------
 echo -e "\n${CYAN}====================================================${NC}"

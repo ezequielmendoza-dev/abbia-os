@@ -98,6 +98,13 @@ Una vez migrado, puedes usar el CLI `./abbia` desde la raíz de tu proyecto:
 # Validar estado del proyecto
 ./abbia validate
 
-# Abrir el dashboard interactivo
+# Abrir el dashboard interactivo (se actualiza automáticamente en cada cierre de fase)
 ./abbia dashboard
+
+# Iniciar servidor en vivo con Live Reload automático
+./abbia serve
+
+# Vigilar cambios en segundo plano
+./abbia watch
+
 ```

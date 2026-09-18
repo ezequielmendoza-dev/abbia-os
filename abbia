@@ -76,6 +76,12 @@ case "$COMMAND" in
     dashboard|ui)
         bash "$CORE_PATH/dashboard.sh" "$@"
         ;;
+    serve|live)
+        bash "$CORE_PATH/dashboard.sh" --serve "$@"
+        ;;
+    watch)
+        bash "$CORE_PATH/dashboard.sh" --watch "$@"
+        ;;
     snapshot|summary)
         if [ -f "$CWD/.abbia/memory/context-snapshot.md" ]; then
             cat "$CWD/.abbia/memory/context-snapshot.md"
@@ -124,7 +130,9 @@ case "$COMMAND" in
         echo "  archive <INIT>             Archivar iniciativa completada (requiere QA Aprobado)"
         echo "  sync [--fix]               Sincronizar y reconciliar estado y métricas"
         echo "  validate                   Validar consistencia de la estructura Abbia"
-        echo "  dashboard                  Generar y abrir el visualizador interactivo en el navegador"
+        echo "  dashboard [OPCIONES]       Generar y abrir el visualizador interactivo (--watch, --serve)"
+        echo "  serve [PORT]               Iniciar servidor local con Live Reload (auto-recarga)"
+        echo "  watch                      Vigilar cambios en .abbia/ y regenerar automáticamente"
         echo "  snapshot                   Ver el Context Snapshot actual en la consola"
         echo "  update [VERSION]           Actualizar el framework Abbia OS"
         echo "  migrate                    Migrar proyecto legacy (.ai/ o .stratum/) a Abbia (.abbia/)"
