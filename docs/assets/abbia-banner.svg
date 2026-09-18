@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#9333ea"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    
+    <!-- Glow Filters -->
+    <filter id="skyGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="purpleGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <style>
+    .font-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 800; }
+    .font-mono { font-family: 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace; }
+    .font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+  </style>
+
+  <!-- Background Canvas Card -->
+  <rect width="900" height="240" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- ==================== PRISMA DELTA LOGO MARK ==================== -->
+  <g transform="translate(20, 0)">
+    <!-- Outer Triangle Left Diagonal -->
+    <line x1="120" y1="36" x2="35" y2="195" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" filter="url(#skyGlow)"/>
+    <!-- Inner Triangle Left Diagonal -->
+    <line x1="120" y1="54" x2="48" y2="195" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+
+    <!-- Outer Triangle Right Diagonal -->
+    <line x1="120" y1="36" x2="205" y2="195" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" filter="url(#skyGlow)"/>
+    <!-- Inner Triangle Right Diagonal -->
+    <line x1="120" y1="54" x2="192" y2="195" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+
+    <!-- Apex Top Arrow Marker -->
+    <polygon points="120,24 114,35 126,35" fill="#38bdf8" filter="url(#skyGlow)"/>
+
+    <!-- Middle Crossbar (Double line with center diamond gap) -->
+    <!-- Left Segment -->
+    <line x1="78" y1="120" x2="108" y2="120" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+    <line x1="78" y1="128" x2="108" y2="128" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+    <!-- Right Segment -->
+    <line x1="132" y1="120" x2="162" y2="120" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+    <line x1="132" y1="128" x2="162" y2="128" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Middle Stage Nodes -->
+    <circle cx="78" cy="124" r="7.5" fill="#34d399" stroke="#065f46" stroke-width="2"/>
+    <circle cx="162" cy="124" r="7.5" fill="#34d399" stroke="#065f46" stroke-width="2"/>
+
+    <!-- Center Memory Core Diamond -->
+    <polygon points="120,114 130,124 120,134 110,124" fill="url(#purpleGrad)" stroke="#e9d5ff" stroke-width="1.5" filter="url(#purpleGlow)"/>
+
+    <!-- Base Crossbar (Double Line) -->
+    <line x1="35" y1="191" x2="205" y2="191" stroke="#34d399" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="35" y1="199" x2="205" y2="199" stroke="#34d399" stroke-width="3.5" stroke-linecap="round"/>
+
+    <!-- Base Corner Nodes -->
+    <circle cx="35" cy="195" r="8.5" fill="#34d399" stroke="#065f46" stroke-width="2"/>
+    <circle cx="205" cy="195" r="8.5" fill="#34d399" stroke="#065f46" stroke-width="2"/>
+  </g>
+
+  <!-- ==================== BRAND TYPOGRAPHY & CHIPS ==================== -->
+  <g transform="translate(280, 0)">
+    <!-- Top System Version Badge -->
+    <g transform="translate(0, 42)">
+      <rect width="68" height="22" rx="6" fill="#0369a1" fill-opacity="0.3" stroke="#38bdf8" stroke-width="1"/>
+      <text x="34" y="15" fill="#38bdf8" class="font-mono" font-size="11" font-weight="700" text-anchor="middle">v4.0.0</text>
+
+      <text x="80" y="15" fill="#64748b" class="font-mono" font-size="12">│</text>
+      <text x="96" y="15" fill="#94a3b8" class="font-sans" font-size="12" font-weight="500" letter-spacing="1">AI SOFTWARE ENGINEERING OS</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="0" y="112" fill="url(#titleGrad)" class="font-title" font-size="46" letter-spacing="2">ABBIA OS</text>
+
+    <!-- Subtitle / Tagline -->
+    <text x="0" y="142" fill="#94a3b8" class="font-sans" font-size="15" font-style="italic" font-weight="400">
+      "Layered Context · Structured Memory · Autonomous Delivery"
+    </text>
+
+    <!-- Pipeline Stages Chips -->
+    <g transform="translate(0, 172)">
+      <!-- Spec -->
+      <rect x="0" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <text x="41" y="17" fill="#38bdf8" class="font-mono" font-size="11" text-anchor="middle">1:spec ✓</text>
+
+      <!-- Arch -->
+      <rect x="90" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <text x="131" y="17" fill="#38bdf8" class="font-mono" font-size="11" text-anchor="middle">2:arch ✓</text>
+
+      <!-- Plan -->
+      <rect x="180" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <text x="221" y="17" fill="#38bdf8" class="font-mono" font-size="11" text-anchor="middle">3:plan ✓</text>
+
+      <!-- Test -->
+      <rect x="270" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <text x="311" y="17" fill="#38bdf8" class="font-mono" font-size="11" text-anchor="middle">4:test ✓</text>
+
+      <!-- Dev -->
+      <rect x="360" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <text x="401" y="17" fill="#38bdf8" class="font-mono" font-size="11" text-anchor="middle">5:dev ✓</text>
+
+      <!-- QA Approved Badge -->
+      <rect x="450" y="0" width="130" height="26" rx="6" fill="#065f46" fill-opacity="0.4" stroke="#34d399" stroke-width="1.5"/>
+      <circle cx="464" cy="13" r="4" fill="#34d399"/>
+      <text x="518" y="17" fill="#34d399" class="font-mono" font-size="11" font-weight="700" text-anchor="middle">6:qa APROBADO</text>
+    </g>
+  </g>
+</svg>

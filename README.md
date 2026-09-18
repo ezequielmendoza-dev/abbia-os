@@ -1,16 +1,9 @@
 <div align="center">
 
-```text
-           ▲
-          ╱ ╲
-         ╱╱ ╲╲       ABBIA OS
-        ╱╱   ╲╲      AI Software Engineering Operating System
-       ●═══◆═══●     v4.0.0
-      ╱╱       ╲╲
-     ●═══════════●   Layered Context · Structured Memory · Autonomous Delivery
-```
+<img src="docs/assets/abbia-banner.svg" alt="Abbia OS — AI Software Engineering Operating System" width="100%" />
 
-# Abbia OS
+<br/><br/>
+
 ### *De la improvisación en el chat a la precisión de un estudio de ingeniería.*
 **Framework de Specification-Driven Development (SDD) & Orquestación Multi-Agente Asistida por IA**
 
