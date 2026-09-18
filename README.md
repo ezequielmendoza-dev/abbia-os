@@ -1,12 +1,13 @@
 <div align="center">
 
 ```text
-         ▲
-        ╱ ╲       ABBIA OS
-       ╱   ╲      AI Software Engineering Operating System
-      ●──◆──●     v4.0.0
-     ╱       ╲
-    ●─────────●   Layered Context · Structured Memory · Autonomous Delivery
+           ▲
+          ╱ ╲
+         ╱╱ ╲╲       ABBIA OS
+        ╱╱   ╲╲      AI Software Engineering Operating System
+       ●═══◆═══●     v4.0.0
+      ╱╱       ╲╲
+     ●═══════════●   Layered Context · Structured Memory · Autonomous Delivery
 ```
 
 # Abbia OS

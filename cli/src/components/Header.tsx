@@ -24,20 +24,21 @@ export const Header: React.FC<HeaderProps> = ({ projectInfo, currentScreen }) =>
         justifyContent="space-between"
       >
         <Box flexDirection="row" alignItems="center">
-          {/* Prisma Delta Logo */}
+          {/* Prisma Delta Logo (Parallel Lines) */}
           <Box flexDirection="column" marginRight={2}>
             <Text color={colors.primary}>     ▲</Text>
             <Text color={colors.primary}>    ╱ ╲</Text>
-            <Text color={colors.primary}>   ╱   ╲</Text>
+            <Text color={colors.primary}>   ╱╱ ╲╲</Text>
+            <Text color={colors.primary}>  ╱╱   ╲╲</Text>
             <Text>
-              <Text color={colors.secondary}>  ●</Text>
-              <Text color={colors.secondary}>──</Text>
+              <Text color={colors.secondary}> ●</Text>
+              <Text color={colors.secondary}>═══</Text>
               <Text color={colors.accent}>◆</Text>
-              <Text color={colors.secondary}>──</Text>
+              <Text color={colors.secondary}>═══</Text>
               <Text color={colors.secondary}>●</Text>
             </Text>
-            <Text color={colors.primary}> ╱       ╲</Text>
-            <Text color={colors.secondary}>●─────────●</Text>
+            <Text color={colors.primary}>╱╱       ╲╲</Text>
+            <Text color={colors.secondary}>●═══════════●</Text>
           </Box>
 
           <Box flexDirection="column" justifyContent="center">
