@@ -35150,6 +35150,11 @@ var MainMenu = ({ projectInfo, onSelect }) => {
   const [selectedDesc, setSelectedDesc] = (0, import_react25.useState)(
     "Crea una nueva feature, bug, auditor\xEDa o refactor con la estructura SDD estandarizada."
   );
+  use_input_default((input, key) => {
+    if (key.escape || input === "q") {
+      onSelect("exit");
+    }
+  });
   const items = [
     {
       label: "\u{1F680}  Nueva Iniciativa (Wizard)",
@@ -35340,11 +35345,27 @@ var NewInitiativeScreen = ({
   const [initiativeId, setInitiativeId] = (0, import_react27.useState)("");
   const [initiativeSlug, setInitiativeSlug] = (0, import_react27.useState)("");
   const [error, setError] = (0, import_react27.useState)("");
+  use_input_default((input, key) => {
+    if (key.escape) {
+      if (step === "type") {
+        onCancel();
+      } else if (step === "id") {
+        setStep("type");
+        setError("");
+      } else if (step === "slug") {
+        setStep("id");
+        setError("");
+      } else if (step === "confirm") {
+        setStep("slug");
+      }
+    }
+  });
   const typeOptions = [
     { label: "\u2728 Feature (Nueva funcionalidad)", value: "feature" },
     { label: "\u{1F41B} Bug (Correcci\xF3n de error)", value: "bug" },
     { label: "\u{1F50D} Audit (Auditor\xEDa de seguridad / arquitectura)", value: "audit" },
-    { label: "\u267B\uFE0F  Refactor (Mejora estructural)", value: "refactor" }
+    { label: "\u267B\uFE0F  Refactor (Mejora estructural)", value: "refactor" },
+    { label: "\u21A9\uFE0F  Cancelar y volver al men\xFA", value: "__cancel__" }
   ];
   const handleIdSubmit = () => {
     const trimmed = initiativeId.trim();
@@ -35368,15 +35389,19 @@ var NewInitiativeScreen = ({
   };
   const confirmOptions = [
     { label: "\u{1F680} S\xED, crear iniciativa", value: "yes" },
-    { label: "\u274C Cancelar y volver", value: "no" }
+    { label: "\u274C Cancelar y volver al men\xFA", value: "no" }
   ];
-  return /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.primary, padding: 1 }, /* @__PURE__ */ import_react27.default.createElement(Box_default, { marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.primary, bold: true }, "\u{1F680} Nueva Iniciativa SDD"), /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "[ Esc / Ctrl+C para cancelar ]")), step === "type" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 1/3: Selecciona el tipo de iniciativa:"), /* @__PURE__ */ import_react27.default.createElement(
+  return /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.primary, padding: 1 }, /* @__PURE__ */ import_react27.default.createElement(Box_default, { marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.primary, bold: true }, "\u{1F680} Nueva Iniciativa SDD"), /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "[ Esc: Volver / Cancelar ]")), step === "type" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 1/3: Selecciona el tipo de iniciativa:"), /* @__PURE__ */ import_react27.default.createElement(
     SelectInput_default,
     {
       items: typeOptions,
       onSelect: (item) => {
-        setSelectedType(item.value);
-        setStep("id");
+        if (item.value === "__cancel__") {
+          onCancel();
+        } else {
+          setSelectedType(item.value);
+          setStep("id");
+        }
       }
     }
   )), step === "id" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 2/3: Ingresa el identificador num\xE9rico o clave (ej: 01, 105, auth):"), /* @__PURE__ */ import_react27.default.createElement(Box_default, { borderStyle: "single", borderColor: colors.primary, paddingX: 1 }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.primary }, "ID: "), /* @__PURE__ */ import_react27.default.createElement(
@@ -35387,7 +35412,7 @@ var NewInitiativeScreen = ({
       onSubmit: handleIdSubmit,
       placeholder: "01"
     }
-  )), error && /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.error }, error), /* @__PURE__ */ import_react27.default.createElement(Box_default, { marginTop: 1 }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "Presiona Enter para continuar"))), step === "slug" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 3/3: Ingresa el slug descriptivo en min\xFAsculas (ej: user-authentication):"), /* @__PURE__ */ import_react27.default.createElement(Box_default, { borderStyle: "single", borderColor: colors.primary, paddingX: 1 }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.primary }, "Slug: "), /* @__PURE__ */ import_react27.default.createElement(
+  )), error && /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.error }, error), /* @__PURE__ */ import_react27.default.createElement(Box_default, { marginTop: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "[ Enter: Continuar ]"), /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "[ Esc: Volver al paso anterior ]"))), step === "slug" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 3/3: Ingresa el slug descriptivo en min\xFAsculas (ej: user-authentication):"), /* @__PURE__ */ import_react27.default.createElement(Box_default, { borderStyle: "single", borderColor: colors.primary, paddingX: 1 }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.primary }, "Slug: "), /* @__PURE__ */ import_react27.default.createElement(
     build_default,
     {
       value: initiativeSlug,
@@ -35395,7 +35420,7 @@ var NewInitiativeScreen = ({
       onSubmit: handleSlugSubmit,
       placeholder: "user-authentication"
     }
-  )), error && /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.error }, error), /* @__PURE__ */ import_react27.default.createElement(Box_default, { marginTop: 1 }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "Presiona Enter para continuar"))), step === "confirm" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(
+  )), error && /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.error }, error), /* @__PURE__ */ import_react27.default.createElement(Box_default, { marginTop: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "[ Enter: Continuar ]"), /* @__PURE__ */ import_react27.default.createElement(Text, { color: colors.textDim }, "[ Esc: Volver al paso anterior ]"))), step === "confirm" && /* @__PURE__ */ import_react27.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react27.default.createElement(
     Box_default,
     {
       borderStyle: "single",
@@ -35437,6 +35462,21 @@ var FinishPhaseScreen = ({
   const [tokensIn, setTokensIn] = (0, import_react28.useState)("5000");
   const [tokensOut, setTokensOut] = (0, import_react28.useState)("1500");
   const [duration, setDuration] = (0, import_react28.useState)("60");
+  use_input_default((input, key) => {
+    if (key.escape) {
+      if (step === "initiative") {
+        onCancel();
+      } else if (step === "phase") {
+        setStep("initiative");
+      } else if (step === "role") {
+        setStep("phase");
+      } else if (step === "model") {
+        setStep("role");
+      } else if (step === "confirm") {
+        setStep("model");
+      }
+    }
+  });
   if (projectInfo.initiatives.length === 0) {
     return /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.warning, padding: 1 }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.warning, bold: true }, "\u26A0\uFE0F  No hay iniciativas activas en .abbia/initiatives/"), /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginTop: 1 }, 'Crea una nueva iniciativa primero con la opci\xF3n "Nueva Iniciativa".'), /* @__PURE__ */ import_react28.default.createElement(Box_default, { marginTop: 1 }, /* @__PURE__ */ import_react28.default.createElement(
       SelectInput_default,
@@ -35446,17 +35486,21 @@ var FinishPhaseScreen = ({
       }
     )));
   }
-  const initItems = projectInfo.initiatives.map((init) => ({
-    label: `\u{1F4C1} ${init.folderName} (QA: ${init.qaVerdict || "PENDIENTE"})`,
-    value: init.folderName
-  }));
+  const initItems = [
+    ...projectInfo.initiatives.map((init) => ({
+      label: `\u{1F4C1} ${init.folderName} (QA: ${init.qaVerdict || "PENDIENTE"})`,
+      value: init.folderName
+    })),
+    { label: "\u21A9\uFE0F  Cancelar y volver al men\xFA", value: "__cancel__" }
+  ];
   const phaseItems = [
     { label: "1\uFE0F\u20E3  Fase 1: Especificaci\xF3n Funcional (1-spec.md)", value: "1-spec" },
     { label: "2\uFE0F\u20E3  Fase 2: Arquitectura T\xE9cnica (2-arch.md)", value: "2-arch" },
     { label: "3\uFE0F\u20E3  Fase 3: Plan de Implementaci\xF3n (3-plan.md)", value: "3-plan" },
     { label: "4\uFE0F\u20E3  Fase 4: Estrategia de Pruebas (4-test.md)", value: "4-test" },
     { label: "5\uFE0F\u20E3  Fase 5: Desarrollo de C\xF3digo (5-dev.md)", value: "5-dev" },
-    { label: "6\uFE0F\u20E3  Fase 6: Validaci\xF3n Adversarial de QA (6-qa.md)", value: "6-qa" }
+    { label: "6\uFE0F\u20E3  Fase 6: Validaci\xF3n Adversarial de QA (6-qa.md)", value: "6-qa" },
+    { label: "\u21A9\uFE0F  Volver al paso anterior", value: "__back__" }
   ];
   const roleItems = [
     { label: "\u{1F469}\u200D\u{1F4BB} Senior Developer (developer)", value: "developer" },
@@ -35466,7 +35510,8 @@ var FinishPhaseScreen = ({
     { label: "\u{1F3A8} UI Designer (ui-designer)", value: "ui-designer" },
     { label: "\u{1F451} Tech Lead (tech-lead)", value: "tech-lead" },
     { label: "\u{1F680} DevOps Engineer (devops)", value: "devops" },
-    { label: "\u{1F9E0} Skill Manager (skill-manager)", value: "skill-manager" }
+    { label: "\u{1F9E0} Skill Manager (skill-manager)", value: "skill-manager" },
+    { label: "\u21A9\uFE0F  Volver al paso anterior", value: "__back__" }
   ];
   const modelItems = [
     { label: "Claude 3.7 Sonnet (claude-3-7-sonnet)", value: "claude-3-7-sonnet" },
@@ -35474,7 +35519,8 @@ var FinishPhaseScreen = ({
     { label: "Gemini 2.5 Flash (gemini-2.5-flash)", value: "gemini-2.5-flash" },
     { label: "GPT-4o (gpt-4o)", value: "gpt-4o" },
     { label: "o3-mini (o3-mini)", value: "o3-mini" },
-    { label: "Otro / Modelo Custom (custom)", value: "custom-model" }
+    { label: "Otro / Modelo Custom (custom)", value: "custom-model" },
+    { label: "\u21A9\uFE0F  Volver al paso anterior", value: "__back__" }
   ];
   const handleFinish = () => {
     const args = [
@@ -35494,13 +35540,17 @@ var FinishPhaseScreen = ({
     ];
     onSubmit(args);
   };
-  return /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.primary, padding: 1 }, /* @__PURE__ */ import_react28.default.createElement(Box_default, { marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.primary, bold: true }, "\u{1F3C1} Cierre Mandatorio de Fase (finish-phase \u2014 Regla R6)"), /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textDim }, "[ Esc / Ctrl+C para cancelar ]")), step === "initiative" && /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 1/4: Selecciona la iniciativa a cerrar:"), /* @__PURE__ */ import_react28.default.createElement(
+  return /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.primary, padding: 1 }, /* @__PURE__ */ import_react28.default.createElement(Box_default, { marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.primary, bold: true }, "\u{1F3C1} Cierre Mandatorio de Fase (finish-phase \u2014 Regla R6)"), /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textDim }, "[ Esc: Volver / Cancelar ]")), step === "initiative" && /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 1/4: Selecciona la iniciativa a cerrar:"), /* @__PURE__ */ import_react28.default.createElement(
     SelectInput_default,
     {
       items: initItems,
       onSelect: (item) => {
-        setSelectedInit(item.value);
-        setStep("phase");
+        if (item.value === "__cancel__") {
+          onCancel();
+        } else {
+          setSelectedInit(item.value);
+          setStep("phase");
+        }
       }
     }
   )), step === "phase" && /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Iniciativa: ", /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.primary, bold: true }, selectedInit)), /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 2/4: Selecciona la fase completada:"), /* @__PURE__ */ import_react28.default.createElement(
@@ -35508,8 +35558,12 @@ var FinishPhaseScreen = ({
     {
       items: phaseItems,
       onSelect: (item) => {
-        setSelectedPhase(item.value);
-        setStep("role");
+        if (item.value === "__back__") {
+          setStep("initiative");
+        } else {
+          setSelectedPhase(item.value);
+          setStep("role");
+        }
       }
     }
   )), step === "role" && /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 3/4: Selecciona el rol del agente responsable:"), /* @__PURE__ */ import_react28.default.createElement(
@@ -35517,8 +35571,12 @@ var FinishPhaseScreen = ({
     {
       items: roleItems,
       onSelect: (item) => {
-        setSelectedRole(item.value);
-        setStep("model");
+        if (item.value === "__back__") {
+          setStep("phase");
+        } else {
+          setSelectedRole(item.value);
+          setStep("model");
+        }
       }
     }
   )), step === "model" && /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react28.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Paso 4/4: Modelo LLM utilizado en esta fase:"), /* @__PURE__ */ import_react28.default.createElement(
@@ -35526,8 +35584,12 @@ var FinishPhaseScreen = ({
     {
       items: modelItems,
       onSelect: (item) => {
-        setSelectedModel(item.value);
-        setStep("confirm");
+        if (item.value === "__back__") {
+          setStep("role");
+        } else {
+          setSelectedModel(item.value);
+          setStep("confirm");
+        }
       }
     }
   )), step === "confirm" && /* @__PURE__ */ import_react28.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react28.default.createElement(
@@ -35549,11 +35611,14 @@ var FinishPhaseScreen = ({
     {
       items: [
         { label: "\u{1F3C1} Confirmar y Registrar Telemetr\xEDa", value: "yes" },
-        { label: "\u274C Cancelar", value: "no" }
+        { label: "\u21A9\uFE0F  Volver al paso anterior", value: "back" },
+        { label: "\u274C Cancelar y volver al men\xFA", value: "cancel" }
       ],
       onSelect: (item) => {
         if (item.value === "yes") {
           handleFinish();
+        } else if (item.value === "back") {
+          setStep("model");
         } else {
           onCancel();
         }
@@ -35571,6 +35636,15 @@ var ArchiveScreen = ({
 }) => {
   const [selectedInit, setSelectedInit] = (0, import_react29.useState)("");
   const [isConfirming, setIsConfirming] = (0, import_react29.useState)(false);
+  use_input_default((input, key) => {
+    if (key.escape) {
+      if (isConfirming) {
+        setIsConfirming(false);
+      } else {
+        onCancel();
+      }
+    }
+  });
   if (projectInfo.initiatives.length === 0) {
     return /* @__PURE__ */ import_react29.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.warning, padding: 1 }, /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.warning, bold: true }, "\u26A0\uFE0F  No hay iniciativas activas para archivar."), /* @__PURE__ */ import_react29.default.createElement(Box_default, { marginTop: 1 }, /* @__PURE__ */ import_react29.default.createElement(
       SelectInput_default,
@@ -35580,27 +35654,34 @@ var ArchiveScreen = ({
       }
     )));
   }
-  const items = projectInfo.initiatives.map((init) => {
-    let tag = "";
-    if (init.qaVerdict === "APROBADO") {
-      tag = " [\u{1F7E2} QA APROBADO - LISTO]";
-    } else if (init.qaVerdict === "APROBADO_CON_OBSERVACIONES") {
-      tag = " [\u{1F7E1} OBS]";
-    } else {
-      tag = " [\u23F3 EN PROGRESO / PENDIENTE]";
-    }
-    return {
-      label: `\u{1F4C1} ${init.folderName}${tag}`,
-      value: init.folderName
-    };
-  });
-  return /* @__PURE__ */ import_react29.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.primary, padding: 1 }, /* @__PURE__ */ import_react29.default.createElement(Box_default, { marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.primary, bold: true }, "\u{1F4E6} Archivar Iniciativa (.abbia/archive/)"), /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.textDim }, "[ Esc / Ctrl+C para cancelar ]")), !isConfirming ? /* @__PURE__ */ import_react29.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Selecciona la iniciativa a mover al archivo hist\xF3rico:"), /* @__PURE__ */ import_react29.default.createElement(
+  const items = [
+    ...projectInfo.initiatives.map((init) => {
+      let tag = "";
+      if (init.qaVerdict === "APROBADO") {
+        tag = " [\u{1F7E2} QA APROBADO - LISTO]";
+      } else if (init.qaVerdict === "APROBADO_CON_OBSERVACIONES") {
+        tag = " [\u{1F7E1} OBS]";
+      } else {
+        tag = " [\u23F3 EN PROGRESO / PENDIENTE]";
+      }
+      return {
+        label: `\u{1F4C1} ${init.folderName}${tag}`,
+        value: init.folderName
+      };
+    }),
+    { label: "\u21A9\uFE0F  Cancelar y volver al men\xFA", value: "__cancel__" }
+  ];
+  return /* @__PURE__ */ import_react29.default.createElement(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: colors.primary, padding: 1 }, /* @__PURE__ */ import_react29.default.createElement(Box_default, { marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }, /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.primary, bold: true }, "\u{1F4E6} Archivar Iniciativa (.abbia/archive/)"), /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.textDim }, "[ Esc: Cancelar ]")), !isConfirming ? /* @__PURE__ */ import_react29.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react29.default.createElement(Text, { color: colors.textMuted, marginBottom: 1 }, "Selecciona la iniciativa a mover al archivo hist\xF3rico:"), /* @__PURE__ */ import_react29.default.createElement(
     SelectInput_default,
     {
       items,
       onSelect: (item) => {
-        setSelectedInit(item.value);
-        setIsConfirming(true);
+        if (item.value === "__cancel__") {
+          onCancel();
+        } else {
+          setSelectedInit(item.value);
+          setIsConfirming(true);
+        }
       }
     }
   )) : /* @__PURE__ */ import_react29.default.createElement(Box_default, { flexDirection: "column" }, /* @__PURE__ */ import_react29.default.createElement(
@@ -35619,13 +35700,16 @@ var ArchiveScreen = ({
     {
       items: [
         { label: "\u{1F4E6} S\xED, archivar iniciativa", value: "yes" },
-        { label: "\u274C Cancelar", value: "no" }
+        { label: "\u21A9\uFE0F  Volver a la lista", value: "back" },
+        { label: "\u274C Cancelar y volver al men\xFA", value: "cancel" }
       ],
       onSelect: (item) => {
         if (item.value === "yes") {
           onSubmit(selectedInit);
-        } else {
+        } else if (item.value === "back") {
           setIsConfirming(false);
+        } else {
+          onCancel();
         }
       }
     }

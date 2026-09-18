@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import { colors } from '../theme.js';
 import { ProjectInfo } from '../utils/abbia.js';
@@ -18,6 +18,16 @@ export const ArchiveScreen: React.FC<ArchiveScreenProps> = ({
   const [selectedInit, setSelectedInit] = useState<string>('');
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
 
+  useInput((input, key) => {
+    if (key.escape) {
+      if (isConfirming) {
+        setIsConfirming(false);
+      } else {
+        onCancel();
+      }
+    }
+  });
+
   if (projectInfo.initiatives.length === 0) {
     return (
       <Box flexDirection="column" borderStyle="round" borderColor={colors.warning} padding={1}>
@@ -34,20 +44,23 @@ export const ArchiveScreen: React.FC<ArchiveScreenProps> = ({
     );
   }
 
-  const items = projectInfo.initiatives.map((init) => {
-    let tag = '';
-    if (init.qaVerdict === 'APROBADO') {
-      tag = ' [🟢 QA APROBADO - LISTO]';
-    } else if (init.qaVerdict === 'APROBADO_CON_OBSERVACIONES') {
-      tag = ' [🟡 OBS]';
-    } else {
-      tag = ' [⏳ EN PROGRESO / PENDIENTE]';
-    }
-    return {
-      label: `📁 ${init.folderName}${tag}`,
-      value: init.folderName,
-    };
-  });
+  const items = [
+    ...projectInfo.initiatives.map((init) => {
+      let tag = '';
+      if (init.qaVerdict === 'APROBADO') {
+        tag = ' [🟢 QA APROBADO - LISTO]';
+      } else if (init.qaVerdict === 'APROBADO_CON_OBSERVACIONES') {
+        tag = ' [🟡 OBS]';
+      } else {
+        tag = ' [⏳ EN PROGRESO / PENDIENTE]';
+      }
+      return {
+        label: `📁 ${init.folderName}${tag}`,
+        value: init.folderName,
+      };
+    }),
+    { label: '↩️  Cancelar y volver al menú', value: '__cancel__' },
+  ];
 
   return (
     <Box flexDirection="column" borderStyle="round" borderColor={colors.primary} padding={1}>
@@ -55,7 +68,7 @@ export const ArchiveScreen: React.FC<ArchiveScreenProps> = ({
         <Text color={colors.primary} bold>
           📦 Archivar Iniciativa (.abbia/archive/)
         </Text>
-        <Text color={colors.textDim}>[ Esc / Ctrl+C para cancelar ]</Text>
+        <Text color={colors.textDim}>[ Esc: Cancelar ]</Text>
       </Box>
 
       {!isConfirming ? (
@@ -66,8 +79,12 @@ export const ArchiveScreen: React.FC<ArchiveScreenProps> = ({
           <SelectInput
             items={items}
             onSelect={(item) => {
-              setSelectedInit(item.value);
-              setIsConfirming(true);
+              if (item.value === '__cancel__') {
+                onCancel();
+              } else {
+                setSelectedInit(item.value);
+                setIsConfirming(true);
+              }
             }}
           />
         </Box>
@@ -91,13 +108,16 @@ export const ArchiveScreen: React.FC<ArchiveScreenProps> = ({
           <SelectInput
             items={[
               { label: '📦 Sí, archivar iniciativa', value: 'yes' },
-              { label: '❌ Cancelar', value: 'no' },
+              { label: '↩️  Volver a la lista', value: 'back' },
+              { label: '❌ Cancelar y volver al menú', value: 'cancel' },
             ]}
             onSelect={(item) => {
               if (item.value === 'yes') {
                 onSubmit(selectedInit);
-              } else {
+              } else if (item.value === 'back') {
                 setIsConfirming(false);
+              } else {
+                onCancel();
               }
             }}
           />

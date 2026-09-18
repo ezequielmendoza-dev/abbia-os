@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { colors } from '../theme.js';
@@ -19,11 +19,28 @@ export const NewInitiativeScreen: React.FC<NewInitiativeScreenProps> = ({
   const [initiativeSlug, setInitiativeSlug] = useState<string>('');
   const [error, setError] = useState<string>('');
 
+  useInput((input, key) => {
+    if (key.escape) {
+      if (step === 'type') {
+        onCancel();
+      } else if (step === 'id') {
+        setStep('type');
+        setError('');
+      } else if (step === 'slug') {
+        setStep('id');
+        setError('');
+      } else if (step === 'confirm') {
+        setStep('slug');
+      }
+    }
+  });
+
   const typeOptions = [
     { label: '✨ Feature (Nueva funcionalidad)', value: 'feature' },
     { label: '🐛 Bug (Corrección de error)', value: 'bug' },
     { label: '🔍 Audit (Auditoría de seguridad / arquitectura)', value: 'audit' },
     { label: '♻️  Refactor (Mejora estructural)', value: 'refactor' },
+    { label: '↩️  Cancelar y volver al menú', value: '__cancel__' },
   ];
 
   const handleIdSubmit = () => {
@@ -50,7 +67,7 @@ export const NewInitiativeScreen: React.FC<NewInitiativeScreenProps> = ({
 
   const confirmOptions = [
     { label: '🚀 Sí, crear iniciativa', value: 'yes' },
-    { label: '❌ Cancelar y volver', value: 'no' },
+    { label: '❌ Cancelar y volver al menú', value: 'no' },
   ];
 
   return (
@@ -59,7 +76,7 @@ export const NewInitiativeScreen: React.FC<NewInitiativeScreenProps> = ({
         <Text color={colors.primary} bold>
           🚀 Nueva Iniciativa SDD
         </Text>
-        <Text color={colors.textDim}>[ Esc / Ctrl+C para cancelar ]</Text>
+        <Text color={colors.textDim}>[ Esc: Volver / Cancelar ]</Text>
       </Box>
 
       {/* Step 1: Select Type */}
@@ -71,8 +88,12 @@ export const NewInitiativeScreen: React.FC<NewInitiativeScreenProps> = ({
           <SelectInput
             items={typeOptions}
             onSelect={(item) => {
-              setSelectedType(item.value);
-              setStep('id');
+              if (item.value === '__cancel__') {
+                onCancel();
+              } else {
+                setSelectedType(item.value);
+                setStep('id');
+              }
             }}
           />
         </Box>
@@ -94,8 +115,9 @@ export const NewInitiativeScreen: React.FC<NewInitiativeScreenProps> = ({
             />
           </Box>
           {error && <Text color={colors.error}>{error}</Text>}
-          <Box marginTop={1}>
-            <Text color={colors.textDim}>Presiona Enter para continuar</Text>
+          <Box marginTop={1} flexDirection="row" justifyContent="space-between">
+            <Text color={colors.textDim}>[ Enter: Continuar ]</Text>
+            <Text color={colors.textDim}>[ Esc: Volver al paso anterior ]</Text>
           </Box>
         </Box>
       )}
@@ -116,8 +138,9 @@ export const NewInitiativeScreen: React.FC<NewInitiativeScreenProps> = ({
             />
           </Box>
           {error && <Text color={colors.error}>{error}</Text>}
-          <Box marginTop={1}>
-            <Text color={colors.textDim}>Presiona Enter para continuar</Text>
+          <Box marginTop={1} flexDirection="row" justifyContent="space-between">
+            <Text color={colors.textDim}>[ Enter: Continuar ]</Text>
+            <Text color={colors.textDim}>[ Esc: Volver al paso anterior ]</Text>
           </Box>
         </Box>
       )}

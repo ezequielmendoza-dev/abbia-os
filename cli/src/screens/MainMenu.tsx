@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import { colors } from '../theme.js';
 import { ProjectInfo } from '../utils/abbia.js';
@@ -20,6 +20,12 @@ export const MainMenu: React.FC<MainMenuProps> = ({ projectInfo, onSelect }) => 
   const [selectedDesc, setSelectedDesc] = useState<string>(
     'Crea una nueva feature, bug, auditoría o refactor con la estructura SDD estandarizada.'
   );
+
+  useInput((input, key) => {
+    if (key.escape || input === 'q') {
+      onSelect('exit');
+    }
+  });
 
   const items: MenuItem[] = [
     {

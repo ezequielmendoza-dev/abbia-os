@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
-import TextInput from 'ink-text-input';
 import { colors } from '../theme.js';
 import { ProjectInfo } from '../utils/abbia.js';
 
@@ -16,7 +15,7 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
   onCancel,
   onSubmit,
 }) => {
-  const [step, setStep] = useState<'initiative' | 'phase' | 'role' | 'model' | 'metrics' | 'confirm'>('initiative');
+  const [step, setStep] = useState<'initiative' | 'phase' | 'role' | 'model' | 'confirm'>('initiative');
   const [selectedInit, setSelectedInit] = useState<string>('');
   const [selectedPhase, setSelectedPhase] = useState<string>('5-dev');
   const [selectedRole, setSelectedRole] = useState<string>('developer');
@@ -24,6 +23,22 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
   const [tokensIn, setTokensIn] = useState<string>('5000');
   const [tokensOut, setTokensOut] = useState<string>('1500');
   const [duration, setDuration] = useState<string>('60');
+
+  useInput((input, key) => {
+    if (key.escape) {
+      if (step === 'initiative') {
+        onCancel();
+      } else if (step === 'phase') {
+        setStep('initiative');
+      } else if (step === 'role') {
+        setStep('phase');
+      } else if (step === 'model') {
+        setStep('role');
+      } else if (step === 'confirm') {
+        setStep('model');
+      }
+    }
+  });
 
   if (projectInfo.initiatives.length === 0) {
     return (
@@ -44,10 +59,13 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
     );
   }
 
-  const initItems = projectInfo.initiatives.map((init) => ({
-    label: `📁 ${init.folderName} (QA: ${init.qaVerdict || 'PENDIENTE'})`,
-    value: init.folderName,
-  }));
+  const initItems = [
+    ...projectInfo.initiatives.map((init) => ({
+      label: `📁 ${init.folderName} (QA: ${init.qaVerdict || 'PENDIENTE'})`,
+      value: init.folderName,
+    })),
+    { label: '↩️  Cancelar y volver al menú', value: '__cancel__' },
+  ];
 
   const phaseItems = [
     { label: '1️⃣  Fase 1: Especificación Funcional (1-spec.md)', value: '1-spec' },
@@ -56,6 +74,7 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
     { label: '4️⃣  Fase 4: Estrategia de Pruebas (4-test.md)', value: '4-test' },
     { label: '5️⃣  Fase 5: Desarrollo de Código (5-dev.md)', value: '5-dev' },
     { label: '6️⃣  Fase 6: Validación Adversarial de QA (6-qa.md)', value: '6-qa' },
+    { label: '↩️  Volver al paso anterior', value: '__back__' },
   ];
 
   const roleItems = [
@@ -67,6 +86,7 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
     { label: '👑 Tech Lead (tech-lead)', value: 'tech-lead' },
     { label: '🚀 DevOps Engineer (devops)', value: 'devops' },
     { label: '🧠 Skill Manager (skill-manager)', value: 'skill-manager' },
+    { label: '↩️  Volver al paso anterior', value: '__back__' },
   ];
 
   const modelItems = [
@@ -76,6 +96,7 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
     { label: 'GPT-4o (gpt-4o)', value: 'gpt-4o' },
     { label: 'o3-mini (o3-mini)', value: 'o3-mini' },
     { label: 'Otro / Modelo Custom (custom)', value: 'custom-model' },
+    { label: '↩️  Volver al paso anterior', value: '__back__' },
   ];
 
   const handleFinish = () => {
@@ -103,7 +124,7 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
         <Text color={colors.primary} bold>
           🏁 Cierre Mandatorio de Fase (finish-phase — Regla R6)
         </Text>
-        <Text color={colors.textDim}>[ Esc / Ctrl+C para cancelar ]</Text>
+        <Text color={colors.textDim}>[ Esc: Volver / Cancelar ]</Text>
       </Box>
 
       {/* Step 1: Select Initiative */}
@@ -115,8 +136,12 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
           <SelectInput
             items={initItems}
             onSelect={(item) => {
-              setSelectedInit(item.value);
-              setStep('phase');
+              if (item.value === '__cancel__') {
+                onCancel();
+              } else {
+                setSelectedInit(item.value);
+                setStep('phase');
+              }
             }}
           />
         </Box>
@@ -134,8 +159,12 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
           <SelectInput
             items={phaseItems}
             onSelect={(item) => {
-              setSelectedPhase(item.value);
-              setStep('role');
+              if (item.value === '__back__') {
+                setStep('initiative');
+              } else {
+                setSelectedPhase(item.value);
+                setStep('role');
+              }
             }}
           />
         </Box>
@@ -150,8 +179,12 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
           <SelectInput
             items={roleItems}
             onSelect={(item) => {
-              setSelectedRole(item.value);
-              setStep('model');
+              if (item.value === '__back__') {
+                setStep('phase');
+              } else {
+                setSelectedRole(item.value);
+                setStep('model');
+              }
             }}
           />
         </Box>
@@ -166,8 +199,12 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
           <SelectInput
             items={modelItems}
             onSelect={(item) => {
-              setSelectedModel(item.value);
-              setStep('confirm');
+              if (item.value === '__back__') {
+                setStep('role');
+              } else {
+                setSelectedModel(item.value);
+                setStep('confirm');
+              }
             }}
           />
         </Box>
@@ -207,11 +244,14 @@ export const FinishPhaseScreen: React.FC<FinishPhaseScreenProps> = ({
           <SelectInput
             items={[
               { label: '🏁 Confirmar y Registrar Telemetría', value: 'yes' },
-              { label: '❌ Cancelar', value: 'no' },
+              { label: '↩️  Volver al paso anterior', value: 'back' },
+              { label: '❌ Cancelar y volver al menú', value: 'cancel' },
             ]}
             onSelect={(item) => {
               if (item.value === 'yes') {
                 handleFinish();
+              } else if (item.value === 'back') {
+                setStep('model');
               } else {
                 onCancel();
               }
