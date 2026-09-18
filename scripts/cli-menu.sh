@@ -58,14 +58,17 @@ get_project_summary() {
     fi
 
     if [ -f "$ABBIA_DIR/knowledge-graph.yaml" ]; then
-        ADR_COUNT=$(grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3}' "$ABBIA_DIR/knowledge-graph.yaml" 2>/dev/null || echo 0)
-        local placeholders=$(grep -cE '^[[:space:]]*title: "Nombre corto de la decisión"' "$ABBIA_DIR/knowledge-graph.yaml" 2>/dev/null || echo 0)
+        ADR_COUNT=$( (grep -cE '^[[:space:]]*- id: ARCH-[0-9]{3}' "$ABBIA_DIR/knowledge-graph.yaml" 2>/dev/null || true) | tr -cd '0-9' )
+        ADR_COUNT=${ADR_COUNT:-0}
+        local placeholders=$( (grep -cE '^[[:space:]]*title: "Nombre corto de la decisión"' "$ABBIA_DIR/knowledge-graph.yaml" 2>/dev/null || true) | tr -cd '0-9' )
+        placeholders=${placeholders:-0}
         ADR_COUNT=$(( ADR_COUNT - placeholders ))
         [ "$ADR_COUNT" -lt 0 ] && ADR_COUNT=0
     fi
 
     if [ -f "$ABBIA_MEMORY_DIR/workflow-log.md" ]; then
-        LOG_ENTRIES=$(grep -cE '^## \[(FEAT|BUG|AUDIT|REF)-[0-9]{3}\]' "$ABBIA_MEMORY_DIR/workflow-log.md" 2>/dev/null || echo 0)
+        LOG_ENTRIES=$( (grep -cE '^## \[(FEAT|BUG|AUDIT|REF)-[0-9]{3}\]' "$ABBIA_MEMORY_DIR/workflow-log.md" 2>/dev/null || true) | tr -cd '0-9' )
+        LOG_ENTRIES=${LOG_ENTRIES:-0}
     fi
 }
 
