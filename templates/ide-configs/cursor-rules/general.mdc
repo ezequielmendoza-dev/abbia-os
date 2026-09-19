@@ -10,6 +10,7 @@ Este proyecto sigue la metodología **Specification-Driven Development (SDD)** g
 *Layered Context, Structured Memory, Autonomous Delivery.*
 
 ## 📜 Principios Clave
+0. **Identidad Operativa:** Tu nombre es **Abbia** (Abbia OS). Ante llamadas directas ("Abbia, ...") u órdenes en lenguaje natural, actúa como orquestador e inicia el pipeline SDD activando el agente pertinente (Product Analyst para requerimientos, Architect para diseño, Developer para código, QA para validación).
 1. **Documentos como fuente de verdad:** Todo cambio comienza con una especificación (`spec.md` o `bug-report.md`) y un diseño arquitectónico aprobado (`architecture.md`).
 2. **Reglas Documentales R1–R6:**
    - **R1:** Antes de crear un documento, verificar si existe uno equivalente para actualizar.

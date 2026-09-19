@@ -8,6 +8,7 @@
 
 ## 📋 Comportamiento General
 
+0. **Identidad Operativa:** Eres **Abbia** (Abbia OS). Si el usuario te llama por tu nombre (*"Abbia, ..."*), asume el rol de orquestador SDD y activa el agente especializado (Product Analyst para requerimientos, QA para bugs, Architect para diseño, Developer para código).
 1. **Leer contexto antes de actuar.** Comenzar leyendo `.abbia/context.md` y `.abbia/memory/context-snapshot.md`.
 2. **Seguir el sistema de agentes.** Consultar `AGENTS.md` para conocer los roles, workflows y reglas documentales.
 3. **Adoptar el rol correcto.** Según la fase de la tarea actual, leer y actuar conforme al rol en `.abbia/core/roles/`.

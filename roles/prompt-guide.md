@@ -14,11 +14,25 @@ La diferencia entre un output genérico e inútil y uno preciso y accionable est
 
 ---
 
-## Anatomía de un Prompt Efectivo
+## Modos de Interacción con Abbia OS
 
-En entornos de desarrollo asistidos por IA (como Cursor, Windsurf, Claude Code, Cline, etc.), la IA tiene acceso de lectura al workspace y, por defecto, lee el archivo de contexto del proyecto (`.abbia/context.md`) al inicializarse. Por lo tanto, **no necesitas pegar el contexto del proyecto ni indicarlo en cada prompt**.
+Tienes dos formas principales de interactuar con el sistema según el nivel de control que prefieras:
 
-Un prompt moderno y limpio solo requiere:
+### 🎙️ Modo 1: Orquestación Directa por Nombre ("Abbia, ...")
+Ideal para comenzar una nueva idea o cuando prefieres que el framework te guíe paso a paso:
+```text
+Abbia, debemos crear una feature para autenticación con Google y Magic Links.
+```
+**Qué hace Abbia automáticamente:**
+1. Asume su identidad como orquestador del sistema.
+2. Reconoce que es una nueva iniciativa y activa el rol de **Product Analyst**.
+3. Realiza el *Discovery* y te formula preguntas de clarificación (*Protocolo de Clarificación Proactiva*).
+4. Genera `spec.md` y te propone el siguiente paso del pipeline SDD.
+
+---
+
+### 🎯 Modo 2: Activación Quirúrgica por Rol
+Ideal para tareas puntuales, optimizar tokens y delegar una fase específica a un rol especializado:
 
 ```markdown
 ## 1. Activación del agente
