@@ -4,6 +4,14 @@ Todas los cambios notables en este repositorio se documentan en este archivo.
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [4.1.0] — 2026-09-21
+
+### 🚀 Auto-Telemetry & Estimación Heurística Inteligente
+- **Auto-descubrimiento de Variables de Entorno de Telemetría** — `finish-phase.sh` y `common.sh` ahora reconocen de forma transparente `ABBIA_TOKENS_IN`, `ABBIA_TOKENS_OUT`, `ABBIA_MODEL`, `ABBIA_DURATION` y `ABBIA_PROVIDER` para integraciones con runners CI/CD y harnesses de agentes.
+- **Motor de Auto-Estimación Heurística (Fallback)** — Cuando el agente o subagente opera en un IDE que no inyecta tokens en tiempo de ejecución, `finish-phase.sh` estima inteligentemente el consumo en base a los artefactos generados/modificados en la iniciativa (`tokens_out`), el contexto base del proyecto y el rol (`tokens_in`), y calcula la duración del delta de sesión (`duration_s`), asignando `source: estimate`.
+- **Soporte para `--no-estimate` y Prioridad a Valores Medidos** — Si el usuario o agente provee `--tokens-in <N> --tokens-out <N> --source measured`, los valores medidos tienen precedencia absoluta. El flag `--no-estimate` permite dejar los campos en `null` explícitamente si se desea.
+- **Suite de Pruebas Extendida** — Se agregaron pruebas automatizadas en `tests/test-runner.sh` (38/38 pasando) validando la estimación heurística, el respeto a `--no-estimate` y el descubrimiento de variables de entorno.
+
 ## [4.0.0] — 2026-09-18
 
 ### 🚀 Rebranding e Identidad de Producto: Abbia OS

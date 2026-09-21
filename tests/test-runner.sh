@@ -135,8 +135,26 @@ assert_success "finish-phase.sh cierra fase spec para FEAT-001" \
 assert_success "workflow-log.md registró la entrada de FEAT-001" \
     grep -q "## \[FEAT-001\]" "$TMP_TEST_DIR/.abbia/memory/workflow-log.md"
 
-assert_success "executions.yaml registró la telemetría" \
+assert_success "executions.yaml registró la telemetría medida" \
     grep -q "tokens_in: 3500" "$TMP_TEST_DIR/.abbia/metrics/executions.yaml"
+
+assert_success "finish-phase.sh auto-estima telemetría si no se pasan tokens" \
+    bash "$SCRIPTS_DIR/finish-phase.sh" BUG-001 implement developer --note "Corrección de bug con auto-estimación"
+
+assert_success "executions.yaml contiene tokens estimados (no-null)" \
+    grep -q "source: estimate" "$TMP_TEST_DIR/.abbia/metrics/executions.yaml"
+
+assert_success "finish-phase.sh respeta --no-estimate dejando tokens en null" \
+    bash "$SCRIPTS_DIR/finish-phase.sh" BUG-001 qa qa --no-estimate --note "Cierre qa sin estimación"
+
+assert_success "executions.yaml registró null con --no-estimate" \
+    grep -q "tokens_in: null" "$TMP_TEST_DIR/.abbia/metrics/executions.yaml"
+
+assert_success "finish-phase.sh auto-descubre variables ABBIA_TOKENS_IN y ABBIA_TOKENS_OUT" \
+    env ABBIA_TOKENS_IN=4200 ABBIA_TOKENS_OUT=850 bash "$SCRIPTS_DIR/finish-phase.sh" BUG-001 deploy devops --note "Deploy con env telemetría"
+
+assert_success "executions.yaml registró tokens descubiertos por entorno" \
+    grep -q "tokens_in: 4200" "$TMP_TEST_DIR/.abbia/metrics/executions.yaml"
 
 assert_success "aggregates.yaml fue regenerado" \
     test -f "$TMP_TEST_DIR/.abbia/metrics/aggregates.yaml"

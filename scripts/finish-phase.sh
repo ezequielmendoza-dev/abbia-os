@@ -20,9 +20,9 @@
 #   --mode rapido|estandar|profundo   Modo del DAG (default: estandar)
 #   --model M                         Modelo utilizado (ej: claude-3-7-sonnet)
 #   --provider P                      Proveedor (ej: cursor, claude-code, antigravity)
-#   --tokens-in N                     Tokens de entrada (default: null)
-#   --tokens-out N                    Tokens de salida (default: null)
-#   --duration N                      Duración en segundos (default: null)
+#   --tokens-in N                     Tokens de entrada (default: auto-estimado o null si --no-estimate)
+#   --tokens-out N                    Tokens de salida (default: auto-estimado o null si --no-estimate)
+#   --duration N                      Duración en segundos (default: auto-estimado o null si --no-estimate)
 #   --attempts N                      Intentos del nodo incl. back-edges (default: 1)
 #   --verdict V                       PASS|FAIL|APROBADO|RECHAZADO (si la fase es un gate)
 #   --source S                        measured|estimate (default: estimate)
@@ -30,6 +30,7 @@
 #   --archive                         Archiva automáticamente la iniciativa en archive/
 #   --ask-archive                     Pregunta interactivamente si archivar
 #   --no-snapshot                     No regenerar context-snapshot
+#   --no-estimate                     No auto-estimar tokens si no se especifican (dejar como null)
 # ==============================================================================
 
 set -euo pipefail
@@ -68,10 +69,13 @@ DURATION_S="null"
 ATTEMPTS=1
 VERDICT="null"
 SOURCE="estimate"
+SOURCE_EXPLICIT=false
 NOTE=""
 ARCHIVE=false
 ASK_ARCHIVE=false
 NO_SNAPSHOT=false
+NO_ESTIMATE=false
+ESTIMATED_TELEMETRY=false
 
 ARGS=("$@")
 i=0
@@ -86,11 +90,12 @@ while [ $i -lt ${#ARGS[@]} ]; do
         --duration)   DURATION_S="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
         --attempts)   ATTEMPTS="${ARGS[$((i+1))]:-1}"; i=$((i+2)) ;;
         --verdict)    VERDICT="${ARGS[$((i+1))]:-null}"; i=$((i+2)) ;;
-        --source)     SOURCE="${ARGS[$((i+1))]:-estimate}"; i=$((i+2)) ;;
+        --source)     SOURCE="${ARGS[$((i+1))]:-estimate}"; SOURCE_EXPLICIT=true; i=$((i+2)) ;;
         --note)       NOTE="${ARGS[$((i+1))]:-}"; i=$((i+2)) ;;
         --archive)    ARCHIVE=true; i=$((i+1)) ;;
         --ask-archive) ASK_ARCHIVE=true; i=$((i+1)) ;;
         --no-snapshot) NO_SNAPSHOT=true; i=$((i+1)) ;;
+        --no-estimate) NO_ESTIMATE=true; i=$((i+1)) ;;
         --) i=$((i+1)) ;;
         -*) echo -e "${RED}Error: Opción desconocida '${ARGS[$i]}'.${NC}"; exit 1 ;;
         *) i=$((i+1)) ;;
@@ -130,6 +135,9 @@ if [ "$TARGET_ENV" = "null" ] || [ -z "$TARGET_ENV" ]; then
         *) TARGET_ENV="local" ;;
     esac
 fi
+
+# Auto-descubrimiento de variables de entorno y sesión
+discover_session_telemetry
 
 if [ "$PROVIDER" = "null" ] || [ -z "$PROVIDER" ]; then
     if [ -n "${OPENCODE_SERVER:-}" ] || [ -n "${OPENCODE:-}" ]; then
@@ -173,9 +181,19 @@ if [ "$VERDICT" != "null" ] && [[ ! "$VERDICT" =~ ^(PASS|FAIL|APROBADO|RECHAZADO
     echo -e "${RED}Error: --verdict debe ser PASS|FAIL|APROBADO|RECHAZADO.${NC}"; exit 1
 fi
 
-if [ "$TOKENS_IN" = "null" ] && [ "$TOKENS_OUT" = "null" ]; then
+# Auto-estimación heurística si no se pasaron tokens y no está deshabilitada
+if [ "$NO_ESTIMATE" = false ]; then
+    estimate_phase_consumption "$PROJECT_ROOT" "$INITIATIVE_ID" "$PHASE" "$ROLE"
+fi
+
+if [ "$ESTIMATED_TELEMETRY" = true ]; then
+    [ "$SOURCE_EXPLICIT" = false ] && SOURCE="estimate"
+    echo -e "${CYAN}ℹ Telemetría estimada automáticamente (heurística de contexto/artefactos): in=${TOKENS_IN}, out=${TOKENS_OUT}, duration=${DURATION_S}s (source: ${SOURCE}).${NC}"
+elif [ "$TOKENS_IN" = "null" ] && [ "$TOKENS_OUT" = "null" ]; then
     echo -e "${YELLOW}⚠ Sin telemetría de tokens (quedarán como null). Para registrar tokens reales, usa:${NC}"
     echo -e "${YELLOW}  --tokens-in <N> --tokens-out <N> --duration <segundos> --source measured${NC}"
+else
+    echo -e "${GREEN}✓ Telemetría registrada: in=${TOKENS_IN}, out=${TOKENS_OUT}, duration=${DURATION_S}s (source: ${SOURCE}).${NC}"
 fi
 
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"

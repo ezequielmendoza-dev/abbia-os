@@ -157,7 +157,12 @@ per_env:
 
 ### Fase 1 — Capturar (al cerrar cada agente)
 
-Todo agente del pipeline registra su ejecución en `executions.yaml` ejecutando obligatoriamente `finish-phase.sh` con sus flags de telemetría (`--model`, `--tokens-in`, `--tokens-out`, `--duration`, `--source measured|estimate`). Si el canal del agente no expone contadores exactos, el agente debe estimar los tokens y duración en lugar de omitirlos como `null`.
+Todo agente del pipeline registra su ejecución en `executions.yaml` ejecutando obligatoriamente `finish-phase.sh` (o `./abbia finish`) con sus flags de telemetría (`--model`, `--tokens-in`, `--tokens-out`, `--duration`, `--source measured|estimate`).
+
+**Auto-Telemetry & Estimación Heurística Inteligente:**
+1. **Auto-descubrimiento:** `finish-phase.sh` inspecciona automáticamente variables de entorno de runner (`ABBIA_TOKENS_IN`, `ABBIA_TOKENS_OUT`, `ABBIA_MODEL`, `ABBIA_DURATION`, `ABBIA_PROVIDER`).
+2. **Estimación heurística inteligente (Fallback):** Si los tokens no se suministran explícitamente y no hay variables de entorno, `finish-phase.sh` estima tokens de entrada y salida basándose en el contexto cargado (`context-snapshot.md`, `knowledge-graph.yaml`, rol) y los artefactos producidos en la iniciativa, asignando `source: estimate`.
+3. **Control explícito:** El usuario o agente puede forzar valores medidos (`--source measured`), o desactivar la estimación (`--no-estimate`) para mantener valores `null` si así se desea.
 
 > **Automatización:** `scripts/finish-phase.sh` registra la ejecución (con `source: measured` o `source: estimate`), deduciendo el entorno y rama activa, junto con la entrada de `workflow-log.md` y la regeneración del snapshot.
 

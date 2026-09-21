@@ -282,6 +282,140 @@ EOF
     fi
 }
 
+# Auto-descubrimiento de telemetría desde variables de entorno y metadatos de sesión
+discover_session_telemetry() {
+    # Variables de entorno prioritarias (inyectadas por runners, harnesses o scripts)
+    if [ -n "${ABBIA_MODEL:-}" ] && [ "${MODEL:-null}" = "null" ]; then
+        MODEL="$ABBIA_MODEL"
+    fi
+    if [ -n "${ABBIA_PROVIDER:-}" ] && [ "${PROVIDER:-null}" = "null" ]; then
+        PROVIDER="$ABBIA_PROVIDER"
+    fi
+    if [ -n "${ABBIA_TOKENS_IN:-}" ] && [ "${TOKENS_IN:-null}" = "null" ]; then
+        TOKENS_IN="$ABBIA_TOKENS_IN"
+        SOURCE="measured"
+    fi
+    if [ -n "${ABBIA_TOKENS_OUT:-}" ] && [ "${TOKENS_OUT:-null}" = "null" ]; then
+        TOKENS_OUT="$ABBIA_TOKENS_OUT"
+        SOURCE="measured"
+    fi
+    if [ -n "${ABBIA_DURATION:-}" ] && [ "${DURATION_S:-null}" = "null" ]; then
+        DURATION_S="$ABBIA_DURATION"
+    fi
+}
+
+# Estimación heurística de consumo (tokens in/out y duración) basada en artefactos y contexto
+estimate_phase_consumption() {
+    local project_root="${1:-$(detect_project_root)}"
+    local initiative="${2:-}"
+    local phase="${3:-}"
+    local role="${4:-}"
+    resolve_abbia_paths "$project_root"
+
+    # Si todos los campos ya tienen valor, nada que estimar
+    if [ "${TOKENS_IN:-null}" != "null" ] && [ "${TOKENS_OUT:-null}" != "null" ] && [ "${DURATION_S:-null}" != "null" ]; then
+        return 0
+    fi
+
+    if command -v python3 &>/dev/null; then
+        local est_result
+        est_result=$(python3 - "$project_root" "$initiative" "$phase" "$role" "$ABBIA_DIR" "$ABBIA_INITIATIVES_DIR" << 'PYEOF'
+import sys, os, glob, re
+from datetime import datetime, timezone
+
+project_root = sys.argv[1]
+initiative   = sys.argv[2]
+phase        = sys.argv[3]
+role         = sys.argv[4]
+abbia_dir    = sys.argv[5]
+ini_dir      = sys.argv[6]
+
+# 1. Estimación de tokens de salida (artefactos generados/modificados)
+out_bytes = 0
+ini_matches = glob.glob(os.path.join(ini_dir, f"{initiative}*"))
+if ini_matches and os.path.isdir(ini_matches[0]):
+    for root, _, files in os.walk(ini_matches[0]):
+        for f in files:
+            fp = os.path.join(root, f)
+            if os.path.isfile(fp):
+                out_bytes += os.path.getsize(fp)
+
+tokens_out = max(350, int(out_bytes / 3.8)) if out_bytes > 0 else 500
+
+# 2. Estimación de tokens de entrada (contexto base + spec + rol)
+in_bytes = 0
+for f in ["context.md", "knowledge-graph.yaml", "memory/context-snapshot.md", "decisions.md"]:
+    fp = os.path.join(abbia_dir, f)
+    if os.path.isfile(fp):
+        in_bytes += os.path.getsize(fp)
+
+core_roles = os.path.join(abbia_dir, "core", "roles", f"{role}.md")
+if not os.path.isfile(core_roles):
+    core_roles = os.path.join(project_root, "roles", f"{role}.md")
+if os.path.isfile(core_roles):
+    in_bytes += os.path.getsize(core_roles)
+
+if ini_matches and os.path.isdir(ini_matches[0]):
+    for root, _, files in os.walk(ini_matches[0]):
+        for f in files:
+            fp = os.path.join(root, f)
+            if os.path.isfile(fp):
+                in_bytes += os.path.getsize(fp)
+
+tokens_in = max(1800, int((in_bytes / 3.8) * 1.5))
+
+# 3. Estimación de duración en segundos
+duration_s = 180
+exec_file = os.path.join(abbia_dir, "metrics", "executions.yaml")
+if os.path.isfile(exec_file):
+    last_ts = None
+    with open(exec_file, "r", encoding="utf-8") as f:
+        for line in f:
+            m = re.match(r'^\s+- ts:\s*(.+)$', line)
+            if m:
+                last_ts = m.group(1).strip()
+    if last_ts:
+        try:
+            dt_last = datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+            dt_now = datetime.now(timezone.utc)
+            delta = int((dt_now - dt_last).total_seconds())
+            if 10 <= delta <= 3600:
+                duration_s = delta
+        except Exception:
+            pass
+
+if duration_s == 180:
+    phase_durations = {
+        "analysis": 240, "discovery": 240, "ui-design": 360,
+        "architecture": 420, "tech-review-1": 180, "tech-review-2": 180,
+        "implement": 600, "tasks": 300, "qa": 300, "approval": 120, "deploy": 180
+    }
+    duration_s = phase_durations.get(phase.lower(), 240)
+
+print(f"{tokens_in}:{tokens_out}:{duration_s}")
+PYEOF
+        )
+        if [ -n "$est_result" ]; then
+            local est_ti est_to est_dur
+            est_ti=$(echo "$est_result" | cut -d: -f1)
+            est_to=$(echo "$est_result" | cut -d: -f2)
+            est_dur=$(echo "$est_result" | cut -d: -f3)
+
+            if [ "${TOKENS_IN:-null}" = "null" ]; then
+                TOKENS_IN="$est_ti"
+                ESTIMATED_TELEMETRY=true
+            fi
+            if [ "${TOKENS_OUT:-null}" = "null" ]; then
+                TOKENS_OUT="$est_to"
+                ESTIMATED_TELEMETRY=true
+            fi
+            if [ "${DURATION_S:-null}" = "null" ]; then
+                DURATION_S="$est_dur"
+            fi
+        fi
+    fi
+}
+
 # Re-genera .abbia/dashboard.html silenciosamente si ya existe en el proyecto destino
 auto_refresh_dashboard_if_exists() {
     local project_root="${1:-$(detect_project_root)}"
@@ -300,4 +434,6 @@ auto_refresh_dashboard_if_exists() {
         echo -e "${GREEN}✓ Dashboard interactivo actualizado automáticamente (${dash_file#$PROJECT_ROOT/}).${NC}"
     fi
 }
+
+
 
