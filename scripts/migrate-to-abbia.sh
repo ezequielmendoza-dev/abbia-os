@@ -115,6 +115,8 @@ fi
 # Limpiar directorio origen residual
 if [ -d "$SRC_DIR" ]; then
     rm -rf "$SRC_DIR/dashboard.html" 2>/dev/null || true
+    rm -rf "$SRC_DIR/agents" 2>/dev/null || true
+    rm -rf "$SRC_DIR/core" 2>/dev/null || true
     rmdir "$SRC_DIR" 2>/dev/null || true
     if [ -d "$SRC_DIR" ]; then
         echo -e "${YELLOW}! Nota: Quedaron elementos residuales en $(basename "$SRC_DIR")/. Por favor revísalos manualmente.${NC}"
@@ -139,6 +141,24 @@ fi
 echo -e "\n${BLUE}--- Paso 4: Regenerando Reglas de IDEs y CLI Wrapper ---${NC}"
 resolve_abbia_paths "$PROJECT_ROOT"
 bash "$SCRIPT_DIR/setup-ide.sh" --auto
+
+# Actualizar/instalar templates de IDEs para Abbia OS
+IDE_TEMPLATES_DIR="$ABBIA_CORE_ROOT/templates/ide-configs"
+if [ -d "$IDE_TEMPLATES_DIR" ]; then
+    [ -f "$PROJECT_ROOT/.cursorrules" ] && cp "$IDE_TEMPLATES_DIR/cursorrules" "$PROJECT_ROOT/.cursorrules" && echo -e "  ${GREEN}✓${NC} Actualizado .cursorrules"
+    [ -f "$PROJECT_ROOT/CLAUDE.md" ] && cp "$IDE_TEMPLATES_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md" && echo -e "  ${GREEN}✓${NC} Actualizado CLAUDE.md"
+    [ -f "$PROJECT_ROOT/.windsurfrules" ] && cp "$IDE_TEMPLATES_DIR/windsurfrules" "$PROJECT_ROOT/.windsurfrules" && echo -e "  ${GREEN}✓${NC} Actualizado .windsurfrules"
+    [ -f "$PROJECT_ROOT/.clinerules" ] && cp "$IDE_TEMPLATES_DIR/clinerules" "$PROJECT_ROOT/.clinerules" && echo -e "  ${GREEN}✓${NC} Actualizado .clinerules"
+    [ -f "$PROJECT_ROOT/AGENTS.md" ] && cp "$IDE_TEMPLATES_DIR/AGENTS.md" "$PROJECT_ROOT/AGENTS.md" && echo -e "  ${GREEN}✓${NC} Actualizado AGENTS.md"
+    if [ -d "$PROJECT_ROOT/.cursor/rules" ] && [ -d "$IDE_TEMPLATES_DIR/cursor-rules" ]; then
+        cp -r "$IDE_TEMPLATES_DIR/cursor-rules/"* "$PROJECT_ROOT/.cursor/rules/"
+        echo -e "  ${GREEN}✓${NC} Actualizadas reglas modulares de Cursor (.cursor/rules/*.mdc)"
+    fi
+    if [ -f "$PROJECT_ROOT/.github/copilot-instructions.md" ]; then
+        cp "$IDE_TEMPLATES_DIR/copilot-instructions.md" "$PROJECT_ROOT/.github/copilot-instructions.md"
+        echo -e "  ${GREEN}✓${NC} Actualizado .github/copilot-instructions.md"
+    fi
+fi
 
 # Paso 5: Reconciliación de Memoria y Snapshot
 echo -e "\n${BLUE}--- Paso 5: Reconciliando Memoria Técnica Abbia ---${NC}"

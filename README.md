@@ -208,10 +208,19 @@ Explora [`examples/golden-project/`](examples/golden-project/) para ver un proye
 
 ## 🔄 ¿Vienes de `.ai/` o versiones previas?
 
-¡Migrar es facilísimo y 100% seguro! Revisa nuestra [Guía de Migración a Abbia OS v4.0.0](docs/migration-guide-v4.md) o simplemente ejecuta:
+¡Migrar es facilísimo y 100% seguro! Si tu proyecto tiene la estructura previa (`.ai/` o `.stratum/`), actualiza tu submódulo y ejecuta el script de migración:
+
 ```bash
-./abbia migrate
+# 1. Actualiza el submódulo a la última versión de Abbia OS
+git submodule update --remote
+
+# 2. Ejecuta el script de migración desde tu estructura previa
+bash .ai/agents/scripts/migrate-to-abbia.sh
+# (o si venías de .stratum/: bash .stratum/core/scripts/migrate-to-abbia.sh)
 ```
+
+> 💡 *El script migrará tus artefactos a `.abbia/`, preservará todas tus iniciativas y memoria técnica, configurará `.gitmodules` y dejará instalado el nuevo CLI wrapper `./abbia` en la raíz de tu proyecto.*  
+> Para más detalles paso a paso, consulta la [Guía de Migración a Abbia OS v4.0.0](docs/migration-guide-v4.md).
 
 ---
 
